@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="town.cpp" />
     <ClCompile Include="train.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="menu.cpp" />
@@ -153,6 +154,7 @@
     <None Include="settings.json" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="town.h" />
     <ClInclude Include="train.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="text.h" />

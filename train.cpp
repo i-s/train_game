@@ -4,18 +4,26 @@
 #include <time.h>
 #include "menu.h"
 #include "text.h"
+#include "train.h"
 #include <math.h>
 #include <stdlib.h>
 
 /*To-do:
-V) Движение поезда от точки к точке
-V) Исправить train_move (выход за координаты точки)
-V) Проблема с поворотом текстуры
-V) Проблема с непопаданием в цель (проверить углы и тому подобное)
-X) Равномерное замедление при приближении к станции\рычагу
-V) Взаимодействие с рычагами
-1)
+1) Баг с кнопками
+2) Оповещение о прибытии поезда
+3) Вывод количества ресурсов
 */
+
+//Загружаем глобальные переменные из town.cpp
+extern int g_humans, g_resourses, g_food;
+
+//Загружаем глобальные RECT-ы
+extern SDL_Rect g_recthumans;
+extern SDL_Rect g_rectfood;
+extern SDL_Rect g_rectresourses;
+
+//Загружаем глобальный шрифт
+//extern TTF_Font* my_font;
 
 //float x;float y;
 struct Point {
@@ -31,10 +39,10 @@ struct Lever {
 	SDL_Texture* texture_switched;
 };
 
-struct Background {
-	SDL_Texture* texture;
-	SDL_Rect rectangle;
-};
+//struct Background {
+//	SDL_Texture* texture;
+//	SDL_Rect rectangle;
+//};
 
 //SDL_Texture* texture;SDL_Rect rectangle;float angle;SDL_Point coord;SDL_Rect rectangle;float speed;bool shown;int type;bool reached_town;
 struct Train {
@@ -122,11 +130,16 @@ void Move_Train(float speed_x, float speed_y, Point* train_position) {
 }
 
 //Отрисовываем фон, поезд, рычаги.
-void Update(SDL_Renderer* renderer, Train train, Background background, Lever lever1, Lever lever2) {
+void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background background, Lever lever1, Lever lever2, char* texts[]) {
 	draw_background(renderer, background);
 	if(train.shown){ draw_train(renderer, train); }	//Не отрисовываем поезд, если он не должен быть виден
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
+
+	draw_text(window,renderer,texts[0],g_recthumans);
+	draw_text(window, renderer, texts[1], g_rectfood);
+	draw_text(window, renderer, texts[2], g_rectresourses);
+
 	SDL_RenderPresent(renderer);
 }
 
@@ -167,7 +180,10 @@ void Define_Train_Type_And_Delay(Train* train, int difficulty, SDL_Texture* text
 	//printf_s("train_type = %d\n", (*train).type);
 }
 
-void train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
+//Экран "поезд".
+//Возврат -1 -> выход из программы с ошибкой (не нажата кнопка город)
+//Возврат 0 -> была нажата кнопка город
+int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
 	srand(int(time(NULL)));
 	int DIFFICULTY=0; //Переменная, отвечающая за сложность приезда поезда. Должна будет передаваться в ф-ию. Чем больше: тем хуже игроку
 	
@@ -177,35 +193,35 @@ void train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 
 	//Загружаем текстуры
 	//Фона
-	SDL_Surface* background_surf = SDL_LoadBMP("textures/background.bmp");
+	SDL_Surface* background_surf = SDL_LoadBMP("resourses/textures/background.bmp");
 	SDL_Texture* background_texture = SDL_CreateTextureFromSurface(renderer, background_surf);
 	SDL_FreeSurface(background_surf);
 	//Поезда
-	SDL_Surface* train_type_0_surf = SDL_LoadBMP("textures/train_type_0.bmp");
+	SDL_Surface* train_type_0_surf = SDL_LoadBMP("resourses/textures/train_type_0.bmp");
 	SDL_SetColorKey(train_type_0_surf, 1, SDL_MapRGB(train_type_0_surf->format, 0, 255, 0));
 	SDL_Texture* train_type_0_texture = SDL_CreateTextureFromSurface(renderer, train_type_0_surf);
 	SDL_FreeSurface(train_type_0_surf);
-	SDL_Surface* train_type_1_surf = SDL_LoadBMP("textures/train_type_1.bmp");
+	SDL_Surface* train_type_1_surf = SDL_LoadBMP("resourses/textures/train_type_1.bmp");
 	SDL_SetColorKey(train_type_1_surf, 1, SDL_MapRGB(train_type_1_surf->format, 0, 255, 0));
 	SDL_Texture* train_type_1_texture = SDL_CreateTextureFromSurface(renderer, train_type_1_surf);
 	SDL_FreeSurface(train_type_1_surf);
-	SDL_Surface* train_type_2_surf = SDL_LoadBMP("textures/train_type_2.bmp");
+	SDL_Surface* train_type_2_surf = SDL_LoadBMP("resourses/textures/train_type_2.bmp");
 	SDL_SetColorKey(train_type_2_surf, 1, SDL_MapRGB(train_type_2_surf->format, 0, 255, 0));
 	SDL_Texture* train_type_2_texture = SDL_CreateTextureFromSurface(renderer, train_type_2_surf);
 	SDL_FreeSurface(train_type_2_surf);
-	SDL_Surface* train_type_3_surf = SDL_LoadBMP("textures/train_type_3.bmp");
+	SDL_Surface* train_type_3_surf = SDL_LoadBMP("resourses/textures/train_type_3.bmp");
 	SDL_SetColorKey(train_type_3_surf, 1, SDL_MapRGB(train_type_3_surf->format, 0, 255, 0));
 	SDL_Texture* train_type_3_texture = SDL_CreateTextureFromSurface(renderer, train_type_3_surf);
 	SDL_FreeSurface(train_type_3_surf);
 
 	SDL_Texture* train_textures[4] = {train_type_0_texture,train_type_1_texture ,train_type_2_texture ,train_type_3_texture };
 	//Рычагов
-	SDL_Surface* lever_surf = SDL_LoadBMP("textures/lever.bmp");
+	SDL_Surface* lever_surf = SDL_LoadBMP("resourses/textures/lever.bmp");
 	SDL_SetColorKey(lever_surf, 1, SDL_MapRGB(lever_surf->format, 0, 255, 0));
 	SDL_Texture* lever_texture = SDL_CreateTextureFromSurface(renderer, lever_surf);
 	SDL_FreeSurface(lever_surf);
 	//Нажатых рычагов
-	SDL_Surface* lever_switched_surf = SDL_LoadBMP("textures/lever_switched.bmp");
+	SDL_Surface* lever_switched_surf = SDL_LoadBMP("resourses/textures/lever_switched.bmp");
 	SDL_SetColorKey(lever_switched_surf, 1, SDL_MapRGB(lever_switched_surf->format, 0, 255, 0));
 	SDL_Texture* lever_switched_texture = SDL_CreateTextureFromSurface(renderer, lever_switched_surf);
 	SDL_FreeSurface(lever_switched_surf);
@@ -221,11 +237,15 @@ void train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
 
+	//Кнопка города
+	SDL_Rect town = {444,196,264,215};
+
 	//Делаем рычаги кнопками
-	SDL_Rect buttons[2];
+	SDL_Rect buttons[3];
 	//Заполняем массив понятным способом
 	buttons[0] = lever1.rect;
 	buttons[1] = lever2.rect;
+	buttons[2] = town;
 
 	//Презентуем рендерер
 	SDL_RenderPresent(renderer);
@@ -285,9 +305,18 @@ void train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	int time_from_start; //Время со старта программы
 	int time_of_last_click=time_of_start; //Время предыдущего клика
 
-	float speed_x, speed_y;
+	float speed_x, speed_y; //Скорость по x и y для поезда
+	float rast; //Расстояние до конечной точки маршрута
 
-	float rast;
+	bool town_button_pressed = false; //Нажата ли кнопка "город"?
+
+	//Строки для хранения числовых значений людей, еды и ресурсов.
+	char* text_humans = new char[10];
+	char* text_food = new char[10];
+	char* text_resourses = new char[10];
+
+	//Массив строк для удобной передачи в ф-ию
+	char* texts[3] = {text_humans, text_food, text_resourses};
 
 	//Обработка ивентов
 	while (!quit) {
@@ -301,7 +330,7 @@ void train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		int button_flag = -1;
 
 		if ((time(NULL) - time_of_last_click >= 1)&&(LKMPressed(event))) { //Кликать не чаще 1 раза в секунду
-			for (int i = 0; i <= 1; i++) {
+			for (int i = 0; i <= 2; i++) {
 				button_flag = CheckIfMouseOnButton(event, i, buttons);
 				if (button_flag == 0) {
 					SwitchLever(&lever1);
@@ -310,6 +339,9 @@ void train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 				else if (button_flag == 1) {
 					SwitchLever(&lever2);
 					time_of_last_click = time(NULL);
+				}
+				else if (button_flag == 2) {
+					town_button_pressed = true;
 				}
 			}
 		}
@@ -393,12 +425,21 @@ void train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 				flag_line = 0;
 			}
 		}
-		Update(renderer, train, background, lever1, lever2);
+				
+		_itoa_s(g_humans, text_humans, 10, 10);
+		_itoa_s(g_food, text_food, 10, 10);
+		_itoa_s(g_resourses, text_resourses, 10, 10);
+
+		Update(window, renderer, train, background, lever1, lever2, texts);
 
 		time_from_start = time(NULL) - time_of_start;
 		
 		//Вывод дебаг-информации
 		printf_s("time = %d : x = %.0f, y = %.0f, way = %d, time_arrive = %.1f\n", time_from_start, train.coord.x, train.coord.y, current_path, train.time_before_arrive);
+
+		g_humans++;
+		g_food--;
+		g_resourses += 2;
 
 		SDL_Delay(10);
 
@@ -418,11 +459,15 @@ void train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		//printf_s("delta = %.3f\n",delta*0.001);
 		last_tick_time = tick_time;
 
-		
+		//Если время до прибытия поезда > 0, отнимаем из него прошедшее время за цикл
 		if (train.time_before_arrive > 0) {
 			train.time_before_arrive -= delta*0.001;
 		}
 		
+		//Выходим из цикла при нажатии на город
+		if (town_button_pressed) {
+			break;
+		}
 
 		//Ограничиваем ФПС.
 		/*if (delta < max_tick_time)
@@ -437,4 +482,11 @@ void train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	SDL_DestroyTexture(train_type_3_texture);
 	SDL_DestroyTexture(lever_texture);
 	SDL_DestroyTexture(lever_switched_texture);
+
+	if (town_button_pressed) {
+		return 0;
+	}
+	else {
+		return -1;
+	}
 }

@@ -29,6 +29,7 @@ void DrawButtons(SDL_Renderer* renderer,SDL_Rect buttons[], SDL_Texture* start_t
 	SDL_RenderCopy(renderer, exit_texture, NULL, &buttons[2]);
 }
 
+//Экран "меню".
 //Возврат 0 -> программа закрыта
 //Возврат 1 -> нажата кнопка Start
 //Возврат -1 -> проблема с кнопкой
@@ -55,25 +56,25 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	buttons[2] = button_exit;
 
 	//Загружаем текстуры
-	SDL_Surface* menu_surf = SDL_LoadBMP("textures/menu.bmp");
+	SDL_Surface* menu_surf = SDL_LoadBMP("resourses/textures/menu.bmp");
 	SDL_Texture* menu_texture = SDL_CreateTextureFromSurface(renderer, menu_surf);
 	SDL_FreeSurface(menu_surf);
-	SDL_Surface* start_surf = SDL_LoadBMP("textures/start.bmp");
+	SDL_Surface* start_surf = SDL_LoadBMP("resourses/textures/start.bmp");
 	SDL_Texture* start_texture = SDL_CreateTextureFromSurface(renderer, start_surf);
 	SDL_FreeSurface(start_surf);
-	SDL_Surface* setting_surf = SDL_LoadBMP("textures/setting.bmp");
+	SDL_Surface* setting_surf = SDL_LoadBMP("resourses/textures/setting.bmp");
 	SDL_Texture* setting_texture = SDL_CreateTextureFromSurface(renderer, setting_surf);
 	SDL_FreeSurface(setting_surf);
-	SDL_Surface* exit_surf = SDL_LoadBMP("textures/exit.bmp");
+	SDL_Surface* exit_surf = SDL_LoadBMP("resourses/textures/exit.bmp");
 	SDL_Texture* exit_texture = SDL_CreateTextureFromSurface(renderer, exit_surf);
 	SDL_FreeSurface(exit_surf);
-	SDL_Surface* start_surf_click = SDL_LoadBMP("textures/start_selected.bmp");
+	SDL_Surface* start_surf_click = SDL_LoadBMP("resourses/textures/start_selected.bmp");
 	SDL_Texture* start_texture_click = SDL_CreateTextureFromSurface(renderer, start_surf_click);
 	SDL_FreeSurface(start_surf_click);
-	SDL_Surface* setting_surf_click = SDL_LoadBMP("textures/setting_selected.bmp");
+	SDL_Surface* setting_surf_click = SDL_LoadBMP("resourses/textures/setting_selected.bmp");
 	SDL_Texture* setting_texture_click = SDL_CreateTextureFromSurface(renderer, setting_surf_click);
 	SDL_FreeSurface(setting_surf_click);
-	SDL_Surface* exit_surf_click = SDL_LoadBMP("textures/exit_selected.bmp");
+	SDL_Surface* exit_surf_click = SDL_LoadBMP("resourses/textures/exit_selected.bmp");
 	SDL_Texture* exit_texture_click = SDL_CreateTextureFromSurface(renderer, exit_surf_click);
 	SDL_FreeSurface(exit_surf_click);
 
