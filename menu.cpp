@@ -1,5 +1,4 @@
 #include <SDL.h>
-#include <nlohmann/json.hpp>
 
 /*To-do:
 V —делать объ€вление button-ов не глобальным дл€ функции (работа с размерами окна)
@@ -137,6 +136,8 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 			SDL_RenderPresent(renderer);
 			buttons_changed = 0;
 		}
+
+		SDL_Delay(10);
 	}
 
 	//ќчищаем пам€ть

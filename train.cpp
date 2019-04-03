@@ -1,15 +1,20 @@
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <stdio.h>
 #include <time.h>
 #include "menu.h"
+#include "text.h"
+#include <math.h>
+#include <stdlib.h>
 
 /*To-do:
 V) Движение поезда от точки к точке
 V) Исправить train_move (выход за координаты точки)
-1) Проблема с поворотом текстуры
-2) Проблема с непопаданием в цель (проверить углы и тому подобное)
-3) Равномерное замедление при приближении к станции\рычагу
-4) Взаимодействие с рычагами
+V) Проблема с поворотом текстуры
+V) Проблема с непопаданием в цель (проверить углы и тому подобное)
+X) Равномерное замедление при приближении к станции\рычагу
+V) Взаимодействие с рычагами
+1)
 */
 
 //float x;float y;
@@ -31,14 +36,17 @@ struct Background {
 	SDL_Rect rectangle;
 };
 
-//SDL_Texture* texture;SDL_Rect rectangle;float angle;SDL_Point coord;SDL_Rect rectangle;float speed;bool shown
+//SDL_Texture* texture;SDL_Rect rectangle;float angle;SDL_Point coord;SDL_Rect rectangle;float speed;bool shown;int type;bool reached_town;
 struct Train {
 	SDL_Texture* texture;
 	SDL_Rect rectangle;
 	float angle;
 	Point coord;
 	float speed;
-	bool shown;
+	bool shown; //Нужно ли отображать\двигать поезд: 0 - нет, 1 - да
+	int type; // Тип поезда: 0 - обычный, 1 - торговый, 2 - с людьми, 3 - рейдерский
+	bool reached_town; //Достиг ли поезд города
+	float time_before_arrive; //Время до прибытия
 };
 
 //SDL_Point point1;SDL_Point point2;
@@ -57,6 +65,7 @@ void draw_train(SDL_Renderer* renderer, Train train) {
 	SDL_RenderCopyEx(renderer, train.texture, NULL, &train.rectangle, train.angle, NULL, SDL_FLIP_NONE);
 }
 
+//Рисуем рычаг
 void draw_lever(SDL_Renderer* renderer, Lever lever) {
 	if (lever.switched)
 		SDL_RenderCopy(renderer, lever.texture_switched, NULL, &lever.rect);
@@ -121,6 +130,7 @@ void Update(SDL_Renderer* renderer, Train train, Background background, Lever le
 	SDL_RenderPresent(renderer);
 }
 
+//Переключает рычаг
 void SwitchLever(Lever *lever) {
 	if ((*lever).switched == 0) {
 		(*lever).switched = 1;
@@ -130,8 +140,37 @@ void SwitchLever(Lever *lever) {
 	}
 }
 
-void game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
+//Задаёт тип поезда в зависимости от сложности
+void Define_Train_Type_And_Delay(Train* train, int difficulty, SDL_Texture* textures[]) {
+	int chance_type_0 = 5; //Шанс прибытия обычного (тип 0) поезда
+	int chance_type_1 = int(fmax(10 - difficulty, 2)); //Шанс прибытия торгового (тип 1) поезда
+	int chance_type_2 = int(fmax(10 - difficulty, 1)); //Шанс прибытия пассажирского (тип 2) поезда
+	int chance_type_3 = int(fmin(difficulty, 3)); //Шанс прибытия рейдерского (тип 3) поезда
 
+	int luckynumber = rand() % (chance_type_0 + chance_type_1 + chance_type_2 + chance_type_3);
+
+	if (luckynumber < chance_type_0) {
+		(*train).type = 0;
+	}
+	else if (luckynumber < chance_type_0 + chance_type_1) {
+		(*train).type = 1;
+	}
+	else if (luckynumber < chance_type_0 + chance_type_1 + chance_type_2) {
+		(*train).type = 2;
+	}
+	else {
+		(*train).type = 3;
+	}
+	(*train).texture = textures[train->type];
+
+	(*train).time_before_arrive = 5 + rand() % 5;
+	//printf_s("train_type = %d\n", (*train).type);
+}
+
+void train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
+	srand(int(time(NULL)));
+	int DIFFICULTY=0; //Переменная, отвечающая за сложность приезда поезда. Должна будет передаваться в ф-ию. Чем больше: тем хуже игроку
+	
 	//Создаём ивент и переменную для отслеживания закрытия окна
 	SDL_Event event;
 	bool quit = false;
@@ -142,10 +181,24 @@ void game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize
 	SDL_Texture* background_texture = SDL_CreateTextureFromSurface(renderer, background_surf);
 	SDL_FreeSurface(background_surf);
 	//Поезда
-	SDL_Surface* train_surf = SDL_LoadBMP("textures/train.bmp");
-	SDL_SetColorKey(train_surf, 1, SDL_MapRGB(train_surf->format, 0, 255, 0));
-	SDL_Texture* train_texture = SDL_CreateTextureFromSurface(renderer, train_surf);
-	SDL_FreeSurface(train_surf);
+	SDL_Surface* train_type_0_surf = SDL_LoadBMP("textures/train_type_0.bmp");
+	SDL_SetColorKey(train_type_0_surf, 1, SDL_MapRGB(train_type_0_surf->format, 0, 255, 0));
+	SDL_Texture* train_type_0_texture = SDL_CreateTextureFromSurface(renderer, train_type_0_surf);
+	SDL_FreeSurface(train_type_0_surf);
+	SDL_Surface* train_type_1_surf = SDL_LoadBMP("textures/train_type_1.bmp");
+	SDL_SetColorKey(train_type_1_surf, 1, SDL_MapRGB(train_type_1_surf->format, 0, 255, 0));
+	SDL_Texture* train_type_1_texture = SDL_CreateTextureFromSurface(renderer, train_type_1_surf);
+	SDL_FreeSurface(train_type_1_surf);
+	SDL_Surface* train_type_2_surf = SDL_LoadBMP("textures/train_type_2.bmp");
+	SDL_SetColorKey(train_type_2_surf, 1, SDL_MapRGB(train_type_2_surf->format, 0, 255, 0));
+	SDL_Texture* train_type_2_texture = SDL_CreateTextureFromSurface(renderer, train_type_2_surf);
+	SDL_FreeSurface(train_type_2_surf);
+	SDL_Surface* train_type_3_surf = SDL_LoadBMP("textures/train_type_3.bmp");
+	SDL_SetColorKey(train_type_3_surf, 1, SDL_MapRGB(train_type_3_surf->format, 0, 255, 0));
+	SDL_Texture* train_type_3_texture = SDL_CreateTextureFromSurface(renderer, train_type_3_surf);
+	SDL_FreeSurface(train_type_3_surf);
+
+	SDL_Texture* train_textures[4] = {train_type_0_texture,train_type_1_texture ,train_type_2_texture ,train_type_3_texture };
 	//Рычагов
 	SDL_Surface* lever_surf = SDL_LoadBMP("textures/lever.bmp");
 	SDL_SetColorKey(lever_surf, 1, SDL_MapRGB(lever_surf->format, 0, 255, 0));
@@ -188,47 +241,47 @@ void game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize
 	Line line4 = { {345,25},{345,345} }; //Второй участок пути (до второго поворота)
 
 	Line line5 = { {345,345},{400,440} }; //Второй поворот
-	Line line6 = { {400,440}, {580, 440} };
-	Line line7 = { {580,440},{580,300} };
+	Line line6 = { {400,440}, {560, 440} };
+	Line line10 = { {560,440}, {580, 420} };
+	Line line7 = { {580,420},{580,300} };
 
 	Line line8 = { {345,345},{345,600} }; //Третий участок пути (до конца экрана)
 
 	Line line9 = { {345,600},{345,700} }; //Участок пути за эрканом
 
-	Line main_path[10] = { line0, line1,line2,line3,line4,line5,line6,line7,line8,line9 };
+	Line main_path[11] = { line0, line1,line2,line3,line4,line5,line6,line7,line8,line9,line10 };
 
 	//Задаём поезду начальные значения
 	//SDL_Point train_position = { 0,0 };
 
 
-	int IWantThisToBeTheFirst = 1; //ПЕРЕМЕННАЯ, ОТВЕЧАЮЩАЯ ЗА МЕСТО ПОЯВЛЕНИЯ ПОЕЗДА
+	int start_position = 1; //ПЕРЕМЕННАЯ, ОТВЕЧАЮЩАЯ ЗА МЕСТО ПОЯВЛЕНИЯ ПОЕЗДА
 
 
-	SDL_Rect train_rectangle = { main_path[IWantThisToBeTheFirst].point1.x, main_path[IWantThisToBeTheFirst].point1.y,20,80 };
-	Train train = { train_texture, train_rectangle , 0 , line1.point1, 0, true };
+	SDL_Rect train_rectangle = { main_path[start_position].point1.x, main_path[start_position].point1.y,20,80 };
+	Train train;
+	train.rectangle = train_rectangle;
+	train.speed = 1.5;
+	train.shown = true;
+	train.reached_town = false;
+	Define_Train_Type_And_Delay(&train,DIFFICULTY,train_textures);
 
 	//Подсчёт времени
-	/*
-	const int FPS = 60;
-	const int max_tick_time = 1000 / FPS;
 	int last_tick_time = 0;
 	int delta = 0; //Разница во времени
-	int clock = 0; //Клок для работы со скоростью
-	*/
 
-	//Двигаем поезд
-	printf_s("speed = "); scanf_s("%f", &train.speed);
+	//printf_s("speed = "); scanf_s("%f", &train.speed);
 
 	bool have_counted_speed = false; //Флаг, определяющий, была ли уже посчитана скорость
 	int flag_line = 0; //Флаг, который равен 1, когда мы дошли до конца пути.
-	int current_path = IWantThisToBeTheFirst; //Хранит номер текущего пути.
+	int current_path = start_position; //Хранит номер текущего пути.
 
 	//Начальное положение поезда:
 	train.coord.x = main_path[current_path].point1.x;
 	train.coord.y = main_path[current_path].point1.y;
 
 	//Время запуска программы
-	int time_of_start = time(NULL);
+	int time_of_start = int(time(NULL));
 	int time_from_start; //Время со старта программы
 	int time_of_last_click=time_of_start; //Время предыдущего клика
 
@@ -242,26 +295,26 @@ void game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize
 		if (event.type == SDL_QUIT)
 			quit = true;
 
+		int time_of_one_cycle = 0;
+
 		//Каждый раз в цикле говорим, что мышь не наведена ни на одну из кнопок
 		int button_flag = -1;
 
-		if (time(NULL) - time_of_last_click >= 1) { //Кликать не чаще 1 раза в секунду
+		if ((time(NULL) - time_of_last_click >= 1)&&(LKMPressed(event))) { //Кликать не чаще 1 раза в секунду
 			for (int i = 0; i <= 1; i++) {
 				button_flag = CheckIfMouseOnButton(event, i, buttons);
-				if (LKMPressed(event)) {
-					if (button_flag == 0) {
-						SwitchLever(&lever1);
-						time_of_last_click = time(NULL);
-					}
-					else if (button_flag == 1) {
-						SwitchLever(&lever2);
-						time_of_last_click = time(NULL);
-					}
+				if (button_flag == 0) {
+					SwitchLever(&lever1);
+					time_of_last_click = time(NULL); //ПРОБЛЕМА С НАЖАТИЯМИ (ПОВТОРНОЕ ПЕРЕКЛЮЧЕНИЕ)
+				}
+				else if (button_flag == 1) {
+					SwitchLever(&lever2);
+					time_of_last_click = time(NULL);
 				}
 			}
 		}
 
-		if (train.shown) {
+		if (train.shown && train.time_before_arrive <= 0) {
 
 			//Проверяем, нужно ли перейти к новому пути и переходим, если нужно
 			if (flag_line) {
@@ -296,6 +349,9 @@ void game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize
 					current_path = 6; //Продолжаем поворачивать
 				}
 				else if (current_path == 6) { //Если мы поворачиваем
+					current_path = 10; //Продолжаем поворачивать
+				}
+				else if (current_path == 10) { //Если мы поворачиваем
 					current_path = 7; //Продолжаем поворачивать
 				}
 				else if (current_path == 7) { //Если дошли до конца поворота
@@ -314,7 +370,9 @@ void game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize
 			if (!have_counted_speed) {
 				CountSpeed(main_path[current_path], train.speed, &speed_x, &speed_y, &train.angle);
 				if (speed_x > 0) {
-					train.angle = 360 - train.angle;
+					if (speed_y >= 0) {
+						train.angle = 360 - train.angle;
+					}
 				}
 				if (speed_y < 0) {
 					train.angle = train.angle + 180;
@@ -324,7 +382,7 @@ void game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize
 
 			//if (Reached_End(main_path[current_path], train.coord, train.speed)) {
 			rast = Rast_to_End(main_path[current_path], train.coord, train.speed);
-			if (rast <=1) {
+			if (rast <= 1) {
 				train.coord = main_path[current_path].point2;
 				flag_line = 1;
 			}
@@ -335,30 +393,36 @@ void game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize
 				flag_line = 0;
 			}
 		}
-
 		Update(renderer, train, background, lever1, lever2);
 
 		time_from_start = time(NULL) - time_of_start;
 		
 		//Вывод дебаг-информации
-		printf_s("time = %d : x = %.0f, y = %.0f, current_way = %d, rast = %.0f\n",time_from_start,train.coord.x, train.coord.y, current_path, rast);
+		printf_s("time = %d : x = %.0f, y = %.0f, way = %d, time_arrive = %.1f\n", time_from_start, train.coord.x, train.coord.y, current_path, train.time_before_arrive);
 
 		SDL_Delay(10);
 
 		//ТЕСТОВЫЙ ПЕРЕЗАПУСК ПОЕЗДА
 		if (!train.shown) {
 			train.shown = true;
-			current_path = IWantThisToBeTheFirst;
+			current_path = start_position;
 			have_counted_speed = false;
 			train.coord.x = main_path[current_path].point1.x;
 			train.coord.y = main_path[current_path].point1.y;
+			Define_Train_Type_And_Delay(&train,++DIFFICULTY,train_textures);
 		}
 		
-		///Считаем время
-		//int tick_time = SDL_GetTicks();
-		//delta = tick_time - last_tick_time;
-		//printf_s("sec = %.3f y=%d\n", float(delta) / 1000, train_start_position.y); //Выводим дебаг-информацию
-		//last_tick_time = tick_time;
+		//Считаем время
+		int tick_time = SDL_GetTicks();
+		delta = tick_time - last_tick_time;
+		//printf_s("delta = %.3f\n",delta*0.001);
+		last_tick_time = tick_time;
+
+		
+		if (train.time_before_arrive > 0) {
+			train.time_before_arrive -= delta*0.001;
+		}
+		
 
 		//Ограничиваем ФПС.
 		/*if (delta < max_tick_time)
@@ -367,5 +431,10 @@ void game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize
 	}
 
 	SDL_DestroyTexture(background_texture);
-	SDL_DestroyTexture(train_texture);
+	SDL_DestroyTexture(train_type_0_texture);
+	SDL_DestroyTexture(train_type_1_texture);
+	SDL_DestroyTexture(train_type_2_texture);
+	SDL_DestroyTexture(train_type_3_texture);
+	SDL_DestroyTexture(lever_texture);
+	SDL_DestroyTexture(lever_switched_texture);
 }

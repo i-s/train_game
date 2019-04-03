@@ -1,6 +1,6 @@
 #include <SDL.h>
 #include "menu.h"
-#include "game.h"
+#include "train.h"
 #undef main
 
 int winsize_w = 800, winsize_h = 600;
@@ -24,7 +24,7 @@ int main() {
 
 	//Запускаем игру
 	if (menu_flag == 1) {
-		game(WINDOW, renderer, winsize_w, winsize_h);
+		train_game(WINDOW, renderer, winsize_w, winsize_h);
 	}
 
 	SDL_DestroyRenderer(renderer);
