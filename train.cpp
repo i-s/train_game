@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <time.h>
 #include "menu.h"
+#include "town.h"
 #include "text.h"
-#include "train.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -16,6 +16,7 @@
 
 //Загружаем глобальные переменные из town.cpp
 extern int g_humans, g_resourses, g_food;
+extern int difficulty;
 
 //Загружаем глобальные RECT-ы
 extern SDL_Rect g_recthumans;
@@ -39,10 +40,7 @@ struct Lever {
 	SDL_Texture* texture_switched;
 };
 
-//struct Background {
-//	SDL_Texture* texture;
-//	SDL_Rect rectangle;
-//};
+extern struct Background;
 
 //SDL_Texture* texture;SDL_Rect rectangle;float angle;SDL_Point coord;SDL_Rect rectangle;float speed;bool shown;int type;bool reached_town;
 struct Train {
@@ -63,10 +61,10 @@ struct Line {
 	Point point2;
 };
 
-//Рисует фон
-void draw_background(SDL_Renderer* renderer, Background background) {
-	SDL_RenderCopy(renderer, background.texture, NULL, &background.rectangle);
-}
+////Рисует фон
+//void draw_background(SDL_Renderer* renderer, Background background) {
+//	SDL_RenderCopy(renderer, background.texture, NULL, &background.rectangle);
+//}
 
 //Рисует поезд
 void draw_train(SDL_Renderer* renderer, Train train) {
@@ -185,8 +183,7 @@ void Define_Train_Type_And_Delay(Train* train, int difficulty, SDL_Texture* text
 //Возврат 0 -> была нажата кнопка город
 int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
 	srand(int(time(NULL)));
-	int DIFFICULTY=0; //Переменная, отвечающая за сложность приезда поезда. Должна будет передаваться в ф-ию. Чем больше: тем хуже игроку
-	
+		
 	//Создаём ивент и переменную для отслеживания закрытия окна
 	SDL_Event event;
 	bool quit = false;
@@ -284,7 +281,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	train.speed = 1.5;
 	train.shown = true;
 	train.reached_town = false;
-	Define_Train_Type_And_Delay(&train,DIFFICULTY,train_textures);
+	Define_Train_Type_And_Delay(&train,difficulty,train_textures);
 
 	//Подсчёт времени
 	int last_tick_time = 0;
@@ -387,6 +384,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 					current_path = 7; //Продолжаем поворачивать
 				}
 				else if (current_path == 7) { //Если дошли до конца поворота
+					train.reached_town = true;
 					train.shown = 0; //Скрываем поезд
 				}
 
@@ -425,7 +423,37 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 				flag_line = 0;
 			}
 		}
-				
+		
+		if (train.reached_town) {
+			switch (train.type) {
+			case 0: { //Если прибыл обычный поезд, то...
+				g_food += -10 + rand() % 50;
+				g_resourses += -10 + rand() % 50;
+				break;
+			}
+			case 1: {//Если прибыл торговый поезд, то...
+				g_food += 10 + rand() % 100;
+				g_resourses += 10 + rand() % 100;
+				break;
+			}
+			case 2: {//Если прибыл пассажирский поезд, то...
+				g_humans += -1 + rand() % 10;
+				g_food += -50 + rand() % 60;
+				g_resourses += -10 + rand() % 20;
+				break;
+			}
+			case 3: {//Если прибыл рейдерский поезд, то...
+				g_humans += -20 + rand() % 20;
+				g_food += -50 + rand() % 50;
+				g_resourses += -100 + rand() % 100;
+				break;
+			}
+			default: break;
+			}
+			train.reached_town = false;
+		}
+
+		//Подготовка к выводу цифр на экран
 		_itoa_s(g_humans, text_humans, 10, 10);
 		_itoa_s(g_food, text_food, 10, 10);
 		_itoa_s(g_resourses, text_resourses, 10, 10);
@@ -437,13 +465,10 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		//Вывод дебаг-информации
 		printf_s("time = %d : x = %.0f, y = %.0f, way = %d, time_arrive = %.1f\n", time_from_start, train.coord.x, train.coord.y, current_path, train.time_before_arrive);
 
-		g_humans++;
-		g_food--;
-		g_resourses += 2;
-
 		SDL_Delay(10);
 
 		//ТЕСТОВЫЙ ПЕРЕЗАПУСК ПОЕЗДА
+		/*
 		if (!train.shown) {
 			train.shown = true;
 			current_path = start_position;
@@ -452,6 +477,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 			train.coord.y = main_path[current_path].point1.y;
 			Define_Train_Type_And_Delay(&train,++DIFFICULTY,train_textures);
 		}
+		*/
 		
 		//Считаем время
 		int tick_time = SDL_GetTicks();
