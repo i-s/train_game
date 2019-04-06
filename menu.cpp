@@ -1,14 +1,14 @@
 #include <SDL.h>
 
 /*To-do:
-V Сделать объявление button-ов не глобальным для функции (работа с размерами окна)
-1) Избавиться от костылей в DrawButtons
-2) Высчитывать положение кнопок по размеру окна
-3) Добавить звук для кнопок
-4) Меню настроек?
+V РЎРґРµР»Р°С‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ button-РѕРІ РЅРµ РіР»РѕР±Р°Р»СЊРЅС‹Рј РґР»СЏ С„СѓРЅРєС†РёРё (СЂР°Р±РѕС‚Р° СЃ СЂР°Р·РјРµСЂР°РјРё РѕРєРЅР°)
+1) РР·Р±Р°РІРёС‚СЊСЃСЏ РѕС‚ РєРѕСЃС‚С‹Р»РµР№ РІ DrawButtons
+2) Р’С‹СЃС‡РёС‚С‹РІР°С‚СЊ РїРѕР»РѕР¶РµРЅРёРµ РєРЅРѕРїРѕРє РїРѕ СЂР°Р·РјРµСЂСѓ РѕРєРЅР°
+3) Р”РѕР±Р°РІРёС‚СЊ Р·РІСѓРє РґР»СЏ РєРЅРѕРїРѕРє
+4) РњРµРЅСЋ РЅР°СЃС‚СЂРѕРµРє?
 */
 
-//Возвращает номер кнопки, на которую наведён курсор, или -1, если не наведена.
+//Р’РѕР·РІСЂР°С‰Р°РµС‚ РЅРѕРјРµСЂ РєРЅРѕРїРєРё, РЅР° РєРѕС‚РѕСЂСѓСЋ РЅР°РІРµРґС‘РЅ РєСѓСЂСЃРѕСЂ, РёР»Рё -1, РµСЃР»Рё РЅРµ РЅР°РІРµРґРµРЅР°.
 int CheckIfMouseOnButton(SDL_Event event, int i, SDL_Rect buttons[]) {
 	if (event.button.x >= buttons[i].x && event.button.x <= buttons[i].x + buttons[i].w &&
 		event.button.y >= buttons[i].y && event.button.y <= buttons[i].y + buttons[i].h)
@@ -16,9 +16,9 @@ int CheckIfMouseOnButton(SDL_Event event, int i, SDL_Rect buttons[]) {
 	return -1;
 }
 
-//Возвращает 1, если ЛКМ нажата, и 0, если нет.
+//Р’РѕР·РІСЂР°С‰Р°РµС‚ 1, РµСЃР»Рё Р›РљРњ РЅР°Р¶Р°С‚Р°, Рё 0, РµСЃР»Рё РЅРµС‚.
 int LKMPressed(SDL_Event event) {
-	if (event.button.button == SDL_BUTTON_LEFT)
+	if (event.button.button == SDL_BUTTON_LEFT && event.button.type == SDL_MOUSEBUTTONDOWN)
 		return 1;
 	return 0;
 }
@@ -29,33 +29,33 @@ void DrawButtons(SDL_Renderer* renderer,SDL_Rect buttons[], SDL_Texture* start_t
 	SDL_RenderCopy(renderer, exit_texture, NULL, &buttons[2]);
 }
 
-//Экран "меню".
-//Возврат 0 -> программа закрыта
-//Возврат 1 -> нажата кнопка Start
-//Возврат -1 -> проблема с кнопкой
+//Р­РєСЂР°РЅ "РјРµРЅСЋ".
+//Р’РѕР·РІСЂР°С‚ 0 -> РїСЂРѕРіСЂР°РјРјР° Р·Р°РєСЂС‹С‚Р°
+//Р’РѕР·РІСЂР°С‚ 1 -> РЅР°Р¶Р°С‚Р° РєРЅРѕРїРєР° Start
+//Р’РѕР·РІСЂР°С‚ -1 -> РїСЂРѕР±Р»РµРјР° СЃ РєРЅРѕРїРєРѕР№
 int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
 	//SDL_Init(SDL_INIT_EVERYTHING);
 
-	//Создаём ивент и переменную для отслеживания событий окна
+	//РЎРѕР·РґР°С‘Рј РёРІРµРЅС‚ Рё РїРµСЂРµРјРµРЅРЅСѓСЋ РґР»СЏ РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ СЃРѕР±С‹С‚РёР№ РѕРєРЅР°
 	SDL_Event event;
 	bool quit = false;
 
-	//Задаём место расположения фона
+	//Р—Р°РґР°С‘Рј РјРµСЃС‚Рѕ СЂР°СЃРїРѕР»РѕР¶РµРЅРёСЏ С„РѕРЅР°
 	SDL_Rect full_screen = { 0,0,winsize_w,winsize_h };
 
-	//Задаём места расположения кнопок (НАГЛЯДНО)
+	//Р—Р°РґР°С‘Рј РјРµСЃС‚Р° СЂР°СЃРїРѕР»РѕР¶РµРЅРёСЏ РєРЅРѕРїРѕРє (РќРђР“Р›РЇР”РќРћ)
 	SDL_Rect button_start = { 260,240,270,80 };
 	SDL_Rect button_setting = { 260,340,270,80 };
 	SDL_Rect button_exit = { 260, 440,270,80 };
 
-	//Массив для хранения кнопок
+	//РњР°СЃСЃРёРІ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РєРЅРѕРїРѕРє
 	SDL_Rect buttons[3] = {};
-	//Понятное заполнение массива:
+	//РџРѕРЅСЏС‚РЅРѕРµ Р·Р°РїРѕР»РЅРµРЅРёРµ РјР°СЃСЃРёРІР°:
 	buttons[0] = button_start;
 	buttons[1] = button_setting;
 	buttons[2] = button_exit;
 
-	//Загружаем текстуры
+	//Р—Р°РіСЂСѓР¶Р°РµРј С‚РµРєСЃС‚СѓСЂС‹
 	SDL_Surface* menu_surf = SDL_LoadBMP("resourses/textures/menu.bmp");
 	SDL_Texture* menu_texture = SDL_CreateTextureFromSurface(renderer, menu_surf);
 	SDL_FreeSurface(menu_surf);
@@ -78,52 +78,52 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	SDL_Texture* exit_texture_click = SDL_CreateTextureFromSurface(renderer, exit_surf_click);
 	SDL_FreeSurface(exit_surf_click);
 
-	//Отрисовываем кнопки и фон
+	//РћС‚СЂРёСЃРѕРІС‹РІР°РµРј РєРЅРѕРїРєРё Рё С„РѕРЅ
 	SDL_RenderCopy(renderer, menu_texture, NULL, &full_screen);
 	DrawButtons(renderer, buttons, start_texture, setting_texture, exit_texture);
 	SDL_RenderPresent(renderer);
 
-	//Переменная для хранения номера кнопки
+	//РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РЅРѕРјРµСЂР° РєРЅРѕРїРєРё
 	int button_flag;
-	//Переменная, которая равна 1, когда необходимо заменить кнопки с нажатых на обычные
+	//РџРµСЂРµРјРµРЅРЅР°СЏ, РєРѕС‚РѕСЂР°СЏ СЂР°РІРЅР° 1, РєРѕРіРґР° РЅРµРѕР±С…РѕРґРёРјРѕ Р·Р°РјРµРЅРёС‚СЊ РєРЅРѕРїРєРё СЃ РЅР°Р¶Р°С‚С‹С… РЅР° РѕР±С‹С‡РЅС‹Рµ
 	int buttons_changed=0;
-	//Переменная, для хранения состояния игры: 1 - нажата кнопка Start
+	//РџРµСЂРµРјРµРЅРЅР°СЏ, РґР»СЏ С…СЂР°РЅРµРЅРёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ РёРіСЂС‹: 1 - РЅР°Р¶Р°С‚Р° РєРЅРѕРїРєР° Start
 	int game_started = 0;
 
-	//Основной цикл
+	//РћСЃРЅРѕРІРЅРѕР№ С†РёРєР»
 	while (!quit && !game_started) {
 		SDL_PollEvent(&event);
 		if (event.type == SDL_QUIT) {
 			quit = 1;
-			return 0; //Возврат 0 -> программа закрыта
+			return 0; //Р’РѕР·РІСЂР°С‚ 0 -> РїСЂРѕРіСЂР°РјРјР° Р·Р°РєСЂС‹С‚Р°
 		}
 
-		//Каждый раз в цикле говорим, что мышь не наведена ни на одну из кнопок
+		//РљР°Р¶РґС‹Р№ СЂР°Р· РІ С†РёРєР»Рµ РіРѕРІРѕСЂРёРј, С‡С‚Рѕ РјС‹С€СЊ РЅРµ РЅР°РІРµРґРµРЅР° РЅРё РЅР° РѕРґРЅСѓ РёР· РєРЅРѕРїРѕРє
 		button_flag = -1;
 
-		//Цикл, проверяющий, наведена ли мышь на кнопку
+		//Р¦РёРєР», РїСЂРѕРІРµСЂСЏСЋС‰РёР№, РЅР°РІРµРґРµРЅР° Р»Рё РјС‹С€СЊ РЅР° РєРЅРѕРїРєСѓ
 		for (int i = 0; i <= 2; i++) {
 			button_flag = CheckIfMouseOnButton(event, i, buttons);
 			if (button_flag >= 0) {
 				switch (i)
 				{
-					//Курсор на кнопке Start?
+					//РљСѓСЂСЃРѕСЂ РЅР° РєРЅРѕРїРєРµ Start?
 				case 0:SDL_RenderCopy(renderer, start_texture_click, NULL, &button_start);
-					 //Нажата кнопка Start?
+					 //РќР°Р¶Р°С‚Р° РєРЅРѕРїРєР° Start?
 					if (LKMPressed(event))
 						game_started = 1;
 					break;
-					//Курсор на кнопке Settings?
+					//РљСѓСЂСЃРѕСЂ РЅР° РєРЅРѕРїРєРµ Settings?
 				case 1: SDL_RenderCopy(renderer, setting_texture_click, NULL, &button_setting);
 					break;
-					//Нажата кнопка Exit?
+					//РќР°Р¶Р°С‚Р° РєРЅРѕРїРєР° Exit?
 				case 2: SDL_RenderCopy(renderer, exit_texture_click, NULL, &button_exit);
-					//Нажата кнопка Exit?
+					//РќР°Р¶Р°С‚Р° РєРЅРѕРїРєР° Exit?
 					if (LKMPressed(event))
 						quit = 1;
 					break;
 				default:
-					return -1; //Возврат -1 -> проблема с кнопкой
+					return -1; //Р’РѕР·РІСЂР°С‚ -1 -> РїСЂРѕР±Р»РµРјР° СЃ РєРЅРѕРїРєРѕР№
 				}
 				SDL_RenderPresent(renderer);
 				buttons_changed = 1;
@@ -131,7 +131,7 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 			}
 		}
 
-		//Если не наведено ни на какую из кнопок - отрисовать кнопки в начальное положение
+		//Р•СЃР»Рё РЅРµ РЅР°РІРµРґРµРЅРѕ РЅРё РЅР° РєР°РєСѓСЋ РёР· РєРЅРѕРїРѕРє - РѕС‚СЂРёСЃРѕРІР°С‚СЊ РєРЅРѕРїРєРё РІ РЅР°С‡Р°Р»СЊРЅРѕРµ РїРѕР»РѕР¶РµРЅРёРµ
 		if (button_flag == -1 && buttons_changed == 1) {
 			DrawButtons(renderer, buttons, start_texture, setting_texture, exit_texture);
 			SDL_RenderPresent(renderer);
@@ -141,7 +141,7 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 		SDL_Delay(10);
 	}
 
-	//Очищаем память
+	//РћС‡РёС‰Р°РµРј РїР°РјСЏС‚СЊ
 	SDL_DestroyTexture(menu_texture);
 	SDL_DestroyTexture(start_texture);
 	SDL_DestroyTexture(setting_texture);
@@ -149,6 +149,6 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	SDL_DestroyTexture(start_texture_click);
 	SDL_DestroyTexture(setting_texture_click);
 	SDL_DestroyTexture(exit_texture_click);
-	if (game_started) return 1; //Возврат 1 - нажата кнопка Start
-	return 0; //Возврат 0 -> программа закрыта
+	if (game_started) return 1; //Р’РѕР·РІСЂР°С‚ 1 - РЅР°Р¶Р°С‚Р° РєРЅРѕРїРєР° Start
+	return 0; //Р’РѕР·РІСЂР°С‚ 0 -> РїСЂРѕРіСЂР°РјРјР° Р·Р°РєСЂС‹С‚Р°
 }

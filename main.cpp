@@ -2,28 +2,31 @@
 #include "menu.h"
 #include "train.h"
 #include "town.h"
+#include <time.h>
 #undef main
 
-//Загружаем глобальные переменные из town.cpp
+//Р—Р°РіСЂСѓР¶Р°РµРј РіР»РѕР±Р°Р»СЊРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ РёР· town.cpp
 extern int g_humans,g_resourses,g_food;
 
+
+
 /*To-do:
-V Нажимаемые кнопки в меню
-1) Движение поезда
-2) Звук в игре
-3) Экран города (переход из города в меню поезда)
+V РќР°Р¶РёРјР°РµРјС‹Рµ РєРЅРѕРїРєРё РІ РјРµРЅСЋ
+1) Р”РІРёР¶РµРЅРёРµ РїРѕРµР·РґР°
+2) Р—РІСѓРє РІ РёРіСЂРµ
+3) Р­РєСЂР°РЅ РіРѕСЂРѕРґР° (РїРµСЂРµС…РѕРґ РёР· РіРѕСЂРѕРґР° РІ РјРµРЅСЋ РїРѕРµР·РґР°)
 */
 
 int main() {
-	//Создаём окно
+	//РЎРѕР·РґР°С‘Рј РѕРєРЅРѕ
 	int winsize_w = 800, winsize_h = 600;
 
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Window* WINDOW = SDL_CreateWindow("Main window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		winsize_w, winsize_h, SDL_WINDOW_SHOWN);
-	SDL_Renderer* renderer = SDL_CreateRenderer(WINDOW, -1, 0);
+	SDL_Renderer* renderer = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-	//Тестовые начальные значения ресурсов:
+	//РўРµСЃС‚РѕРІС‹Рµ РЅР°С‡Р°Р»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ СЂРµСЃСѓСЂСЃРѕРІ:
 	g_humans = 100;
 	g_resourses = 50;
 	g_food = 300;
@@ -32,14 +35,18 @@ int main() {
 	//train_game(WINDOW, renderer, winsize_w, winsize_h)
 	//town_game(WINDOW, renderer, winsize_w, winsize_h)
 
-	//Запускаем меню
+	//Р—Р°РїСѓСЃРєР°РµРј РјРµРЅСЋ
 	int menu_flag;
 	int train_flag;
 	int town_flag = -1;
+	extern int GAMESTARTTIME;
+	extern float TIMEUNTILTRAIN;
+	TIMEUNTILTRAIN = 10;
 
-	//Запускаем игру
+	//Р—Р°РїСѓСЃРєР°РµРј РёРіСЂСѓ
 	menu_flag = menu(WINDOW, renderer, winsize_w, winsize_h);
 	if (menu_flag == 1) {
+		GAMESTARTTIME = int(time(NULL)); // РІСЂРµРјСЏ СЃС‚Р°СЂС‚Р° РёРіСЂС‹ Р·Р°РїРёСЃС‹РІР°РµРј
 		while (town_flag != 0) {
 			town_flag = town_game(WINDOW, renderer, winsize_w, winsize_h);
 			if (town_flag == 1) {
@@ -58,7 +65,7 @@ int main() {
 	}
 
 	//if (menu_flag == 1) {
-	//	//Запускаем поезд
+	//	//Р—Р°РїСѓСЃРєР°РµРј РїРѕРµР·Рґ
 	//	 train_flag = train_game(WINDOW, renderer, winsize_w, winsize_h); 
 	//}
 

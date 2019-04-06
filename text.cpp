@@ -1,6 +1,6 @@
 #include <SDL_ttf.h>
 
-//Рисует текст text в окне window и на рендерере renderer на rect-e rect.
+//Р РёСЃСѓРµС‚ С‚РµРєСЃС‚ text РІ РѕРєРЅРµ window Рё РЅР° СЂРµРЅРґРµСЂРµСЂРµ renderer РЅР° rect-e rect.
 void draw_text(SDL_Window* window, SDL_Renderer* renderer, char* text, SDL_Rect rect) {
 	TTF_Init();
 	TTF_Font* my_font = TTF_OpenFont("resourses/Text.ttf", 100);

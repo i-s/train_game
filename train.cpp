@@ -1,3 +1,4 @@
+#pragma once
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <stdio.h>
@@ -7,71 +8,45 @@
 #include "text.h"
 #include <math.h>
 #include <stdlib.h>
+#include "train.h"
+#include "main.h"
 
 /*To-do:
-1) Баг с кнопками
-2) Оповещение о прибытии поезда
-3) Вывод количества ресурсов
+1) 
+2) РћРїРѕРІРµС‰РµРЅРёРµ Рѕ РїСЂРёР±С‹С‚РёРё РїРѕРµР·РґР°
+3) Р’С‹РІРѕРґ РєРѕР»РёС‡РµСЃС‚РІР° СЂРµСЃСѓСЂСЃРѕРІ
 */
 
-//Загружаем глобальные переменные из town.cpp
+//Р—Р°РіСЂСѓР¶Р°РµРј РіР»РѕР±Р°Р»СЊРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ РёР· town.cpp
 extern int g_humans, g_resourses, g_food;
 extern int difficulty;
 
-//Загружаем глобальные RECT-ы
+//Р—Р°РіСЂСѓР¶Р°РµРј РіР»РѕР±Р°Р»СЊРЅС‹Рµ RECT-С‹
 extern SDL_Rect g_recthumans;
 extern SDL_Rect g_rectfood;
 extern SDL_Rect g_rectresourses;
 
-//Загружаем глобальный шрифт
-//extern TTF_Font* my_font;
-
-//float x;float y;
-struct Point {
-	float x;
-	float y;
-};
-
-//SDL_Rect rect;int switched;SDL_Texture* texture;SDL_Texture* texture_switched;
-struct Lever {
-	SDL_Rect rect;
-	int switched;
-	SDL_Texture* texture;
-	SDL_Texture* texture_switched;
-};
-
-extern struct Background;
-
-//SDL_Texture* texture;SDL_Rect rectangle;float angle;SDL_Point coord;SDL_Rect rectangle;float speed;bool shown;int type;bool reached_town;
-struct Train {
-	SDL_Texture* texture;
-	SDL_Rect rectangle;
-	float angle;
-	Point coord;
-	float speed;
-	bool shown; //Нужно ли отображать\двигать поезд: 0 - нет, 1 - да
-	int type; // Тип поезда: 0 - обычный, 1 - торговый, 2 - с людьми, 3 - рейдерский
-	bool reached_town; //Достиг ли поезд города
-	float time_before_arrive; //Время до прибытия
-};
-
-//SDL_Point point1;SDL_Point point2;
-struct Line {
-	Point point1;
-	Point point2;
-};
-
-////Рисует фон
-//void draw_background(SDL_Renderer* renderer, Background background) {
-//	SDL_RenderCopy(renderer, background.texture, NULL, &background.rectangle);
-//}
-
-//Рисует поезд
+//РІРѕР·РІСЂР°С‰Р°СЋ РІСЂРµРјСЏ РґРѕ РЅРѕРІРѕРіРѕ РїРѕРµР·РґР°
+int get_new_train_time()
+{
+	//TODO: РїСЂРёРґСѓРјР°С‚СЊ С‡С‚Рѕ-РЅРёР±СѓРґСЊ
+	return 15;
+}
+//Р РёСЃСѓРµС‚ РїРѕРµР·Рґ
 void draw_train(SDL_Renderer* renderer, Train train) {
 	SDL_RenderCopyEx(renderer, train.texture, NULL, &train.rectangle, train.angle, NULL, SDL_FLIP_NONE);
 }
 
-//Рисуем рычаг
+//Р РёСЃСѓРµС‚ С‚РµРєСЃС‚РѕРІС‹Р№
+void draw_text_box(SDL_Renderer* renderer, Text_box text_box) {
+	SDL_RenderCopy(renderer, text_box.texture, NULL, &text_box.rectangle);
+}
+
+void draw_town_block(SDL_Renderer* renderer, Town_block town_block) {
+	SDL_RenderCopy(renderer, town_block.texture, NULL, &town_block.rectangle);
+}
+
+//Р РёСЃСѓРµРј СЂС‹С‡Р°Рі
 void draw_lever(SDL_Renderer* renderer, Lever lever) {
 	if (lever.switched)
 		SDL_RenderCopy(renderer, lever.texture_switched, NULL, &lever.rect);
@@ -79,16 +54,16 @@ void draw_lever(SDL_Renderer* renderer, Lever lever) {
 		SDL_RenderCopy(renderer, lever.texture, NULL, &lever.rect);
 }
 
-//Считаем скорость
+//РЎС‡РёС‚Р°РµРј СЃРєРѕСЂРѕСЃС‚СЊ
 void CountSpeed(Line path, float speed, float* speed_x, float* speed_y, float* angle) {
-	float sin_a, cos_a; // a - угол между скоростью и осью oY
+	float sin_a, cos_a; // a - СѓРіРѕР» РјРµР¶РґСѓ СЃРєРѕСЂРѕСЃС‚СЊСЋ Рё РѕСЃСЊСЋ oY
 
-	//Считаем синус и косинус угла
+	//РЎС‡РёС‚Р°РµРј СЃРёРЅСѓСЃ Рё РєРѕСЃРёРЅСѓСЃ СѓРіР»Р°
 	sin_a = (fabsf(path.point2.x - path.point1.x)) / (sqrt((path.point2.x - path.point1.x)*(path.point2.x - path.point1.x) + (path.point2.y - path.point1.y)*(path.point2.y - path.point1.y)));
 	cos_a = sqrt(1 - (sin_a * sin_a));
 	*angle = asin(sin_a) * 180 / M_PI;
 
-	//Выясняем, куда движется поезд. Если "znak" = 1, то в сторону увеличения этой координаты, если = -1, то в сторону уменьшения.
+	//Р’С‹СЏСЃРЅСЏРµРј, РєСѓРґР° РґРІРёР¶РµС‚СЃСЏ РїРѕРµР·Рґ. Р•СЃР»Рё "znak" = 1, С‚Рѕ РІ СЃС‚РѕСЂРѕРЅСѓ СѓРІРµР»РёС‡РµРЅРёСЏ СЌС‚РѕР№ РєРѕРѕСЂРґРёРЅР°С‚С‹, РµСЃР»Рё = -1, С‚Рѕ РІ СЃС‚РѕСЂРѕРЅСѓ СѓРјРµРЅСЊС€РµРЅРёСЏ.
 	int znak_x, znak_y;
 	if (path.point1.x <= path.point2.x)
 		znak_x = 1;
@@ -99,14 +74,14 @@ void CountSpeed(Line path, float speed, float* speed_x, float* speed_y, float* a
 	else
 		znak_y = -1;
 
-	//Считаем проекции скорости
+	//РЎС‡РёС‚Р°РµРј РїСЂРѕРµРєС†РёРё СЃРєРѕСЂРѕСЃС‚Рё
 	*speed_x = speed * sin_a * znak_x;
 	*speed_y = speed * cos_a * znak_y;
 }
 
-//Возвращает true, если поезд достиг конца пути
+//Р’РѕР·РІСЂР°С‰Р°РµС‚ true, РµСЃР»Рё РїРѕРµР·Рґ РґРѕСЃС‚РёРі РєРѕРЅС†Р° РїСѓС‚Рё
 bool Reached_End(Line path, Point current_coord, float speed) {
-	//Расстояние от текущей позиции до конца пути
+	//Р Р°СЃСЃС‚РѕСЏРЅРёРµ РѕС‚ С‚РµРєСѓС‰РµР№ РїРѕР·РёС†РёРё РґРѕ РєРѕРЅС†Р° РїСѓС‚Рё
 	float rast = sqrt(((current_coord.x - path.point2.x) * (current_coord.x - path.point2.x)) + ((current_coord.y - path.point2.y) * (current_coord.y - path.point2.y)));
 	if ((rast - speed) <= 0) {
 		return true;
@@ -114,25 +89,27 @@ bool Reached_End(Line path, Point current_coord, float speed) {
 	return false;
 }
 
-//Возвращает расстояние до конца пути
+//Р’РѕР·РІСЂР°С‰Р°РµС‚ СЂР°СЃСЃС‚РѕСЏРЅРёРµ РґРѕ РєРѕРЅС†Р° РїСѓС‚Рё
 float Rast_to_End(Line path, Point current_coord, float speed) {
-	//Расстояние от текущей позиции до конца пути
+	//Р Р°СЃСЃС‚РѕСЏРЅРёРµ РѕС‚ С‚РµРєСѓС‰РµР№ РїРѕР·РёС†РёРё РґРѕ РєРѕРЅС†Р° РїСѓС‚Рё
 	float rast = sqrt(((current_coord.x - path.point2.x) * (current_coord.x - path.point2.x)) + ((current_coord.y - path.point2.y) * (current_coord.y - path.point2.y)));
 	return rast - speed;
 }
 
-//Двигает поезд на speed_x и speed_y.
+//Р”РІРёРіР°РµС‚ РїРѕРµР·Рґ РЅР° speed_x Рё speed_y.
 void Move_Train(float speed_x, float speed_y, Point* train_position) {
 	train_position->x += speed_x;
 	train_position->y += speed_y;
 }
 
-//Отрисовываем фон, поезд, рычаги.
-void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background background, Lever lever1, Lever lever2, char* texts[]) {
+//РћС‚СЂРёСЃРѕРІС‹РІР°РµРј С„РѕРЅ, РїРѕРµР·Рґ, СЂС‹С‡Р°РіРё.
+void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background background, Lever lever1, Lever lever2, char* texts[], Text_box text_box, Town_block town_block) {
 	draw_background(renderer, background);
-	if(train.shown){ draw_train(renderer, train); }	//Не отрисовываем поезд, если он не должен быть виден
+	if(train.shown){ draw_train(renderer, train); }	//РќРµ РѕС‚СЂРёСЃРѕРІС‹РІР°РµРј РїРѕРµР·Рґ, РµСЃР»Рё РѕРЅ РЅРµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІРёРґРµРЅ
+	if (town_block.shown) { draw_town_block(renderer,town_block); }
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
+	if (train.shown) { draw_text_box(renderer, text_box); }
 
 	draw_text(window,renderer,texts[0],g_recthumans);
 	draw_text(window, renderer, texts[1], g_rectfood);
@@ -141,7 +118,7 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background b
 	SDL_RenderPresent(renderer);
 }
 
-//Переключает рычаг
+//РџРµСЂРµРєР»СЋС‡Р°РµС‚ СЂС‹С‡Р°Рі
 void SwitchLever(Lever *lever) {
 	if ((*lever).switched == 0) {
 		(*lever).switched = 1;
@@ -151,12 +128,12 @@ void SwitchLever(Lever *lever) {
 	}
 }
 
-//Задаёт тип поезда в зависимости от сложности
-void Define_Train_Type_And_Delay(Train* train, int difficulty, SDL_Texture* textures[]) {
-	int chance_type_0 = 5; //Шанс прибытия обычного (тип 0) поезда
-	int chance_type_1 = int(fmax(10 - difficulty, 2)); //Шанс прибытия торгового (тип 1) поезда
-	int chance_type_2 = int(fmax(10 - difficulty, 1)); //Шанс прибытия пассажирского (тип 2) поезда
-	int chance_type_3 = int(fmin(difficulty, 3)); //Шанс прибытия рейдерского (тип 3) поезда
+//Р—Р°РґР°С‘С‚ С‚РёРї РїРѕРµР·РґР° РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЃР»РѕР¶РЅРѕСЃС‚Рё
+void Define_Train_Type_And_Delay_And_Speed(Train* train, int difficulty, SDL_Texture* textures[]) {
+	int chance_type_0 = 5; //РЁР°РЅСЃ РїСЂРёР±С‹С‚РёСЏ РѕР±С‹С‡РЅРѕРіРѕ (С‚РёРї 0) РїРѕРµР·РґР°
+	int chance_type_1 = int(fmax(10 - difficulty, 2)); //РЁР°РЅСЃ РїСЂРёР±С‹С‚РёСЏ С‚РѕСЂРіРѕРІРѕРіРѕ (С‚РёРї 1) РїРѕРµР·РґР°
+	int chance_type_2 = int(fmax(10 - difficulty, 1)); //РЁР°РЅСЃ РїСЂРёР±С‹С‚РёСЏ РїР°СЃСЃР°Р¶РёСЂСЃРєРѕРіРѕ (С‚РёРї 2) РїРѕРµР·РґР°
+	int chance_type_3 = int(fmin(difficulty, 3)); //РЁР°РЅСЃ РїСЂРёР±С‹С‚РёСЏ СЂРµР№РґРµСЂСЃРєРѕРіРѕ (С‚РёРї 3) РїРѕРµР·РґР°
 
 	int luckynumber = rand() % (chance_type_0 + chance_type_1 + chance_type_2 + chance_type_3);
 
@@ -172,28 +149,29 @@ void Define_Train_Type_And_Delay(Train* train, int difficulty, SDL_Texture* text
 	else {
 		(*train).type = 3;
 	}
-	(*train).texture = textures[train->type];
-
-	(*train).time_before_arrive = 5 + rand() % 5;
+	//Р—Р°РґР°СЋ РїРѕРµР·РґСѓ С‚РµРєСЃС‚СѓСЂСѓ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ РµРіРѕ С‚РёРїР°
+	(*train).texture = textures[(*train).type];
+	//Р—Р°РґР°СЋ РїРѕРµР·РґСѓ СЃР»СѓС‡Р°Р№РЅСѓСЋ СЃРєРѕСЂРѕСЃС‚СЊ
+	(*train).speed = 1 + rand() % 30 / float(10);
 	//printf_s("train_type = %d\n", (*train).type);
 }
 
-//Экран "поезд".
-//Возврат -1 -> выход из программы с ошибкой (не нажата кнопка город)
-//Возврат 0 -> была нажата кнопка город
+//Р­РєСЂР°РЅ "РїРѕРµР·Рґ".
+//Р’РѕР·РІСЂР°С‚ -1 -> РІС‹С…РѕРґ РёР· РїСЂРѕРіСЂР°РјРјС‹ СЃ РѕС€РёР±РєРѕР№ (РЅРµ РЅР°Р¶Р°С‚Р° РєРЅРѕРїРєР° РіРѕСЂРѕРґ)
+//Р’РѕР·РІСЂР°С‚ 0 -> Р±С‹Р»Р° РЅР°Р¶Р°С‚Р° РєРЅРѕРїРєР° РіРѕСЂРѕРґ
 int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
 	srand(int(time(NULL)));
 		
-	//Создаём ивент и переменную для отслеживания закрытия окна
+	//РЎРѕР·РґР°С‘Рј РёРІРµРЅС‚ Рё РїРµСЂРµРјРµРЅРЅСѓСЋ РґР»СЏ РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ Р·Р°РєСЂС‹С‚РёСЏ РѕРєРЅР°
 	SDL_Event event;
 	bool quit = false;
 
-	//Загружаем текстуры
-	//Фона
+	//Р—Р°РіСЂСѓР¶Р°РµРј С‚РµРєСЃС‚СѓСЂС‹
+	//Р¤РѕРЅР°
 	SDL_Surface* background_surf = SDL_LoadBMP("resourses/textures/background.bmp");
 	SDL_Texture* background_texture = SDL_CreateTextureFromSurface(renderer, background_surf);
 	SDL_FreeSurface(background_surf);
-	//Поезда
+	//РџРѕРµР·РґР°
 	SDL_Surface* train_type_0_surf = SDL_LoadBMP("resourses/textures/train_type_0.bmp");
 	SDL_SetColorKey(train_type_0_surf, 1, SDL_MapRGB(train_type_0_surf->format, 0, 255, 0));
 	SDL_Texture* train_type_0_texture = SDL_CreateTextureFromSurface(renderer, train_type_0_surf);
@@ -212,185 +190,250 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	SDL_FreeSurface(train_type_3_surf);
 
 	SDL_Texture* train_textures[4] = {train_type_0_texture,train_type_1_texture ,train_type_2_texture ,train_type_3_texture };
-	//Рычагов
+	//Р С‹С‡Р°РіРѕРІ
 	SDL_Surface* lever_surf = SDL_LoadBMP("resourses/textures/lever.bmp");
 	SDL_SetColorKey(lever_surf, 1, SDL_MapRGB(lever_surf->format, 0, 255, 0));
 	SDL_Texture* lever_texture = SDL_CreateTextureFromSurface(renderer, lever_surf);
 	SDL_FreeSurface(lever_surf);
-	//Нажатых рычагов
+	//РќР°Р¶Р°С‚С‹С… СЂС‹С‡Р°РіРѕРІ
 	SDL_Surface* lever_switched_surf = SDL_LoadBMP("resourses/textures/lever_switched.bmp");
 	SDL_SetColorKey(lever_switched_surf, 1, SDL_MapRGB(lever_switched_surf->format, 0, 255, 0));
 	SDL_Texture* lever_switched_texture = SDL_CreateTextureFromSurface(renderer, lever_switched_surf);
 	SDL_FreeSurface(lever_switched_surf);
+	//РћРєРѕС€РєР° РѕРїРѕРІРµС‰РµРЅРёР№
+	SDL_Surface* text_box_train_type_0 = SDL_LoadBMP("resourses/textures/text_box_train_type_0.bmp");
+	//SDL_SetColorKey(text_box_train_type_0, 1, SDL_MapRGB(text_box_train_type_0->format, 0, 255, 0));
+	SDL_Texture* text_box_train_type_0_texture = SDL_CreateTextureFromSurface(renderer, text_box_train_type_0);
+	SDL_FreeSurface(text_box_train_type_0);
+	SDL_Surface* text_box_train_type_1 = SDL_LoadBMP("resourses/textures/text_box_train_type_1.bmp");
+	//SDL_SetColorKey(text_box_train_type_1, 1, SDL_MapRGB(text_box_train_type_1->format, 0, 255, 0));
+	SDL_Texture* text_box_train_type_1_texture = SDL_CreateTextureFromSurface(renderer, text_box_train_type_1);
+	SDL_FreeSurface(text_box_train_type_1);
+	SDL_Surface* text_box_train_type_2 = SDL_LoadBMP("resourses/textures/text_box_train_type_2.bmp");
+	//SDL_SetColorKey(text_box_train_type_2, 1, SDL_MapRGB(text_box_train_type_2->format, 0, 255, 0));
+	SDL_Texture* text_box_train_type_2_texture = SDL_CreateTextureFromSurface(renderer, text_box_train_type_2);
+	SDL_FreeSurface(text_box_train_type_2);
+	SDL_Surface* text_box_train_type_3 = SDL_LoadBMP("resourses/textures/text_box_train_type_3.bmp");
+	//SDL_SetColorKey(text_box_train_type_3, 1, SDL_MapRGB(text_box_train_type_3->format, 0, 255, 0));
+	SDL_Texture* text_box_train_type_3_texture = SDL_CreateTextureFromSurface(renderer, text_box_train_type_3);
+	SDL_FreeSurface(text_box_train_type_3);
 
-	//Рисуем задний план
+	SDL_Texture* text_box_textures[4] = { text_box_train_type_0_texture ,text_box_train_type_1_texture,text_box_train_type_2_texture,text_box_train_type_3_texture };
+	//Р—Р°РїСЂРµС‚Р° РЅР° РІС…РѕРґ РІ РіРѕСЂРѕРґ
+	SDL_Surface* town_block_surf = SDL_LoadBMP("resourses/textures/town_block.bmp");
+	SDL_SetColorKey(town_block_surf, 1, SDL_MapRGB(town_block_surf->format, 0, 255, 0));
+	SDL_Texture* town_block_texture = SDL_CreateTextureFromSurface(renderer, town_block_surf);
+	SDL_FreeSurface(town_block_surf);
+
+
+	//Р РёСЃСѓРµРј Р·Р°РґРЅРёР№ РїР»Р°РЅ
 	SDL_Rect bground_rectangle = { 0,0,winsize_w,winsize_h };
 	Background background = { background_texture, bground_rectangle };
 	draw_background(renderer, background);
 
-	//Рисуем рычаги
+	//Р РёСЃСѓРµРј СЂС‹С‡Р°РіРё
 	Lever lever1 = { { 380,60, 40,50 },0,lever_switched_texture,lever_texture };
 	Lever lever2 = { { 305,370,40,50 },0,lever_texture,lever_switched_texture };
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
 
-	//Кнопка города
+	//РљРЅРѕРїРєР° РіРѕСЂРѕРґР°
 	SDL_Rect town = {444,196,264,215};
 
-	//Делаем рычаги кнопками
+	//РџСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРє РѕРїРѕРІРµС‰РµРЅРёСЏ
+	Text_box text_box;
+	text_box.rectangle = { 53,311,228,263 };
+
+	//Р—РЅР°Рє Р±Р»РѕРєР° РіРѕСЂРѕРґР°
+	Town_block town_block;
+	town_block.rectangle = {448,199,256,208};
+	town_block.texture = town_block_texture;
+	town_block.shown = false;
+
+	//Р”РµР»Р°РµРј СЂС‹С‡Р°РіРё РєРЅРѕРїРєР°РјРё
 	SDL_Rect buttons[3];
-	//Заполняем массив понятным способом
+	//Р—Р°РїРѕР»РЅСЏРµРј РјР°СЃСЃРёРІ РїРѕРЅСЏС‚РЅС‹Рј СЃРїРѕСЃРѕР±РѕРј
 	buttons[0] = lever1.rect;
 	buttons[1] = lever2.rect;
 	buttons[2] = town;
 
-	//Презентуем рендерер
+	//РџСЂРµР·РµРЅС‚СѓРµРј СЂРµРЅРґРµСЂРµСЂ
 	SDL_RenderPresent(renderer);
 
-	//Задаём пути
-	Line line0 = { {345,-100},{345,-80} }; //Участок пути за экраном
+	//Р—Р°РґР°С‘Рј РїСѓС‚Рё
+	Line line0 = { {345,-100},{345,-80} }; //РЈС‡Р°СЃС‚РѕРє РїСѓС‚Рё Р·Р° СЌРєСЂР°РЅРѕРј
 
-	Line line1 = { {345,-80},{345,25} }; // Первый участок пути (до первого поворота)
+	Line line1 = { {345,-80},{345,25} }; // РџРµСЂРІС‹Р№ СѓС‡Р°СЃС‚РѕРє РїСѓС‚Рё (РґРѕ РїРµСЂРІРѕРіРѕ РїРѕРІРѕСЂРѕС‚Р°)
 
-	Line line2 = { {345,25},{315,100} }; //Первый поворот
+	Line line2 = { {345,25},{315,100} }; //РџРµСЂРІС‹Р№ РїРѕРІРѕСЂРѕС‚
 	Line line3 = { {315,100},{-80,225} };
 
-	Line line4 = { {345,25},{345,345} }; //Второй участок пути (до второго поворота)
+	Line line4 = { {345,25},{345,345} }; //Р’С‚РѕСЂРѕР№ СѓС‡Р°СЃС‚РѕРє РїСѓС‚Рё (РґРѕ РІС‚РѕСЂРѕРіРѕ РїРѕРІРѕСЂРѕС‚Р°)
 
-	Line line5 = { {345,345},{400,440} }; //Второй поворот
+	Line line5 = { {345,345},{400,440} }; //Р’С‚РѕСЂРѕР№ РїРѕРІРѕСЂРѕС‚
 	Line line6 = { {400,440}, {560, 440} };
 	Line line10 = { {560,440}, {580, 420} };
 	Line line7 = { {580,420},{580,300} };
 
-	Line line8 = { {345,345},{345,600} }; //Третий участок пути (до конца экрана)
+	Line line8 = { {345,345},{345,600} }; //РўСЂРµС‚РёР№ СѓС‡Р°СЃС‚РѕРє РїСѓС‚Рё (РґРѕ РєРѕРЅС†Р° СЌРєСЂР°РЅР°)
 
-	Line line9 = { {345,600},{345,700} }; //Участок пути за эрканом
+	Line line9 = { {345,600},{345,700} }; //РЈС‡Р°СЃС‚РѕРє РїСѓС‚Рё Р·Р° СЌСЂРєР°РЅРѕРј
 
 	Line main_path[11] = { line0, line1,line2,line3,line4,line5,line6,line7,line8,line9,line10 };
 
-	//Задаём поезду начальные значения
-	//SDL_Point train_position = { 0,0 };
+	int start_position = 1; //РџР•Р Р•РњР•РќРќРђРЇ, РћРўР’Р•Р§РђР®Р©РђРЇ Р—Рђ РњР•РЎРўРћ РџРћРЇР’Р›Р•РќРРЇ РџРћР•Р—Р”Рђ
 
+	extern float TIMEUNTILTRAIN;//РІСЂРµРјСЏ РґРѕ РїРѕРµР·РґР°
+	
 
-	int start_position = 1; //ПЕРЕМЕННАЯ, ОТВЕЧАЮЩАЯ ЗА МЕСТО ПОЯВЛЕНИЯ ПОЕЗДА
-
-
-	SDL_Rect train_rectangle = { main_path[start_position].point1.x, main_path[start_position].point1.y,20,80 };
-	Train train;
-	train.rectangle = train_rectangle;
-	train.speed = 1.5;
-	train.shown = true;
-	train.reached_town = false;
-	Define_Train_Type_And_Delay(&train,difficulty,train_textures);
-
-	//Подсчёт времени
-	int last_tick_time = 0;
-	int delta = 0; //Разница во времени
-
+	//РџРѕРґСЃС‡С‘С‚ РІСЂРµРјРµРЅРё
+	extern int LASTTICKTIME;
+	extern int DELTA; //Р Р°Р·РЅРёС†Р° РІРѕ РІСЂРµРјРµРЅРё
+	extern int GAMESTARTTIME;
+	extern int GAMETIME; //Р’СЂРµРјСЏ СЃРѕ СЃС‚Р°СЂС‚Р° РїСЂРѕРіСЂР°РјРјС‹
+	int time_of_last_click = GAMESTARTTIME; //Р’СЂРµРјСЏ РїСЂРµРґС‹РґСѓС‰РµРіРѕ РєР»РёРєР°
+	//extern int TIMEUNTILTRAIN;//РІСЂРµРјСЏ РґРѕ РїРѕРµР·РґР°
 	//printf_s("speed = "); scanf_s("%f", &train.speed);
 
-	bool have_counted_speed = false; //Флаг, определяющий, была ли уже посчитана скорость
-	int flag_line = 0; //Флаг, который равен 1, когда мы дошли до конца пути.
-	int current_path = start_position; //Хранит номер текущего пути.
+	bool have_counted_speed = false; //Р¤Р»Р°Рі, РѕРїСЂРµРґРµР»СЏСЋС‰РёР№, Р±С‹Р»Р° Р»Рё СѓР¶Рµ РїРѕСЃС‡РёС‚Р°РЅР° СЃРєРѕСЂРѕСЃС‚СЊ
+	int flag_line = 0; //Р¤Р»Р°Рі, РєРѕС‚РѕСЂС‹Р№ СЂР°РІРµРЅ 1, РєРѕРіРґР° РјС‹ РґРѕС€Р»Рё РґРѕ РєРѕРЅС†Р° РїСѓС‚Рё.
+	int current_path = start_position; //РҐСЂР°РЅРёС‚ РЅРѕРјРµСЂ С‚РµРєСѓС‰РµРіРѕ РїСѓС‚Рё.
 
-	//Начальное положение поезда:
-	train.coord.x = main_path[current_path].point1.x;
-	train.coord.y = main_path[current_path].point1.y;
+	//РќР°С‡Р°Р»СЊРЅРѕРµ РїРѕР»РѕР¶РµРЅРёРµ РїРѕРµР·РґР°:
+	/*train.coord.x = main_path[current_path].point1.x;
+	train.coord.y = main_path[current_path].point1.y;*/
 
-	//Время запуска программы
-	int time_of_start = int(time(NULL));
-	int time_from_start; //Время со старта программы
-	int time_of_last_click=time_of_start; //Время предыдущего клика
+	//Р’СЂРµРјСЏ Р·Р°РїСѓСЃРєР° РїСЂРѕРіСЂР°РјРјС‹
+	bool traincreated = false;
 
-	float speed_x, speed_y; //Скорость по x и y для поезда
-	float rast; //Расстояние до конечной точки маршрута
+	float speed_x, speed_y; //РЎРєРѕСЂРѕСЃС‚СЊ РїРѕ x Рё y РґР»СЏ РїРѕРµР·РґР°
+	float rast; //Р Р°СЃСЃС‚РѕСЏРЅРёРµ РґРѕ РєРѕРЅРµС‡РЅРѕР№ С‚РѕС‡РєРё РјР°СЂС€СЂСѓС‚Р°
 
-	bool town_button_pressed = false; //Нажата ли кнопка "город"?
+	bool town_button_pressed = false; //РќР°Р¶Р°С‚Р° Р»Рё РєРЅРѕРїРєР° "РіРѕСЂРѕРґ"?
 
-	//Строки для хранения числовых значений людей, еды и ресурсов.
+	//РЎС‚СЂРѕРєРё РґР»СЏ С…СЂР°РЅРµРЅРёСЏ С‡РёСЃР»РѕРІС‹С… Р·РЅР°С‡РµРЅРёР№ Р»СЋРґРµР№, РµРґС‹ Рё СЂРµСЃСѓСЂСЃРѕРІ.
 	char* text_humans = new char[10];
 	char* text_food = new char[10];
 	char* text_resourses = new char[10];
 
-	//Массив строк для удобной передачи в ф-ию
+	//РњР°СЃСЃРёРІ СЃС‚СЂРѕРє РґР»СЏ СѓРґРѕР±РЅРѕР№ РїРµСЂРµРґР°С‡Рё РІ С„-РёСЋ
 	char* texts[3] = {text_humans, text_food, text_resourses};
 
-	//Обработка ивентов
+	int steps = 0; //РљРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕС…РѕРґРѕРІ while
+
+	SDL_Rect train_rectangle = { main_path[start_position].point1.x, main_path[start_position].point1.y,20,80 };
+	Train train;
+
+	//РћР±СЂР°Р±РѕС‚РєР° РёРІРµРЅС‚РѕРІ
 	while (!quit) {
+		if (!traincreated) {
+			train.rectangle = train_rectangle;
+			train.reached_town = false;
+			train.shown = false;
+			have_counted_speed = false;
+			train.time_before_arrive = TIMEUNTILTRAIN;
+			Define_Train_Type_And_Delay_And_Speed(&train, difficulty, train_textures);
+			text_box.texture = text_box_textures[train.type];
+
+			flag_line = 0; //Р¤Р»Р°Рі, РєРѕС‚РѕСЂС‹Р№ СЂР°РІРµРЅ 1, РєРѕРіРґР° РјС‹ РґРѕС€Р»Рё РґРѕ РєРѕРЅС†Р° РїСѓС‚Рё.
+			current_path = start_position; //РҐСЂР°РЅРёС‚ РЅРѕРјРµСЂ С‚РµРєСѓС‰РµРіРѕ РїСѓС‚Рё.
+
+			train.coord.x = main_path[current_path].point1.x;
+			train.coord.y = main_path[current_path].point1.y;
+
+			traincreated = true;
+		}
+		if (TIMEUNTILTRAIN < 0) {
+			train.shown = true;
+		}
 		SDL_PollEvent(&event);
 		if (event.type == SDL_QUIT)
 			quit = true;
 
+
+
 		int time_of_one_cycle = 0;
 
-		//Каждый раз в цикле говорим, что мышь не наведена ни на одну из кнопок
+		//РљР°Р¶РґС‹Р№ СЂР°Р· РІ С†РёРєР»Рµ РіРѕРІРѕСЂРёРј, С‡С‚Рѕ РјС‹С€СЊ РЅРµ РЅР°РІРµРґРµРЅР° РЅРё РЅР° РѕРґРЅСѓ РёР· РєРЅРѕРїРѕРє
 		int button_flag = -1;
 
-		if ((time(NULL) - time_of_last_click >= 1)&&(LKMPressed(event))) { //Кликать не чаще 1 раза в секунду
+		if ((time(NULL) - time_of_last_click >= 1)&&(LKMPressed(event))) { //РљР»РёРєР°С‚СЊ РЅРµ С‡Р°С‰Рµ 1 СЂР°Р·Р° РІ СЃРµРєСѓРЅРґСѓ
 			for (int i = 0; i <= 2; i++) {
 				button_flag = CheckIfMouseOnButton(event, i, buttons);
 				if (button_flag == 0) {
 					SwitchLever(&lever1);
-					time_of_last_click = time(NULL); //ПРОБЛЕМА С НАЖАТИЯМИ (ПОВТОРНОЕ ПЕРЕКЛЮЧЕНИЕ)
+					time_of_last_click = time(NULL); //РџР РћР‘Р›Р•РњРђ РЎ РќРђР–РђРўРРЇРњР (РџРћР’РўРћР РќРћР• РџР•Р Р•РљР›Р®Р§Р•РќРР•)
 				}
 				else if (button_flag == 1) {
 					SwitchLever(&lever2);
 					time_of_last_click = time(NULL);
 				}
-				else if (button_flag == 2) {
+				else if (button_flag == 2 && !train.shown) {//РµСЃР»Рё РїРѕРµР·Рґ РµРґРµС‚ РЅРµ РґРѕРїСѓСЃРєР°РµРј РІС…РѕРґР° РІ Р±СѓРЅРєРµСЂ
 					town_button_pressed = true;
+				}
+				else if (button_flag == 2 && train.shown) {
+					town_block.shown = true;
 				}
 			}
 		}
 
 		if (train.shown && train.time_before_arrive <= 0) {
 
-			//Проверяем, нужно ли перейти к новому пути и переходим, если нужно
+			//РџСЂРѕРІРµСЂСЏРµРј, РЅСѓР¶РЅРѕ Р»Рё РїРµСЂРµР№С‚Рё Рє РЅРѕРІРѕРјСѓ РїСѓС‚Рё Рё РїРµСЂРµС…РѕРґРёРј, РµСЃР»Рё РЅСѓР¶РЅРѕ
 			if (flag_line) {
 				have_counted_speed = false;
-				if (current_path == 1) { //Если на первом участке пути
-					if (lever1.switched) { //Если первый рычаг нажат
-						current_path = 2; //Поворачиваем на первый поворот
+				if (current_path == 1) { //Р•СЃР»Рё РЅР° РїРµСЂРІРѕРј СѓС‡Р°СЃС‚РєРµ РїСѓС‚Рё
+					if (lever1.switched) { //Р•СЃР»Рё РїРµСЂРІС‹Р№ СЂС‹С‡Р°Рі РЅР°Р¶Р°С‚
+						current_path = 2; //РџРѕРІРѕСЂР°С‡РёРІР°РµРј РЅР° РїРµСЂРІС‹Р№ РїРѕРІРѕСЂРѕС‚
 					}
 					else {
-						current_path = 4; //Продолжаем движение вниз
+						current_path = 4; //РџСЂРѕРґРѕР»Р¶Р°РµРј РґРІРёР¶РµРЅРёРµ РІРЅРёР·
 					}
 				}
 
-				else if (current_path == 2) { //Если мы поворачиваем
-					current_path = 3; //Продолжаем поворачивать
+				else if (current_path == 2) { //Р•СЃР»Рё РјС‹ РїРѕРІРѕСЂР°С‡РёРІР°РµРј
+					current_path = 3; //РџСЂРѕРґРѕР»Р¶Р°РµРј РїРѕРІРѕСЂР°С‡РёРІР°С‚СЊ
 				}
 
-				else if (current_path == 3) { //Если дошли до конца поворота
-					train.shown = 0; //Скрываем поезд
+				else if (current_path == 3) { //Р•СЃР»Рё РґРѕС€Р»Рё РґРѕ РєРѕРЅС†Р° РїРѕРІРѕСЂРѕС‚Р°
+					town_block.shown = false;
+					train.shown = 0; //РЎРєСЂС‹РІР°РµРј РїРѕРµР·Рґ
+					TIMEUNTILTRAIN = get_new_train_time();//РЅРѕРІРѕРµ РІСЂРµРјСЏ РґРѕ РїРѕРµР·РґР°
+					traincreated = false;
 				}
 
-				else if (current_path == 4) { //Если на втором участке пути
-					if (lever2.switched) { //Если второй рычаг нажат
-						current_path = 5; //Поворачиваем на второй поворот
+				else if (current_path == 4) { //Р•СЃР»Рё РЅР° РІС‚РѕСЂРѕРј СѓС‡Р°СЃС‚РєРµ РїСѓС‚Рё
+					if (lever2.switched) { //Р•СЃР»Рё РІС‚РѕСЂРѕР№ СЂС‹С‡Р°Рі РЅР°Р¶Р°С‚
+						current_path = 5; //РџРѕРІРѕСЂР°С‡РёРІР°РµРј РЅР° РІС‚РѕСЂРѕР№ РїРѕРІРѕСЂРѕС‚
 					}
 					else {
-						current_path = 8; //Продолжаем движение вниз
+						current_path = 8; //РџСЂРѕРґРѕР»Р¶Р°РµРј РґРІРёР¶РµРЅРёРµ РІРЅРёР·
 					}
 				}
 
-				else if (current_path == 5) { //Если мы поворачиваем
-					current_path = 6; //Продолжаем поворачивать
+				else if (current_path == 5) { //Р•СЃР»Рё РјС‹ РїРѕРІРѕСЂР°С‡РёРІР°РµРј
+					current_path = 6; //РџСЂРѕРґРѕР»Р¶Р°РµРј РїРѕРІРѕСЂР°С‡РёРІР°С‚СЊ
 				}
-				else if (current_path == 6) { //Если мы поворачиваем
-					current_path = 10; //Продолжаем поворачивать
+				else if (current_path == 6) { //Р•СЃР»Рё РјС‹ РїРѕРІРѕСЂР°С‡РёРІР°РµРј
+					current_path = 10; //РџСЂРѕРґРѕР»Р¶Р°РµРј РїРѕРІРѕСЂР°С‡РёРІР°С‚СЊ
 				}
-				else if (current_path == 10) { //Если мы поворачиваем
-					current_path = 7; //Продолжаем поворачивать
+				else if (current_path == 10) { //Р•СЃР»Рё РјС‹ РїРѕРІРѕСЂР°С‡РёРІР°РµРј
+					current_path = 7; //РџСЂРѕРґРѕР»Р¶Р°РµРј РїРѕРІРѕСЂР°С‡РёРІР°С‚СЊ
 				}
-				else if (current_path == 7) { //Если дошли до конца поворота
+				else if (current_path == 7) { //Р•СЃР»Рё РґРѕС€Р»Рё РґРѕ РєРѕРЅС†Р° РїРѕРІРѕСЂРѕС‚Р°
 					train.reached_town = true;
-					train.shown = 0; //Скрываем поезд
+					town_block.shown = false;
+					train.shown = 0; //РЎРєСЂС‹РІР°РµРј РїРѕРµР·Рґ
+					TIMEUNTILTRAIN = get_new_train_time();//РЅРѕРІРѕРµ РІСЂРµРјСЏ РґРѕ РїРѕРµР·РґР°
+					traincreated = false;
 				}
 
-				else if (current_path == 8) {//Если дошли до конца пути
+				else if (current_path == 8) {//Р•СЃР»Рё РґРѕС€Р»Рё РґРѕ РєРѕРЅС†Р° РїСѓС‚Рё
 					current_path = 9;
-					train.shown = 0; //Скрываем поезд
+					town_block.shown = false;
+					train.shown = 0; //РЎРєСЂС‹РІР°РµРј РїРѕРµР·Рґ
+					TIMEUNTILTRAIN = get_new_train_time();//РЅРѕРІРѕРµ РІСЂРµРјСЏ РґРѕ РїРѕРµР·РґР°
+					traincreated = false;
 				}
 
 				train.coord.x = main_path[current_path].point1.x;
@@ -426,23 +469,23 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		
 		if (train.reached_town) {
 			switch (train.type) {
-			case 0: { //Если прибыл обычный поезд, то...
+			case 0: { //Р•СЃР»Рё РїСЂРёР±С‹Р» РѕР±С‹С‡РЅС‹Р№ РїРѕРµР·Рґ, С‚Рѕ...
 				g_food += -10 + rand() % 50;
 				g_resourses += -10 + rand() % 50;
 				break;
 			}
-			case 1: {//Если прибыл торговый поезд, то...
+			case 1: {//Р•СЃР»Рё РїСЂРёР±С‹Р» С‚РѕСЂРіРѕРІС‹Р№ РїРѕРµР·Рґ, С‚Рѕ...
 				g_food += 10 + rand() % 100;
 				g_resourses += 10 + rand() % 100;
 				break;
 			}
-			case 2: {//Если прибыл пассажирский поезд, то...
+			case 2: {//Р•СЃР»Рё РїСЂРёР±С‹Р» РїР°СЃСЃР°Р¶РёСЂСЃРєРёР№ РїРѕРµР·Рґ, С‚Рѕ...
 				g_humans += -1 + rand() % 10;
 				g_food += -50 + rand() % 60;
 				g_resourses += -10 + rand() % 20;
 				break;
 			}
-			case 3: {//Если прибыл рейдерский поезд, то...
+			case 3: {//Р•СЃР»Рё РїСЂРёР±С‹Р» СЂРµР№РґРµСЂСЃРєРёР№ РїРѕРµР·Рґ, С‚Рѕ...
 				g_humans += -20 + rand() % 20;
 				g_food += -50 + rand() % 50;
 				g_resourses += -100 + rand() % 100;
@@ -453,21 +496,21 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 			train.reached_town = false;
 		}
 
-		//Подготовка к выводу цифр на экран
+		//РџРѕРґРіРѕС‚РѕРІРєР° Рє РІС‹РІРѕРґСѓ С†РёС„СЂ РЅР° СЌРєСЂР°РЅ
 		_itoa_s(g_humans, text_humans, 10, 10);
 		_itoa_s(g_food, text_food, 10, 10);
 		_itoa_s(g_resourses, text_resourses, 10, 10);
 
-		Update(window, renderer, train, background, lever1, lever2, texts);
+		Update(window, renderer, train, background, lever1, lever2, texts, text_box, town_block);
 
-		time_from_start = time(NULL) - time_of_start;
+		GAMETIME = time(NULL) - GAMESTARTTIME;
 		
-		//Вывод дебаг-информации
-		printf_s("time = %d : x = %.0f, y = %.0f, way = %d, time_arrive = %.1f\n", time_from_start, train.coord.x, train.coord.y, current_path, train.time_before_arrive);
+		//Р’С‹РІРѕРґ РґРµР±Р°Рі-РёРЅС„РѕСЂРјР°С†РёРё
+		printf_s("time = %d : x = %.0f, y = %.0f, way = %d, time_arrive = %.1f, tut= %.1f\n", GAMETIME, train.coord.x, train.coord.y, current_path, train.time_before_arrive, TIMEUNTILTRAIN);
 
-		SDL_Delay(10);
+		//SDL_Delay(10);
 
-		//ТЕСТОВЫЙ ПЕРЕЗАПУСК ПОЕЗДА
+		//РўР•РЎРўРћР’Р«Р™ РџР•Р Р•Р—РђРџРЈРЎРљ РџРћР•Р—Р”Рђ
 		/*
 		if (!train.shown) {
 			train.shown = true;
@@ -479,25 +522,31 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		}
 		*/
 		
-		//Считаем время
+		//РЎС‡РёС‚Р°РµРј РІСЂРµРјСЏ
 		int tick_time = SDL_GetTicks();
-		delta = tick_time - last_tick_time;
-		//printf_s("delta = %.3f\n",delta*0.001);
-		last_tick_time = tick_time;
+		DELTA = tick_time - LASTTICKTIME;
 
-		//Если время до прибытия поезда > 0, отнимаем из него прошедшее время за цикл
-		if (train.time_before_arrive > 0) {
-			train.time_before_arrive -= delta*0.001;
+		//printf_s("DELTA = %.3f\n",DELTA*0.001);
+		LASTTICKTIME = tick_time;
+
+		//Р•СЃР»Рё РІСЂРµРјСЏ РґРѕ РїСЂРёР±С‹С‚РёСЏ РїРѕРµР·РґР° > 0, РѕС‚РЅРёРјР°РµРј РёР· РЅРµРіРѕ РїСЂРѕС€РµРґС€РµРµ РІСЂРµРјСЏ Р·Р° С†РёРєР»
+		if (TIMEUNTILTRAIN > 0) {
+			TIMEUNTILTRAIN -= DELTA * 0.001;
+			train.time_before_arrive -= DELTA*0.001;
+		}
+		else if (!train.shown){
+			TIMEUNTILTRAIN = get_new_train_time();
 		}
 		
-		//Выходим из цикла при нажатии на город
+		//Р’С‹С…РѕРґРёРј РёР· С†РёРєР»Р° РїСЂРё РЅР°Р¶Р°С‚РёРё РЅР° РіРѕСЂРѕРґ
 		if (town_button_pressed) {
 			break;
 		}
 
-		//Ограничиваем ФПС.
-		/*if (delta < max_tick_time)
-			SDL_Delay(max_tick_time - delta);
+
+		//РћРіСЂР°РЅРёС‡РёРІР°РµРј Р¤РџРЎ.
+		/*if (DELTA < max_tick_time)
+			SDL_Delay(max_tick_time - DELTA);
 		*/
 	}
 
@@ -506,8 +555,13 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	SDL_DestroyTexture(train_type_1_texture);
 	SDL_DestroyTexture(train_type_2_texture);
 	SDL_DestroyTexture(train_type_3_texture);
+	SDL_DestroyTexture(text_box_train_type_0_texture);
+	SDL_DestroyTexture(text_box_train_type_1_texture);
+	SDL_DestroyTexture(text_box_train_type_2_texture);
+	SDL_DestroyTexture(text_box_train_type_3_texture);
 	SDL_DestroyTexture(lever_texture);
 	SDL_DestroyTexture(lever_switched_texture);
+	SDL_DestroyTexture(town_block_texture);
 
 	if (town_button_pressed) {
 		return 0;

@@ -1,4 +1,6 @@
 {
   "winsize_h": 600,
-  "winsize_w": 800
+  "winsize_w": 800,
+  "volume_music": 100,
+  "volume_sounds": 100
 }

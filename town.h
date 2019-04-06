@@ -1,7 +1,7 @@
 #pragma once
-//Экран "город".
-//Возврат 1 -> переход к экрану "поезд"
-//Возврат 0 -> завершение программы
+//Р­РєСЂР°РЅ "РіРѕСЂРѕРґ".
+//Р’РѕР·РІСЂР°С‚ 1 -> РїРµСЂРµС…РѕРґ Рє СЌРєСЂР°РЅСѓ "РїРѕРµР·Рґ"
+//Р’РѕР·РІСЂР°С‚ 0 -> Р·Р°РІРµСЂС€РµРЅРёРµ РїСЂРѕРіСЂР°РјРјС‹
 int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h);
 
 struct Background {
@@ -9,5 +9,19 @@ struct Background {
 	SDL_Rect rectangle;
 };
 
-//Рисует фон
+//SDL_Texture* texture;SDL_Rect rectangle;int level;int type;int min_humans;int cost_humans;int cost_humans;
+//min_humans - РјРёРЅ РєРѕР»-РІРѕ Р»СЋРґРµР№ РґР»СЏ РїРѕСЃС‚СЂРѕР№РєРё
+//cost_foods - СЃРєРѕР»СЊРєРѕ РµРґС‹ СЃС‚РѕРёС‚
+//cost_resourses - СЃРєРѕР»СЊРєРѕ СЂРµСЃСѓСЂСЃРѕРІ СЃС‚РѕРёС‚
+struct Room
+{
+	SDL_Texture* texture;
+	SDL_Rect rectangle;
+	int level;
+	int type;
+	int min_humans;
+	int cost_foods;
+	int cost_resourses;
+};
+//Р РёСЃСѓРµС‚ С„РѕРЅ
 void draw_background(SDL_Renderer* renderer, Background background);
