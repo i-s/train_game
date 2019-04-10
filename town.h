@@ -28,3 +28,6 @@ void draw_background(SDL_Renderer* renderer, Background background);
 
 //Изменяет количество ресурсов по формулам
 void Update_resourses();
+
+//Изменяет сложность игры по формулам
+void Update_difficulty();

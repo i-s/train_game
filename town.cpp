@@ -53,6 +53,13 @@ struct Room_Selecting {
 	bool shown;
 };
 
+//SDL_Texture* texture;SDL_Rect rectangle;bool active;
+struct Alert {
+	SDL_Texture* texture;
+	SDL_Rect rectangle;
+	bool active;
+};
+
 //Рисует фон
 void draw_background(SDL_Renderer* renderer, Background background) {
 	SDL_RenderCopy(renderer, background.texture, NULL, &background.rectangle);
@@ -61,6 +68,11 @@ void draw_background(SDL_Renderer* renderer, Background background) {
 //Рисует обводку окна
 void draw_room_selecting(SDL_Renderer* renderer, Room_Selecting room_selecting) {
 	SDL_RenderCopy(renderer, room_selecting.texture, NULL, &room_selecting.rectangle);
+}
+
+//Рисует сирену
+void draw_alert(SDL_Renderer* renderer, Alert alert) {
+	SDL_RenderCopy(renderer, alert.texture, NULL, &alert.rectangle);
 }
 
 //Изменяет количество ресурсов по формулам
@@ -93,9 +105,18 @@ void Update_resourses() {
 	g_humans -= delta_humans;
 }
 
+//Изменяет сложность игры по формулам
+void Update_difficulty() {
+	difficulty = int(g_resourses / 25) + int(g_humans / 50) + 1; //Пересчёт сложности игры
+}
+
 //Отрисовывает все изображения на экран
-void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background background, Room_Selecting room_selecting) {
+void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background background, Room_Selecting room_selecting, Alert alert) {
 	draw_background(renderer, background);
+
+	if (alert.active) {
+		draw_alert(renderer, alert);
+	}
 
 	if (room_selecting.shown) {
 		draw_room_selecting(renderer, room_selecting);
@@ -112,6 +133,7 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background
 //Возврат 1 -> переход к экрану "поезд"
 //Возврат 0 -> завершение программы
 int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
+	const char textures[20][100] = { "wow","gay","mom","pup","dad" };
 	//Загружаем текстуры
 	//Фона
 	SDL_Surface* background_surf = SDL_LoadBMP("resourses/textures/background_town_normal.bmp");
@@ -125,6 +147,11 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_SetColorKey(room_selecting_surf, 1, SDL_MapRGB(room_selecting_surf->format, 0, 255, 0));
 	SDL_Texture* room_selecting_texture = SDL_CreateTextureFromSurface(renderer, room_selecting_surf);
 	SDL_FreeSurface(room_selecting_surf);
+	//Сирены оповещения
+	SDL_Surface* alert_surf = SDL_LoadBMP("resourses/textures/alert.bmp");
+	SDL_SetColorKey(alert_surf, 1, SDL_MapRGB(alert_surf->format, 0, 255, 0));
+	SDL_Texture* alert_texture = SDL_CreateTextureFromSurface(renderer, alert_surf);
+	SDL_FreeSurface(alert_surf);
 
 	//Рисуем задний план
 	SDL_Rect bground_rectangle = { 0,0,winsize_w,winsize_h };
@@ -137,6 +164,13 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	room_selecting.rectangle = room_selecting_rect;
 	room_selecting.texture = room_selecting_texture;
 	room_selecting.shown = false;
+
+	//Сирена оповещения
+	SDL_Rect alert_rect = { 296,39,21,29 };
+	Alert alert;
+	alert.rectangle = alert_rect;
+	alert.texture = alert_texture;
+	alert.active = false;
 
 	//Создаём ивент и переменную для отслеживания закрытия окна
 	SDL_Event event;
@@ -269,7 +303,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		_itoa_s(int(g_resourses), text_resourses, 10, 10);
 
 		//Отрисовываем кадр
-		Update(window,renderer, texts, background, room_selecting);
+		Update(window,renderer, texts, background, room_selecting, alert);
 		
 		//Возвращаем нормальную текстуру фона, если никакая кнопка не нажата и фон изменялся
 		if (was_background_changed == true) {
@@ -284,17 +318,22 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		LASTTICKTIME = tick_time;
 
 		one_second -= DELTA*0.001;
-		if (one_second < 0) {
-			Update_resourses();
+		if (one_second < 0) { //Каждую секунду
+			Update_resourses(); //Пересчёт количества ресурсов
+			Update_difficulty(); //Пересчёт сложности игры
 			one_second = 1;
 		}
 
 		//Если время до прибытия поезда > 0, отнимаем из него прошедшее время за цикл
 		if (TIMEUNTILTRAIN > 0) {
 			TIMEUNTILTRAIN -= DELTA * 0.001;
+			if (TIMEUNTILTRAIN < 5) { //Время до получения уведомления о поезде
+				alert.active = true;
+			}
 		}
 		else {
 			TIMEUNTILTRAIN = get_new_train_time();
+			alert.active = false;
 		}
 		printf_s("time = %d, tut= %.1f\n", GAMETIME, TIMEUNTILTRAIN);
 	}

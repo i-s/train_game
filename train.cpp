@@ -490,18 +490,6 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		
 		//Вывод дебаг-информации
 		printf_s("time = %d : x = %.0f, y = %.0f, way = %d, time_arrive = %.1f, tut= %.1f\n", GAMETIME, train.coord.x, train.coord.y, current_path, train.time_before_arrive, TIMEUNTILTRAIN);
-
-		//ТЕСТОВЫЙ ПЕРЕЗАПУСК ПОЕЗДА
-		/*
-		if (!train.shown) {
-			train.shown = true;
-			current_path = start_position;
-			have_counted_speed = false;
-			train.coord.x = main_path[current_path].point1.x;
-			train.coord.y = main_path[current_path].point1.y;
-			Define_Train_Type_And_Delay(&train,++DIFFICULTY,train_textures);
-		}
-		*/
 		
 		//Считаем время
 		int tick_time = SDL_GetTicks();
@@ -511,6 +499,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		one_second -= DELTA * 0.001;
 		if (one_second < 0) {
 			Update_resourses();
+			Update_difficulty();; //Пересчёт сложности игры
 			one_second = 1;
 		}
 

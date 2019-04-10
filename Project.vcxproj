@@ -143,7 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="test.cpp" />
+    <ClCompile Include="textures.cpp" />
     <ClCompile Include="town.cpp" />
     <ClCompile Include="train.cpp" />
     <ClCompile Include="main.cpp" />
