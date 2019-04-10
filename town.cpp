@@ -12,12 +12,23 @@
 
 //Объявление глобальных ресурсов:
 //глобальные люди
-int g_humans;
+float g_humans;
 //глобальные материалы
-int g_resourses;
+float g_resourses;
 //глобальная еда
-int g_food;
+float g_food;
+// глобальное состояние рычагов
+int lever1_pulled, lever2_pulled;
+// таймер 1 секунды
+float one_second;
 
+//Загрузка глобальных ресурсов
+// подсчёт времени
+extern int LASTTICKTIME;
+extern int DELTA; //Разница во времени
+extern int GAMESTARTTIME;
+extern int GAMETIME; //Время со старта программы
+extern float TIMEUNTILTRAIN;//время до поезда
 
 //Запускался ли экран "город" до этого момента
 bool g_have_open_town_before = false;
@@ -52,6 +63,37 @@ void draw_room_selecting(SDL_Renderer* renderer, Room_Selecting room_selecting) 
 	SDL_RenderCopy(renderer, room_selecting.texture, NULL, &room_selecting.rectangle);
 }
 
+//Изменяет количество ресурсов по формулам
+void Update_resourses() {
+	float delta_humans, delta_food, delta_resourses; //Хранят изменение количества ресурсов
+
+	delta_food = g_humans / 100 * fmaxf((g_food/100),1); //Трата еды за 1 секунду равна:
+	/*
+	Количество людей        количество еды
+	---------------- * max(---------------- , 1)
+	      100                    100
+	*/
+	delta_resourses = g_humans / 500; //Трата ресурсов за секунду.
+
+	g_food -= delta_food;
+	g_resourses -= delta_resourses;
+	
+	delta_humans = 0;
+
+	if (g_food < 0) { //Если еды меньше 0...
+		delta_humans = fminf(1,-1 * g_food/10); //уменьшаем количество людей на
+		/*
+		            количество отсутствующей еды
+		min(1, -1 * ----------------------------)
+		                        10
+		*/
+		g_food = 0;
+	}
+
+	g_humans -= delta_humans;
+}
+
+//Отрисовывает все изображения на экран
 void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background background, Room_Selecting room_selecting) {
 	draw_background(renderer, background);
 
@@ -70,7 +112,6 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background
 //Возврат 1 -> переход к экрану "поезд"
 //Возврат 0 -> завершение программы
 int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
-	difficulty = 1; //Сложность игры
 	//Загружаем текстуры
 	//Фона
 	SDL_Surface* background_surf = SDL_LoadBMP("resourses/textures/background_town_normal.bmp");
@@ -122,14 +163,6 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 
 	int button_flag; //Перменная, хранящая номер нажатой кнопки
 
-	//Подсчёт времени
-	extern int LASTTICKTIME;
-	extern int DELTA; //Разница во времени
-	extern int GAMESTARTTIME;
-	extern int GAMETIME; //Время со старта программы
-	int time_of_last_click = GAMESTARTTIME; //Время предыдущего клика
-	extern float TIMEUNTILTRAIN;//время до поезда
-
 	//Запуск SDL_Mixer-а, инициализация музыки и её запуск
 	Mix_Init(MIX_INIT_MP3);
 	if (g_have_open_town_before == false) {
@@ -153,6 +186,8 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	int go_to_train = false; //Флаг, отвечающий за переход к экрану "поезд"
 
 	int choosed_room = -1; //Какая комната выбрана в данный момент
+
+	//int time_of_last_click = GAMESTARTTIME; //Время предыдущего клика
 	
 	//ГЛАВНЫЙ ЦИКЛ
 	while (!quit && !go_to_train) {
@@ -229,15 +264,12 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		}
 
 		//Подготавливаем текст для вывода
-		_itoa_s(g_humans, text_humans, 10, 10);
-		_itoa_s(g_food, text_food, 10, 10);
-		_itoa_s(g_resourses, text_resourses, 10, 10);
+		_itoa_s(int(g_humans), text_humans, 10, 10);
+		_itoa_s(int(g_food), text_food, 10, 10);
+		_itoa_s(int(g_resourses), text_resourses, 10, 10);
 
 		//Отрисовываем кадр
 		Update(window,renderer, texts, background, room_selecting);
-
-
-
 		
 		//Возвращаем нормальную текстуру фона, если никакая кнопка не нажата и фон изменялся
 		if (was_background_changed == true) {
@@ -249,9 +281,13 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		GAMETIME = time(NULL) - GAMESTARTTIME;
 		int tick_time = SDL_GetTicks();
 		DELTA = tick_time - LASTTICKTIME;
-
-		//printf_s("DELTA = %.3f\n",DELTA*0.001);
 		LASTTICKTIME = tick_time;
+
+		one_second -= DELTA*0.001;
+		if (one_second < 0) {
+			Update_resourses();
+			one_second = 1;
+		}
 
 		//Если время до прибытия поезда > 0, отнимаем из него прошедшее время за цикл
 		if (TIMEUNTILTRAIN > 0) {
@@ -262,8 +298,6 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		}
 		printf_s("time = %d, tut= %.1f\n", GAMETIME, TIMEUNTILTRAIN);
 	}
-
-	//printf_s("hum = %d, res = %d, food = %d\n",g_humans,g_resourses,g_food);
 
 	SDL_DestroyTexture(background_texture);
 	SDL_DestroyTexture(background_train_selected_texture);

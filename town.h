@@ -25,3 +25,6 @@ struct Room
 };
 //Рисует фон
 void draw_background(SDL_Renderer* renderer, Background background);
+
+//Изменяет количество ресурсов по формулам
+void Update_resourses();

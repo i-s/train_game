@@ -11,15 +11,16 @@
 #include "train.h"
 #include "main.h"
 
-/*To-do:
-1) 
-2) Оповещение о прибытии поезда
-3) Вывод количества ресурсов
-*/
-
 //Загружаем глобальные переменные из town.cpp
-extern int g_humans, g_resourses, g_food;
+extern float g_humans, g_resourses, g_food;
 extern int difficulty;
+extern int lever1_pulled, lever2_pulled;
+extern int LASTTICKTIME;
+extern int DELTA; //Разница во времени
+extern int GAMESTARTTIME;
+extern int GAMETIME; //Время со старта программы
+extern float TIMEUNTILTRAIN;//время до поезда
+extern float one_second;
 
 //Загружаем глобальные RECT-ы
 extern SDL_Rect g_recthumans;
@@ -77,16 +78,6 @@ void CountSpeed(Line path, float speed, float* speed_x, float* speed_y, float* a
 	//Считаем проекции скорости
 	*speed_x = speed * sin_a * znak_x;
 	*speed_y = speed * cos_a * znak_y;
-}
-
-//Возвращает true, если поезд достиг конца пути
-bool Reached_End(Line path, Point current_coord, float speed) {
-	//Расстояние от текущей позиции до конца пути
-	float rast = sqrt(((current_coord.x - path.point2.x) * (current_coord.x - path.point2.x)) + ((current_coord.y - path.point2.y) * (current_coord.y - path.point2.y)));
-	if ((rast - speed) <= 0) {
-		return true;
-	}
-	return false;
 }
 
 //Возвращает расстояние до конца пути
@@ -232,8 +223,8 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	draw_background(renderer, background);
 
 	//Рисуем рычаги
-	Lever lever1 = { { 380,60, 40,50 },0,lever_switched_texture,lever_texture };
-	Lever lever2 = { { 305,370,40,50 },0,lever_texture,lever_switched_texture };
+	Lever lever1 = { { 380,60, 40,50 },lever1_pulled,lever_switched_texture,lever_texture };
+	Lever lever2 = { { 305,370,40,50 },lever2_pulled,lever_texture,lever_switched_texture };
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
 
@@ -282,15 +273,9 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	Line main_path[11] = { line0, line1,line2,line3,line4,line5,line6,line7,line8,line9,line10 };
 
 	int start_position = 1; //ПЕРЕМЕННАЯ, ОТВЕЧАЮЩАЯ ЗА МЕСТО ПОЯВЛЕНИЯ ПОЕЗДА
-
-	extern float TIMEUNTILTRAIN;//время до поезда
 	
 
 	//Подсчёт времени
-	extern int LASTTICKTIME;
-	extern int DELTA; //Разница во времени
-	extern int GAMESTARTTIME;
-	extern int GAMETIME; //Время со старта программы
 	int time_of_last_click = GAMESTARTTIME; //Время предыдущего клика
 	//extern int TIMEUNTILTRAIN;//время до поезда
 	//printf_s("speed = "); scanf_s("%f", &train.speed);
@@ -452,8 +437,6 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 				}
 				have_counted_speed = true;
 			}
-
-			//if (Reached_End(main_path[current_path], train.coord, train.speed)) {
 			rast = Rast_to_End(main_path[current_path], train.coord, train.speed);
 			if (rast <= 1) {
 				train.coord = main_path[current_path].point2;
@@ -497,9 +480,9 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		}
 
 		//Подготовка к выводу цифр на экран
-		_itoa_s(g_humans, text_humans, 10, 10);
-		_itoa_s(g_food, text_food, 10, 10);
-		_itoa_s(g_resourses, text_resourses, 10, 10);
+		_itoa_s(int(g_humans), text_humans, 10, 10);
+		_itoa_s(int(g_food), text_food, 10, 10);
+		_itoa_s(int(g_resourses), text_resourses, 10, 10);
 
 		Update(window, renderer, train, background, lever1, lever2, texts, text_box, town_block);
 
@@ -507,8 +490,6 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		
 		//Вывод дебаг-информации
 		printf_s("time = %d : x = %.0f, y = %.0f, way = %d, time_arrive = %.1f, tut= %.1f\n", GAMETIME, train.coord.x, train.coord.y, current_path, train.time_before_arrive, TIMEUNTILTRAIN);
-
-		//SDL_Delay(10);
 
 		//ТЕСТОВЫЙ ПЕРЕЗАПУСК ПОЕЗДА
 		/*
@@ -525,9 +506,13 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		//Считаем время
 		int tick_time = SDL_GetTicks();
 		DELTA = tick_time - LASTTICKTIME;
-
-		//printf_s("DELTA = %.3f\n",DELTA*0.001);
 		LASTTICKTIME = tick_time;
+
+		one_second -= DELTA * 0.001;
+		if (one_second < 0) {
+			Update_resourses();
+			one_second = 1;
+		}
 
 		//Если время до прибытия поезда > 0, отнимаем из него прошедшее время за цикл
 		if (TIMEUNTILTRAIN > 0) {
@@ -542,12 +527,6 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		if (town_button_pressed) {
 			break;
 		}
-
-
-		//Ограничиваем ФПС.
-		/*if (DELTA < max_tick_time)
-			SDL_Delay(max_tick_time - DELTA);
-		*/
 	}
 
 	SDL_DestroyTexture(background_texture);
@@ -564,6 +543,9 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	SDL_DestroyTexture(town_block_texture);
 
 	if (town_button_pressed) {
+		//Возвращаем в глобальные переменные состояние рычагов
+		lever1_pulled = lever1.switched;
+		lever2_pulled = lever2.switched;
 		return 0;
 	}
 	else {

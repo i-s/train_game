@@ -6,7 +6,10 @@
 #undef main
 
 //Загружаем глобальные переменные из town.cpp
-extern int g_humans,g_resourses,g_food;
+extern float g_humans,g_resourses,g_food;
+extern int lever1_pulled, lever2_pulled;
+extern int difficulty;
+extern float one_second;
 
 
 
@@ -27,7 +30,7 @@ int main() {
 	SDL_Renderer* renderer = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 	//Тестовые начальные значения ресурсов:
-	g_humans = 100;
+	g_humans = 50;
 	g_resourses = 50;
 	g_food = 300;
 
@@ -39,6 +42,10 @@ int main() {
 	int menu_flag;
 	int train_flag;
 	int town_flag = -1;
+	lever1_pulled = 0;
+	lever2_pulled = 0;
+	difficulty = 1; //Сложность игры
+	one_second = 1;
 	extern int GAMESTARTTIME;
 	extern float TIMEUNTILTRAIN;
 	TIMEUNTILTRAIN = 10;
