@@ -6,9 +6,11 @@
 #include "text.h"
 #include "town.h"
 #include "menu.h"
+//#include "textures.h"
 #include <stdlib.h>
 #include <SDL_mixer.h>
 #include <time.h>
+#define NUMBER_OF_TEXTURES 4
 
 //Объявление глобальных ресурсов:
 //глобальные люди
@@ -21,6 +23,8 @@ float g_food;
 int lever1_pulled, lever2_pulled;
 // таймер 1 секунды
 float one_second;
+// улучшения комнат
+int g_rooms[2][3][2]; //2 ряда по 3 колонки по 2 числа в ячейке: тип и уровень
 
 //Загрузка глобальных ресурсов
 // подсчёт времени
@@ -60,6 +64,11 @@ struct Alert {
 	bool active;
 };
 
+struct Room_icon {
+	SDL_Texture* texture;
+	SDL_Rect rectangle;
+};
+
 //Рисует фон
 void draw_background(SDL_Renderer* renderer, Background background) {
 	SDL_RenderCopy(renderer, background.texture, NULL, &background.rectangle);
@@ -68,6 +77,20 @@ void draw_background(SDL_Renderer* renderer, Background background) {
 //Рисует обводку окна
 void draw_room_selecting(SDL_Renderer* renderer, Room_Selecting room_selecting) {
 	SDL_RenderCopy(renderer, room_selecting.texture, NULL, &room_selecting.rectangle);
+}
+
+//Рисует комнату
+void draw_room(SDL_Renderer* renderer, Room room) {
+	SDL_RenderCopy(renderer, room.texture, NULL, &room.rectangle);
+}
+
+void Define_Rooms_Textures(Room room) {
+
+}
+
+//Рисует иконку комнаты
+void draw_room_icon(SDL_Renderer* renderer, Room_icon room_icon) {
+	SDL_RenderCopy(renderer, room_icon.texture, NULL, &room_icon.rectangle);
 }
 
 //Рисует сирену
@@ -111,8 +134,13 @@ void Update_difficulty() {
 }
 
 //Отрисовывает все изображения на экран
-void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background background, Room_Selecting room_selecting, Alert alert) {
+void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background background, Room_Selecting room_selecting, Alert alert, Room_icon room_icons[], Room rooms[]) {
 	draw_background(renderer, background);
+
+	for (int i = 0; i < 6; i++) {
+		draw_room(renderer, rooms[i]);
+	}
+	//draw_room(renderer, rooms[0]); //ВРЕМЕННО
 
 	if (alert.active) {
 		draw_alert(renderer, alert);
@@ -121,6 +149,8 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background
 	if (room_selecting.shown) {
 		draw_room_selecting(renderer, room_selecting);
 	}
+
+	draw_room_icon(renderer, room_icons[0]); //ВРЕМЕННО
 
 	draw_text(window, renderer, texts[0], g_recthumans);
 	draw_text(window, renderer, texts[1], g_rectfood);
@@ -133,7 +163,20 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background
 //Возврат 1 -> переход к экрану "поезд"
 //Возврат 0 -> завершение программы
 int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
-	const char textures[20][100] = { "wow","gay","mom","pup","dad" };
+
+	//Попытка красиво загружать текстуры в память
+	/*
+	const char textures_path[NUMBER_OF_TEXTURES][100] = { "resourses/textures/background_town_normal.bmp","resourses/textures/background_town_train_selected.bmp",
+		"resourses/textures/room_selecting.bmp","resourses/textures/alert.bmp" }; //NUMBER_OF_TEXTURES расположений текстур
+	const char textures_name[NUMBER_OF_TEXTURES][50] = {"background_texture","background_train_selected_texture",
+	"room_selecting_texture","alert_texture"}; //NUMBER_OF_TEXTURES имён текстур
+	const bool textures_chroma_keys[NUMBER_OF_TEXTURES] = {0,0,1,1};
+	Texture textures[NUMBER_OF_TEXTURES];
+	for (int i = 0; i < NUMBER_OF_TEXTURES; i++) {
+		LoadTexture(renderer, textures[i],textures_name[i],textures_path[i],textures_chroma_keys[i]);
+	}
+	*/
+
 	//Загружаем текстуры
 	//Фона
 	SDL_Surface* background_surf = SDL_LoadBMP("resourses/textures/background_town_normal.bmp");
@@ -152,6 +195,19 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_SetColorKey(alert_surf, 1, SDL_MapRGB(alert_surf->format, 0, 255, 0));
 	SDL_Texture* alert_texture = SDL_CreateTextureFromSurface(renderer, alert_surf);
 	SDL_FreeSurface(alert_surf);
+	//Комнат
+	//обычная(пустая)
+	SDL_Surface* stock_surf = SDL_LoadBMP("resourses/textures/rooms/stock.bmp");
+	SDL_Texture* stock_texture = SDL_CreateTextureFromSurface(renderer, stock_surf);
+	SDL_FreeSurface(stock_surf);
+	//фермы
+	SDL_Surface* farm1_surf = SDL_LoadBMP("resourses/textures/rooms/farm_1.bmp");
+	SDL_Texture* farm1_texture = SDL_CreateTextureFromSurface(renderer, farm1_surf);
+	SDL_FreeSurface(farm1_surf);
+	//иконки фермы
+	SDL_Surface* farm1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/farm_1_icon.bmp");
+	SDL_Texture* farm1_icon_texture = SDL_CreateTextureFromSurface(renderer, farm1_icon_surf);
+	SDL_FreeSurface(farm1_icon_surf);
 
 	//Рисуем задний план
 	SDL_Rect bground_rectangle = { 0,0,winsize_w,winsize_h };
@@ -159,7 +215,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	draw_background(renderer, background);
 
 	//Выделение комнаты
-	SDL_Rect room_selecting_rect = {0,0,231,150};
+	SDL_Rect room_selecting_rect = { 0,0,231,150 };
 	Room_Selecting room_selecting;
 	room_selecting.rectangle = room_selecting_rect;
 	room_selecting.texture = room_selecting_texture;
@@ -185,15 +241,38 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	char* texts[3] = { text_humans, text_food, text_resourses };
 
 	//Описание всех кнопок
-	SDL_Rect rect_button_train = {289,68,52,74};
-	SDL_Rect rect_room_0 = {14,187,229,148};
+	SDL_Rect rect_button_train = { 289,68,52,74 };
+	SDL_Rect rect_room_0 = { 14,187,229,148 };
 	SDL_Rect rect_room_1 = { 287,187,229,148 };
 	SDL_Rect rect_room_2 = { 555,187,229,148 };
 	SDL_Rect rect_room_3 = { 14,342,229,148 };
 	SDL_Rect rect_room_4 = { 287,342,229,148 };
 	SDL_Rect rect_room_5 = { 555,342,229,148 };
-	SDL_Rect buttons[7] = {rect_button_train,rect_room_0,rect_room_1,
-		rect_room_2, rect_room_3,rect_room_4,rect_room_5 };
+
+	SDL_Rect rect_room_icon_0 = { 29,504,56,56 };
+	SDL_Rect rect_room_icon_1 = { 96,504,56,56 };
+	SDL_Rect rect_room_icon_2 = { 163,504,56,56 };
+	SDL_Rect rect_room_icon_3 = { 230,504,56,56 };
+	SDL_Rect rect_room_icon_4 = { 297,504,56,56 };
+	SDL_Rect rect_room_icon_5 = { 363,504,56,56 };
+
+	SDL_Rect buttons[13] = { rect_button_train,rect_room_0,rect_room_1,
+		rect_room_2, rect_room_3,rect_room_4,rect_room_5,
+		rect_room_icon_0,rect_room_icon_1,rect_room_icon_2,rect_room_icon_3,rect_room_icon_4,rect_room_icon_5
+	};
+
+	Room_icon room_icons[6];
+	room_icons[0].rectangle = rect_room_icon_0;
+	room_icons[0].texture = farm1_icon_texture;
+	//Создаём комнаты
+	Room rooms[6];
+	rooms[0].type = g_rooms[0][0][0];
+	rooms[0].level = g_rooms[0][0][1];
+
+	for (int i = 0; i < 6; i++) {
+		rooms[i].rectangle = buttons[1+i];
+		rooms[i].texture = stock_texture;
+	}
 
 	int button_flag; //Перменная, хранящая номер нажатой кнопки
 
@@ -231,12 +310,14 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 
 		bool was_background_changed = false; //Был ли фон изменён?
 		bool was_button_room_pressed = false; //Была ли нажата какая-либо комната?
+		bool was_rooms_changed = false; //Была ли хоть одна комната изменена?
 
-		for (int i = 0; i <= 6; i++) {
+		for (int i = 0; i <= 7; i++) {
 			button_flag = CheckIfMouseOnButton(event, i, buttons);
 
 			switch (button_flag) {
 			case -1: break;
+			//Нажатие на комнаты
 			case 0: {
 				background.texture = background_train_selected_texture;
 				was_background_changed = true;
@@ -287,10 +368,25 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 				}
 				break;
 			}
+			case 7: { //Нажатие на иконку фермы
+				if (LKMPressed(event)) {
+					if (choosed_room > -1) {
+						rooms[choosed_room - 1].type = 1;
+						rooms[choosed_room - 1].texture = farm1_texture;
+						rooms[choosed_room - 1].level = 1;
+						was_rooms_changed = true;
+					}
+				}
+				break;
+			}
 			default: printf_s("There is a problem with a buttons!\n"); break;
 			}
 		}
 		
+		if (was_rooms_changed) {
+			//Define_Rooms_Textures(); //Изменение текстуры WIP
+		}
+
 		//Если комната выделена, нарисовать рамку.
 		if (choosed_room != -1 && was_button_room_pressed == true) {
 			room_selecting.rectangle = buttons[choosed_room];
@@ -303,7 +399,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		_itoa_s(int(g_resourses), text_resourses, 10, 10);
 
 		//Отрисовываем кадр
-		Update(window,renderer, texts, background, room_selecting, alert);
+		Update(window,renderer, texts, background, room_selecting, alert,room_icons,rooms);
 		
 		//Возвращаем нормальную текстуру фона, если никакая кнопка не нажата и фон изменялся
 		if (was_background_changed == true) {
@@ -311,6 +407,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			was_background_changed = false;
 		}
 
+		//Работа с временем
 		SDL_Delay(10);
 		GAMETIME = time(NULL) - GAMESTARTTIME;
 		int tick_time = SDL_GetTicks();
@@ -341,6 +438,17 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_DestroyTexture(background_texture);
 	SDL_DestroyTexture(background_train_selected_texture);
 	SDL_DestroyTexture(room_selecting_texture);
+	SDL_DestroyTexture(alert_texture);
+	SDL_DestroyTexture(farm1_icon_texture);
+	SDL_DestroyTexture(farm1_texture);
+	
+
+	// Попытка красиво выгружать текстуры из памяти
+	/*
+	for (int i = 0; i < NUMBER_OF_TEXTURES; i++) {
+		UnloadTexture(textures[i]);
+	}
+	*/
 
 	//Так НУЖНО выходить из Mix_Init-а. Серьёзно. Сказано в Вики.
 	while (Mix_Init(0))

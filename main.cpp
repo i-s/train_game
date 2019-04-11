@@ -10,6 +10,7 @@ extern float g_humans,g_resourses,g_food;
 extern int lever1_pulled, lever2_pulled;
 extern int difficulty;
 extern float one_second;
+extern int g_rooms[2][3][2];
 
 
 
@@ -33,6 +34,13 @@ int main() {
 	g_humans = 50;
 	g_resourses = 50;
 	g_food = 300;
+
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < 3; j++) {
+			g_rooms[i][j][0] = 0;
+			g_rooms[i][j][1] = 0;
+		}
+	}
 
 	//menu(WINDOW, renderer, winsize_w, winsize_h)
 	//train_game(WINDOW, renderer, winsize_w, winsize_h)

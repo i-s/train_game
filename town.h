@@ -23,6 +23,14 @@ struct Room
 	int cost_foods;
 	int cost_resourses;
 };
+
+//char path[100];char name[50];SDL_Texture* texture;bool chroma_key;
+struct Texture {
+	char name[50];
+	SDL_Texture* texture;
+	bool chroma_key;
+};
+
 //Рисует фон
 void draw_background(SDL_Renderer* renderer, Background background);
 

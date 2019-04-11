@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
+    <ClInclude Include="textures.h" />
     <ClInclude Include="town.h" />
     <ClInclude Include="train.h" />
     <ClInclude Include="menu.h" />
