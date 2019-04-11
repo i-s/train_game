@@ -35,12 +35,17 @@ int main() {
 	g_resourses = 50;
 	g_food = 300;
 
+	//Делаем все комнаты пустыми
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 3; j++) {
 			g_rooms[i][j][0] = 0;
 			g_rooms[i][j][1] = 0;
 		}
 	}
+
+	//Пусть первая комната сразу будет фермой
+	g_rooms[0][0][0] = 1;
+	g_rooms[0][0][1] = 1;
 
 	//menu(WINDOW, renderer, winsize_w, winsize_h)
 	//train_game(WINDOW, renderer, winsize_w, winsize_h)

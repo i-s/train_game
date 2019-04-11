@@ -84,8 +84,22 @@ void draw_room(SDL_Renderer* renderer, Room room) {
 	SDL_RenderCopy(renderer, room.texture, NULL, &room.rectangle);
 }
 
-void Define_Rooms_Textures(Room room) {
-
+void Define_Rooms_Textures(Room* room, SDL_Texture* room_textures[]) {
+	switch ((*room).type) {
+	case 0: (*room).texture = room_textures[0]; break;
+	case 1: { //Ферма
+		switch ((*room).level) { //Уровни фермы
+		case 1: (*room).texture = room_textures[1]; break;
+		case 2: break;
+		case 3: break;
+		}
+		break; }
+	case 2: break;
+	case 3: break;
+	case 4: break;
+	case 5: break;
+	default: break;
+	}
 }
 
 //Рисует иконку комнаты
@@ -209,6 +223,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Texture* farm1_icon_texture = SDL_CreateTextureFromSurface(renderer, farm1_icon_surf);
 	SDL_FreeSurface(farm1_icon_surf);
 
+	//Массив текстур комнат
+	SDL_Texture* room_textures[19] = {stock_texture,farm1_texture};
+
 	//Рисуем задний план
 	SDL_Rect bground_rectangle = { 0,0,winsize_w,winsize_h };
 	Background background = { background_texture, bground_rectangle };
@@ -260,18 +277,26 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		rect_room_2, rect_room_3,rect_room_4,rect_room_5,
 		rect_room_icon_0,rect_room_icon_1,rect_room_icon_2,rect_room_icon_3,rect_room_icon_4,rect_room_icon_5
 	};
-
+	//Создаём иконки
 	Room_icon room_icons[6];
 	room_icons[0].rectangle = rect_room_icon_0;
 	room_icons[0].texture = farm1_icon_texture;
 	//Создаём комнаты
 	Room rooms[6];
-	rooms[0].type = g_rooms[0][0][0];
-	rooms[0].level = g_rooms[0][0][1];
 
+	//Заполняем массив комнат из глобального массива комнат
 	for (int i = 0; i < 6; i++) {
+		if (i < 3) {
+			rooms[i].type = g_rooms[0][i][0];
+			rooms[i].level = g_rooms[0][i][1];
+		}
+		else {
+			rooms[i].type = g_rooms[1][i-3][0];
+			rooms[i].level = g_rooms[1][i-3][1];
+		}
 		rooms[i].rectangle = buttons[1+i];
 		rooms[i].texture = stock_texture;
+		Define_Rooms_Textures(&rooms[i], room_textures);
 	}
 
 	int button_flag; //Перменная, хранящая номер нажатой кнопки
@@ -374,6 +399,14 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 						rooms[choosed_room - 1].type = 1;
 						rooms[choosed_room - 1].texture = farm1_texture;
 						rooms[choosed_room - 1].level = 1;
+						if (choosed_room - 1 < 3) {
+							g_rooms[0][choosed_room - 1][0] = 1;
+							g_rooms[0][choosed_room - 1][1] = 1;
+						}
+						else {
+							g_rooms[1][choosed_room - 4][0] = 1;
+							g_rooms[1][choosed_room - 4][1] = 1;
+						}
 						was_rooms_changed = true;
 					}
 				}
@@ -384,7 +417,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		}
 		
 		if (was_rooms_changed) {
-			//Define_Rooms_Textures(); //Изменение текстуры WIP
+			for (int i = 0; i < 6; i++) {
+				Define_Rooms_Textures(&rooms[i], room_textures); //Изменение текстуры
+			}
 		}
 
 		//Если комната выделена, нарисовать рамку.
