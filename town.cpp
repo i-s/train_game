@@ -12,7 +12,9 @@
 #include <time.h>
 #define NUMBER_OF_TEXTURES 4
 #define INCOME_FROM_FACTORY_1 0.2
+#define INCOME_FROM_FACTORY_2 0.4
 #define INCOME_FROM_FERM_1 1
+#define MAX_ROOM_LEVEL 3
 
 //Объявление глобальных ресурсов:
 //глобальные люди
@@ -97,15 +99,15 @@ void Define_Rooms_Textures(Room* room, SDL_Texture* room_textures[]) {
 	case 1: { //Ферма
 		switch ((*room).level) { //Уровни фермы
 		case 1: (*room).texture = room_textures[1]; break;
-		case 2: break;
-		case 3: break;
+		case 2:  (*room).texture = room_textures[2]; break;
+		case 3:  (*room).texture = room_textures[3]; break;
 		}
 		break; }
 	case 2: { //Фабрика
 		switch ((*room).level) { //Уровни ффбрики
-		case 1: (*room).texture = room_textures[2]; break;
-		case 2: break;
-		case 3: break;
+		case 1: (*room).texture = room_textures[4]; break;
+		case 2: (*room).texture = room_textures[5]; break;
+		case 3: (*room).texture = room_textures[6]; break;
 		}
 		break; }
 	case 3: break;
@@ -184,6 +186,7 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background
 
 	draw_room_icon(renderer, room_icons[0]); //ВРЕМЕННО
 	draw_room_icon(renderer, room_icons[1]); //ВРЕМЕННО
+	draw_room_icon(renderer, room_icons[6]); //ВРЕМЕННО
 
 
 	draw_text(window, renderer, texts[0], g_recthumans);
@@ -238,23 +241,47 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Surface* farm1_surf = SDL_LoadBMP("resourses/textures/rooms/farm_1.bmp");
 	SDL_Texture* farm1_texture = SDL_CreateTextureFromSurface(renderer, farm1_surf);
 	SDL_FreeSurface(farm1_surf);
+	SDL_Surface* farm2_surf = SDL_LoadBMP("resourses/textures/rooms/farm_2.bmp");
+	SDL_Texture* farm2_texture = SDL_CreateTextureFromSurface(renderer, farm2_surf);
+	SDL_FreeSurface(farm2_surf);
+	SDL_Surface* farm3_surf = SDL_LoadBMP("resourses/textures/rooms/farm_3.bmp");
+	SDL_Texture* farm3_texture = SDL_CreateTextureFromSurface(renderer, farm3_surf);
+	SDL_FreeSurface(farm3_surf);
+
 	//иконки фермы
 	SDL_Surface* farm1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/farm_1_icon.bmp");
 	SDL_Texture* farm1_icon_texture = SDL_CreateTextureFromSurface(renderer, farm1_icon_surf);
 	SDL_FreeSurface(farm1_icon_surf);
+	
 	//фабрика
 	SDL_Surface* factory1_surf = SDL_LoadBMP("resourses/textures/rooms/factory_1.bmp");
 	SDL_Texture* factory1_texture = SDL_CreateTextureFromSurface(renderer, factory1_surf);
 	SDL_FreeSurface(factory1_surf);
+	SDL_Surface* factory2_surf = SDL_LoadBMP("resourses/textures/rooms/factory_2.bmp");
+	SDL_Texture* factory2_texture = SDL_CreateTextureFromSurface(renderer, factory2_surf);
+	SDL_FreeSurface(factory2_surf);
+	SDL_Surface* factory3_surf = SDL_LoadBMP("resourses/textures/rooms/factory_3.bmp");
+	SDL_Texture* factory3_texture = SDL_CreateTextureFromSurface(renderer, factory3_surf);
+	SDL_FreeSurface(factory3_surf);
+	
 	//иконки фабрики
 	SDL_Surface* factory1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/farm_1_icon.bmp");//тут поменять
 	SDL_Texture* factory1_icon_texture = SDL_CreateTextureFromSurface(renderer, factory1_icon_surf);
 	SDL_FreeSurface(factory1_icon_surf);
+	
+	
+	//Кнопка update
+	SDL_Surface* room_update_surf = SDL_LoadBMP("resourses/textures/rooms/update.bmp");//тут поменять
+	SDL_Texture* room_update_texture = SDL_CreateTextureFromSurface(renderer, room_update_surf);
+	SDL_FreeSurface(room_update_surf);
+
+
 
 
 
 	//Массив текстур комнат
-	SDL_Texture* room_textures[19] = {stock_texture,farm1_texture, factory1_texture };
+	SDL_Texture* room_textures[19] = {stock_texture,farm1_texture, farm2_texture, farm3_texture, factory1_texture,
+									  factory2_texture , factory3_texture };
 
 	//Рисуем задний план
 	SDL_Rect bground_rectangle = { 0,0,winsize_w,winsize_h };
@@ -311,11 +338,13 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		rect_room_update};
 	//Создаём иконки
 
-	Room_icon room_icons[6];
+	Room_icon room_icons[7];
 	room_icons[0].rectangle = rect_room_icon_0;
 	room_icons[0].texture = farm1_icon_texture;
 	room_icons[1].rectangle = rect_room_icon_1;
 	room_icons[1].texture = factory1_icon_texture;
+	room_icons[6].rectangle = rect_room_update;
+	room_icons[6].texture = room_update_texture;
 /* загрузка других комнат
 	
 	room_icons[2].rectangle = rect_room_icon_2;
@@ -325,6 +354,43 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 */
 	//Создаём комнаты
 	Room rooms[6];
+
+	//доход от комнаты [тип][уровень][0.hum,1.food,2.res]
+	float income_from_rooms[6][MAX_ROOM_LEVEL][3];
+
+	//инициализая дохода
+	{
+		//ферма
+		{
+			income_from_rooms[0][0][0] = 0;
+			income_from_rooms[0][0][1] = 1;
+			income_from_rooms[0][0][2] = 0;
+	
+			income_from_rooms[0][1][0] = 0;
+			income_from_rooms[0][1][1] = 2;
+			income_from_rooms[0][1][2] = 0;
+	
+			income_from_rooms[0][2][0] = 0;
+			income_from_rooms[0][2][1] = 3;
+			income_from_rooms[0][2][2] = 0;
+		}
+		//фабрика
+		{
+			income_from_rooms[1][0][0] = 0;
+			income_from_rooms[1][0][1] = 0;
+			income_from_rooms[1][0][2] = 0.2;
+	
+			income_from_rooms[1][1][0] = 0;
+			income_from_rooms[1][1][1] = 0;
+			income_from_rooms[1][1][2] = 0.3;
+	
+			income_from_rooms[1][2][0] = 0;
+			income_from_rooms[1][2][1] = 0;
+			income_from_rooms[1][2][2] = 0.4;
+		}
+	}
+
+	float cost_rooms[6][MAX_ROOM_LEVEL][3];
 
 	//Заполняем массив комнат из глобального массива комнат
 	for (int i = 0; i < 6; i++) {
@@ -379,7 +445,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		bool was_button_room_pressed = false; //Была ли нажата какая-либо комната?
 		bool was_rooms_changed = false; //Была ли хоть одна комната изменена?
 
-		for (int i = 0; i <= 8; i++) {
+		for (int i = 0; i <= 14; i++) {
 			button_flag = CheckIfMouseOnButton(event, i, buttons);
 
 			switch (button_flag) {
@@ -450,7 +516,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 							g_rooms[1][choosed_room - 4][1] = 1;
 						}
 						was_rooms_changed = true;
-						g_income_food += INCOME_FROM_FERM_1;
+						g_income_food += income_from_rooms[rooms[choosed_room - 1].type-1][rooms[choosed_room - 1].level-1][1];
 					}
 				}
 				break;
@@ -470,7 +536,38 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 							g_rooms[1][choosed_room - 4][1] = 1;
 						}
 						was_rooms_changed = true;
-						g_income_res += INCOME_FROM_FACTORY_1;
+						g_income_res += income_from_rooms[rooms[choosed_room - 1].type-1][rooms[choosed_room - 1].level-1][2];
+					}
+				}
+				break;
+			}
+			case 13: 
+			{ //Нажатие на иконку апгрейда
+				if (LKMPressed(event)) {
+					if (choosed_room > -1 && rooms[choosed_room - 1].type != 0 && rooms[choosed_room - 1].level < MAX_ROOM_LEVEL) {
+						//rooms[choosed_room - 1].texture = 
+						Define_Rooms_Textures(&rooms[choosed_room - 1], room_textures);
+
+						//изменение инкома до апгрейта
+						g_income_hum -= income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
+						g_income_food -= income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
+						g_income_res -= income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
+
+						rooms[choosed_room - 1].level += 1;
+
+						//изменение инкома после апгрейта
+						g_income_hum += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
+						g_income_food += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
+						g_income_res += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
+
+						
+						if (choosed_room - 1 < 3) {
+							g_rooms[0][choosed_room - 1][1] = rooms[choosed_room - 1].level;
+						}
+						else {
+							g_rooms[1][choosed_room - 4][1] = rooms[choosed_room - 1].level;
+						}
+						was_rooms_changed = true;
 					}
 				}
 				break;

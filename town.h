@@ -24,6 +24,8 @@ struct Room
 	int cost_resourses;
 };
 
+
+
 //char path[100];char name[50];SDL_Texture* texture;bool chroma_key;
 struct Texture {
 	char name[50];
@@ -39,3 +41,4 @@ void Update_resourses();
 
 //Изменяет сложность игры по формулам
 void Update_difficulty();
+//
