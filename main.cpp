@@ -11,6 +11,7 @@ extern int lever1_pulled, lever2_pulled;
 extern int difficulty;
 extern float one_second;
 extern int g_rooms[2][3][2];
+extern float g_income_food, g_income_res, g_income_hum;
 
 
 
@@ -34,6 +35,10 @@ int main() {
 	g_humans = 50;
 	g_resourses = 50;
 	g_food = 300;
+	g_income_food = 0;
+	g_income_res = 0;
+	g_income_hum = 0;
+
 
 	//Делаем все комнаты пустыми
 	for (int i = 0; i < 2; i++) {
@@ -43,9 +48,6 @@ int main() {
 		}
 	}
 
-	//Пусть первая комната сразу будет фермой
-	g_rooms[0][0][0] = 1;
-	g_rooms[0][0][1] = 1;
 
 	//menu(WINDOW, renderer, winsize_w, winsize_h)
 	//train_game(WINDOW, renderer, winsize_w, winsize_h)

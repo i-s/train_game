@@ -11,6 +11,8 @@
 #include <SDL_mixer.h>
 #include <time.h>
 #define NUMBER_OF_TEXTURES 4
+#define INCOME_FROM_FACTORY_1 0.2
+#define INCOME_FROM_FERM_1 1
 
 //Объявление глобальных ресурсов:
 //глобальные люди
@@ -25,6 +27,11 @@ int lever1_pulled, lever2_pulled;
 float one_second;
 // улучшения комнат
 int g_rooms[2][3][2]; //2 ряда по 3 колонки по 2 числа в ячейке: тип и уровень
+//доход от комнат
+float g_income_food;
+float g_income_res;
+float g_income_hum;
+
 
 //Загрузка глобальных ресурсов
 // подсчёт времени
@@ -94,7 +101,13 @@ void Define_Rooms_Textures(Room* room, SDL_Texture* room_textures[]) {
 		case 3: break;
 		}
 		break; }
-	case 2: break;
+	case 2: { //Фабрика
+		switch ((*room).level) { //Уровни ффбрики
+		case 1: (*room).texture = room_textures[2]; break;
+		case 2: break;
+		case 3: break;
+		}
+		break; }
 	case 3: break;
 	case 4: break;
 	case 5: break;
@@ -116,6 +129,7 @@ void draw_alert(SDL_Renderer* renderer, Alert alert) {
 void Update_resourses() {
 	float delta_humans, delta_food, delta_resourses; //Хранят изменение количества ресурсов
 
+
 	delta_food = g_humans / 100 * fmaxf((g_food/100),1); //Трата еды за 1 секунду равна:
 	/*
 	Количество людей        количество еды
@@ -125,7 +139,9 @@ void Update_resourses() {
 	delta_resourses = g_humans / 500; //Трата ресурсов за секунду.
 
 	g_food -= delta_food;
+	g_food += g_income_food;
 	g_resourses -= delta_resourses;
+	g_resourses += g_income_res;
 	
 	delta_humans = 0;
 
@@ -140,7 +156,9 @@ void Update_resourses() {
 	}
 
 	g_humans -= delta_humans;
+	g_humans += g_income_hum;
 }
+
 
 //Изменяет сложность игры по формулам
 void Update_difficulty() {
@@ -165,6 +183,8 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background
 	}
 
 	draw_room_icon(renderer, room_icons[0]); //ВРЕМЕННО
+	draw_room_icon(renderer, room_icons[1]); //ВРЕМЕННО
+
 
 	draw_text(window, renderer, texts[0], g_recthumans);
 	draw_text(window, renderer, texts[1], g_rectfood);
@@ -222,9 +242,19 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Surface* farm1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/farm_1_icon.bmp");
 	SDL_Texture* farm1_icon_texture = SDL_CreateTextureFromSurface(renderer, farm1_icon_surf);
 	SDL_FreeSurface(farm1_icon_surf);
+	//фабрика
+	SDL_Surface* factory1_surf = SDL_LoadBMP("resourses/textures/rooms/factory_1.bmp");
+	SDL_Texture* factory1_texture = SDL_CreateTextureFromSurface(renderer, factory1_surf);
+	SDL_FreeSurface(factory1_surf);
+	//иконки фабрики
+	SDL_Surface* factory1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/farm_1_icon.bmp");//тут поменять
+	SDL_Texture* factory1_icon_texture = SDL_CreateTextureFromSurface(renderer, factory1_icon_surf);
+	SDL_FreeSurface(factory1_icon_surf);
+
+
 
 	//Массив текстур комнат
-	SDL_Texture* room_textures[19] = {stock_texture,farm1_texture};
+	SDL_Texture* room_textures[19] = {stock_texture,farm1_texture, factory1_texture };
 
 	//Рисуем задний план
 	SDL_Rect bground_rectangle = { 0,0,winsize_w,winsize_h };
@@ -273,14 +303,26 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Rect rect_room_icon_4 = { 297,504,56,56 };
 	SDL_Rect rect_room_icon_5 = { 363,504,56,56 };
 
-	SDL_Rect buttons[13] = { rect_button_train,rect_room_0,rect_room_1,
+	SDL_Rect rect_room_update = { 430,504,56,56 };
+
+	SDL_Rect buttons[14] = { rect_button_train,rect_room_0,rect_room_1,
 		rect_room_2, rect_room_3,rect_room_4,rect_room_5,
-		rect_room_icon_0,rect_room_icon_1,rect_room_icon_2,rect_room_icon_3,rect_room_icon_4,rect_room_icon_5
-	};
+		rect_room_icon_0,rect_room_icon_1,rect_room_icon_2,rect_room_icon_3,rect_room_icon_4,rect_room_icon_5,
+		rect_room_update};
 	//Создаём иконки
+
 	Room_icon room_icons[6];
 	room_icons[0].rectangle = rect_room_icon_0;
 	room_icons[0].texture = farm1_icon_texture;
+	room_icons[1].rectangle = rect_room_icon_1;
+	room_icons[1].texture = factory1_icon_texture;
+/* загрузка других комнат
+	
+	room_icons[2].rectangle = rect_room_icon_2;
+	room_icons[2].texture = farm1_icon_texture;
+	room_icons[3].rectangle = rect_room_icon_3;
+	room_icons[3].texture = farm1_icon_texture;
+*/
 	//Создаём комнаты
 	Room rooms[6];
 
@@ -337,7 +379,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		bool was_button_room_pressed = false; //Была ли нажата какая-либо комната?
 		bool was_rooms_changed = false; //Была ли хоть одна комната изменена?
 
-		for (int i = 0; i <= 7; i++) {
+		for (int i = 0; i <= 8; i++) {
 			button_flag = CheckIfMouseOnButton(event, i, buttons);
 
 			switch (button_flag) {
@@ -395,7 +437,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			}
 			case 7: { //Нажатие на иконку фермы
 				if (LKMPressed(event)) {
-					if (choosed_room > -1) {
+					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0) {
 						rooms[choosed_room - 1].type = 1;
 						rooms[choosed_room - 1].texture = farm1_texture;
 						rooms[choosed_room - 1].level = 1;
@@ -408,6 +450,27 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 							g_rooms[1][choosed_room - 4][1] = 1;
 						}
 						was_rooms_changed = true;
+						g_income_food += INCOME_FROM_FERM_1;
+					}
+				}
+				break;
+			}
+			case 8: { //Нажатие на иконку фaбрики
+				if (LKMPressed(event)) {
+					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0) {
+						rooms[choosed_room - 1].type = 2;
+						rooms[choosed_room - 1].texture = factory1_texture;
+						rooms[choosed_room - 1].level = 1;
+						if (choosed_room - 1 < 3) {
+							g_rooms[0][choosed_room - 1][0] = 2;
+							g_rooms[0][choosed_room - 1][1] = 1;
+						}
+						else {
+							g_rooms[1][choosed_room - 4][0] = 2;
+							g_rooms[1][choosed_room - 4][1] = 1;
+						}
+						was_rooms_changed = true;
+						g_income_res += INCOME_FROM_FACTORY_1;
 					}
 				}
 				break;
@@ -443,29 +506,31 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		}
 
 		//Работа с временем
-		SDL_Delay(10);
-		GAMETIME = time(NULL) - GAMESTARTTIME;
-		int tick_time = SDL_GetTicks();
-		DELTA = tick_time - LASTTICKTIME;
-		LASTTICKTIME = tick_time;
+		{
+			SDL_Delay(10);
+			GAMETIME = time(NULL) - GAMESTARTTIME;
+			int tick_time = SDL_GetTicks();
+			DELTA = tick_time - LASTTICKTIME;
+			LASTTICKTIME = tick_time;
 
-		one_second -= DELTA*0.001;
-		if (one_second < 0) { //Каждую секунду
-			Update_resourses(); //Пересчёт количества ресурсов
-			Update_difficulty(); //Пересчёт сложности игры
-			one_second = 1;
-		}
-
-		//Если время до прибытия поезда > 0, отнимаем из него прошедшее время за цикл
-		if (TIMEUNTILTRAIN > 0) {
-			TIMEUNTILTRAIN -= DELTA * 0.001;
-			if (TIMEUNTILTRAIN < 5) { //Время до получения уведомления о поезде
-				alert.active = true;
+			one_second -= DELTA * 0.001;
+			if (one_second < 0) { //Каждую секунду
+				Update_resourses(); //Пересчёт количества ресурсов
+				Update_difficulty(); //Пересчёт сложности игры
+				one_second = 1;
 			}
-		}
-		else {
-			TIMEUNTILTRAIN = get_new_train_time();
-			alert.active = false;
+
+			//Если время до прибытия поезда > 0, отнимаем из него прошедшее время за цикл
+			if (TIMEUNTILTRAIN > 0) {
+				TIMEUNTILTRAIN -= DELTA * 0.001;
+				if (TIMEUNTILTRAIN < 5) { //Время до получения уведомления о поезде
+					alert.active = true;
+				}
+			}
+			else {
+				TIMEUNTILTRAIN = get_new_train_time();
+				alert.active = false;
+			}
 		}
 		printf_s("time = %d, tut= %.1f\n", GAMETIME, TIMEUNTILTRAIN);
 	}
