@@ -265,7 +265,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_FreeSurface(factory3_surf);
 	
 	//иконки фабрики
-	SDL_Surface* factory1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/farm_1_icon.bmp");//тут поменять
+	SDL_Surface* factory1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/factory_1_icon.bmp");//тут поменять
 	SDL_Texture* factory1_icon_texture = SDL_CreateTextureFromSurface(renderer, factory1_icon_surf);
 	SDL_FreeSurface(factory1_icon_surf);
 	
@@ -358,7 +358,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	//доход от комнаты [тип][уровень][0.hum,1.food,2.res]
 	float income_from_rooms[6][MAX_ROOM_LEVEL][3];
 
-	//инициализая дохода
+	//инициализация дохода
 	{
 		//ферма
 		{
