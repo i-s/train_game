@@ -389,9 +389,40 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			income_from_rooms[1][2][2] = 0.4;
 		}
 	}
-
+	//цена комнаты [тип][уровень][0.minhum,1.food,2.res]
 	float cost_rooms[6][MAX_ROOM_LEVEL][3];
 
+	//инициализация дохода
+	{
+		//ферма
+		{
+			cost_rooms[0][0][0] = 5;
+			cost_rooms[0][0][1] = 10;
+			cost_rooms[0][0][2] = 1;
+
+			cost_rooms[0][1][0] = 50;
+			cost_rooms[0][1][1] = 50;
+			cost_rooms[0][1][2] = 3;
+
+			cost_rooms[0][2][0] = 75;
+			cost_rooms[0][2][1] = 100;
+			cost_rooms[0][2][2] = 6;
+		}
+		//фабрика
+		{
+			cost_rooms[1][0][0] = 20;
+			cost_rooms[1][0][1] = 50;
+			cost_rooms[1][0][2] = 10;
+
+			cost_rooms[1][1][0] = 40;
+			cost_rooms[1][1][1] = 75;
+			cost_rooms[1][1][2] = 20;
+
+			cost_rooms[1][2][0] = 50;
+			cost_rooms[1][2][1] = 100;
+			cost_rooms[1][2][2] = 30;
+		}
+	}
 	//Заполняем массив комнат из глобального массива комнат
 	for (int i = 0; i < 6; i++) {
 		if (i < 3) {
@@ -430,8 +461,11 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	}
 
 	int go_to_train = false; //Флаг, отвечающий за переход к экрану "поезд"
-
+	
 	int choosed_room = -1; //Какая комната выбрана в данный момент
+
+	//время последнего апдейта
+	int time_last_update = time(NULL);
 
 	//int time_of_last_click = GAMESTARTTIME; //Время предыдущего клика
 	
@@ -503,7 +537,11 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			}
 			case 7: { //Нажатие на иконку фермы
 				if (LKMPressed(event)) {
-					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0) {
+					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0 && 
+						g_food - cost_rooms[0][0][1] > 0 &&
+						g_humans >= cost_rooms[0][0][0] &&
+						g_resourses - cost_rooms[0][0][2] > 0) {
+
 						rooms[choosed_room - 1].type = 1;
 						rooms[choosed_room - 1].texture = farm1_texture;
 						rooms[choosed_room - 1].level = 1;
@@ -515,6 +553,10 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 							g_rooms[1][choosed_room - 4][0] = 1;
 							g_rooms[1][choosed_room - 4][1] = 1;
 						}
+						//вычитаеем цену комнаты
+						g_food -= cost_rooms[0][0][1];
+						g_resourses -= cost_rooms[0][0][2];
+
 						was_rooms_changed = true;
 						g_income_food += income_from_rooms[rooms[choosed_room - 1].type-1][rooms[choosed_room - 1].level-1][1];
 					}
@@ -523,7 +565,11 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			}
 			case 8: { //Нажатие на иконку фaбрики
 				if (LKMPressed(event)) {
-					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0) {
+					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0 &&
+						g_food - cost_rooms[1][0][1] >= 0 &&
+						g_humans >= cost_rooms[1][0][0] &&
+						g_resourses - cost_rooms[1][0][2] >= 0) {
+
 						rooms[choosed_room - 1].type = 2;
 						rooms[choosed_room - 1].texture = factory1_texture;
 						rooms[choosed_room - 1].level = 1;
@@ -535,6 +581,10 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 							g_rooms[1][choosed_room - 4][0] = 2;
 							g_rooms[1][choosed_room - 4][1] = 1;
 						}
+						//вычитаеем цену комнаты
+						g_food -= cost_rooms[1][0][1];
+						g_resourses -= cost_rooms[1][0][2];
+
 						was_rooms_changed = true;
 						g_income_res += income_from_rooms[rooms[choosed_room - 1].type-1][rooms[choosed_room - 1].level-1][2];
 					}
@@ -544,7 +594,12 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			case 13: 
 			{ //Нажатие на иконку апгрейда
 				if (LKMPressed(event)) {
-					if (choosed_room > -1 && rooms[choosed_room - 1].type != 0 && rooms[choosed_room - 1].level < MAX_ROOM_LEVEL) {
+					if (choosed_room > -1 && rooms[choosed_room - 1].type != 0 && time(NULL)- time_last_update + 0.5 > 1 
+						&& rooms[choosed_room - 1].level < MAX_ROOM_LEVEL &&
+						g_food - cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][1] > 0 &&
+						g_humans >= cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][0] &&
+						g_resourses - cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][2] > 0) {
+
 						//rooms[choosed_room - 1].texture = 
 						Define_Rooms_Textures(&rooms[choosed_room - 1], room_textures);
 
@@ -554,6 +609,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 						g_income_res -= income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
 
 						rooms[choosed_room - 1].level += 1;
+						//вычитаем цену за апдейт
+						g_food -= cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][1];
+						g_resourses -= cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][2];
 
 						//изменение инкома после апгрейта
 						g_income_hum += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
@@ -568,6 +626,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 							g_rooms[1][choosed_room - 4][1] = rooms[choosed_room - 1].level;
 						}
 						was_rooms_changed = true;
+						time_last_update = time(NULL);
 					}
 				}
 				break;
