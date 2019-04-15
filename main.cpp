@@ -3,6 +3,9 @@
 #include "train.h"
 #include "town.h"
 #include <time.h>
+#define START_FOOD 1500
+#define START_HUMANS 1150
+#define START_RESOURSES 1200
 #undef main
 
 //Загружаем глобальные переменные из town.cpp
@@ -32,9 +35,9 @@ int main() {
 	SDL_Renderer* renderer = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 	//Тестовые начальные значения ресурсов:
-	g_humans = 50;
-	g_resourses = 50;
-	g_food = 300;
+	g_humans = START_HUMANS;
+	g_resourses = START_RESOURSES;
+	g_food = START_FOOD;
 	g_income_food = 0;
 	g_income_res = 0;
 	g_income_hum = 0;

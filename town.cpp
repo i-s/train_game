@@ -19,6 +19,7 @@
 //Объявление глобальных ресурсов:
 //глобальные люди
 float g_humans;
+int g_humans_cap = 100; //Максимальное количество людей, проживающих в бункере
 //глобальные материалы
 float g_resourses;
 //глобальная еда
@@ -104,14 +105,26 @@ void Define_Rooms_Textures(Room* room, SDL_Texture* room_textures[]) {
 		}
 		break; }
 	case 2: { //Фабрика
-		switch ((*room).level) { //Уровни ффбрики
+		switch ((*room).level) { //Уровни фабрики
 		case 1: (*room).texture = room_textures[4]; break;
 		case 2: (*room).texture = room_textures[5]; break;
 		case 3: (*room).texture = room_textures[6]; break;
 		}
 		break; }
-	case 3: break;
-	case 4: break;
+	case 3: { //Жилая комната
+		switch ((*room).level) { //Уровни жилой комната
+		case 1: (*room).texture = room_textures[7]; break;
+		case 2: (*room).texture = room_textures[8]; break;
+		case 3: (*room).texture = room_textures[9]; break;
+		}
+		break; }
+	case 4: { //Оружейная
+		switch ((*room).level) { //Уровни жилой комната
+		case 1: (*room).texture = room_textures[10]; break;
+		case 2: (*room).texture = room_textures[11]; break;
+		case 3: (*room).texture = room_textures[12]; break;
+		}
+		break; }
 	case 5: break;
 	default: break;
 	}
@@ -148,11 +161,9 @@ void Update_resourses() {
 	delta_humans = 0;
 
 	if (g_food < 0) { //Если еды меньше 0...
-		delta_humans = fminf(1,-1 * g_food/10); //уменьшаем количество людей на
+		delta_humans = log(g_humans)*log(g_humans); //уменьшаем количество людей на
 		/*
-		            количество отсутствующей еды
-		min(1, -1 * ----------------------------)
-		                        10
+		( ln(количество людей) )^2
 		*/
 		g_food = 0;
 	}
@@ -186,6 +197,8 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background
 
 	draw_room_icon(renderer, room_icons[0]); //ВРЕМЕННО
 	draw_room_icon(renderer, room_icons[1]); //ВРЕМЕННО
+	draw_room_icon(renderer, room_icons[2]); //ВРЕМЕННО
+	draw_room_icon(renderer, room_icons[3]); //ВРЕМЕННО
 	draw_room_icon(renderer, room_icons[6]); //ВРЕМЕННО
 
 
@@ -269,7 +282,38 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Texture* factory1_icon_texture = SDL_CreateTextureFromSurface(renderer, factory1_icon_surf);
 	SDL_FreeSurface(factory1_icon_surf);
 	
+	//Жилые комнаты
+	SDL_Surface* living1_surf = SDL_LoadBMP("resourses/textures/rooms/living_1.bmp");
+	SDL_Texture* living1_texture = SDL_CreateTextureFromSurface(renderer, living1_surf);
+	SDL_FreeSurface(living1_surf);
+	SDL_Surface* living2_surf = SDL_LoadBMP("resourses/textures/rooms/living_2.bmp");
+	SDL_Texture* living2_texture = SDL_CreateTextureFromSurface(renderer, living2_surf);
+	SDL_FreeSurface(living2_surf);
+	SDL_Surface* living3_surf = SDL_LoadBMP("resourses/textures/rooms/living_3.bmp");
+	SDL_Texture* living3_texture = SDL_CreateTextureFromSurface(renderer, living3_surf);
+	SDL_FreeSurface(living3_surf);
+
+	//Иконка жилой комнаты
+	SDL_Surface* living1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/living_1_icon.bmp");//тут поменять
+	SDL_Texture* living1_icon_texture = SDL_CreateTextureFromSurface(renderer, living1_icon_surf);
+	SDL_FreeSurface(living1_icon_surf);
 	
+	//Оружейная
+	SDL_Surface* weapony1_surf = SDL_LoadBMP("resourses/textures/rooms/weapony_1.bmp");
+	SDL_Texture* weapony1_texture = SDL_CreateTextureFromSurface(renderer, weapony1_surf);
+	SDL_FreeSurface(weapony1_surf);
+	SDL_Surface* weapony2_surf = SDL_LoadBMP("resourses/textures/rooms/weapony_2.bmp");
+	SDL_Texture* weapony2_texture = SDL_CreateTextureFromSurface(renderer, weapony2_surf);
+	SDL_FreeSurface(weapony2_surf);
+	SDL_Surface* weapony3_surf = SDL_LoadBMP("resourses/textures/rooms/weapony_3.bmp");
+	SDL_Texture* weapony3_texture = SDL_CreateTextureFromSurface(renderer, weapony3_surf);
+	SDL_FreeSurface(weapony3_surf);
+
+	//Иконка оружейной
+	SDL_Surface* weapony1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/weapony_1_icon.bmp");//тут поменять
+	SDL_Texture* weapony1_icon_texture = SDL_CreateTextureFromSurface(renderer, weapony1_icon_surf);
+	SDL_FreeSurface(weapony1_icon_surf);
+
 	//Кнопка update
 	SDL_Surface* room_update_surf = SDL_LoadBMP("resourses/textures/rooms/update.bmp");//тут поменять
 	SDL_Texture* room_update_texture = SDL_CreateTextureFromSurface(renderer, room_update_surf);
@@ -281,7 +325,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 
 	//Массив текстур комнат
 	SDL_Texture* room_textures[19] = {stock_texture,farm1_texture, farm2_texture, farm3_texture, factory1_texture,
-									  factory2_texture , factory3_texture };
+									  factory2_texture , factory3_texture, living1_texture,
+									  living2_texture , living3_texture, weapony1_texture,
+									  weapony2_texture , weapony3_texture };
 
 	//Рисуем задний план
 	SDL_Rect bground_rectangle = { 0,0,winsize_w,winsize_h };
@@ -343,12 +389,15 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	room_icons[0].texture = farm1_icon_texture;
 	room_icons[1].rectangle = rect_room_icon_1;
 	room_icons[1].texture = factory1_icon_texture;
+	room_icons[2].rectangle = rect_room_icon_2;
+	room_icons[2].texture = living1_icon_texture;
+	room_icons[3].rectangle = rect_room_icon_3;
+	room_icons[3].texture = weapony1_icon_texture;
 	room_icons[6].rectangle = rect_room_update;
 	room_icons[6].texture = room_update_texture;
 /* загрузка других комнат
 	
-	room_icons[2].rectangle = rect_room_icon_2;
-	room_icons[2].texture = farm1_icon_texture;
+	
 	room_icons[3].rectangle = rect_room_icon_3;
 	room_icons[3].texture = farm1_icon_texture;
 */
@@ -367,11 +416,11 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			income_from_rooms[0][0][2] = 0;
 	
 			income_from_rooms[0][1][0] = 0;
-			income_from_rooms[0][1][1] = 2;
+			income_from_rooms[0][1][1] = 2.5;
 			income_from_rooms[0][1][2] = 0;
 	
 			income_from_rooms[0][2][0] = 0;
-			income_from_rooms[0][2][1] = 3;
+			income_from_rooms[0][2][1] = 7.5;
 			income_from_rooms[0][2][2] = 0;
 		}
 		//фабрика
@@ -382,11 +431,39 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	
 			income_from_rooms[1][1][0] = 0;
 			income_from_rooms[1][1][1] = 0;
-			income_from_rooms[1][1][2] = 0.3;
+			income_from_rooms[1][1][2] = 0.45;
 	
 			income_from_rooms[1][2][0] = 0;
 			income_from_rooms[1][2][1] = 0;
-			income_from_rooms[1][2][2] = 0.4;
+			income_from_rooms[1][2][2] = 1;
+		}
+		//Жилая комната
+		{
+			income_from_rooms[2][0][0] = 0.001;
+			income_from_rooms[2][0][1] = 0;
+			income_from_rooms[2][0][2] = 0;
+
+			income_from_rooms[2][1][0] = 0.005;
+			income_from_rooms[2][1][1] = 0;
+			income_from_rooms[2][1][2] = 0;
+
+			income_from_rooms[2][2][0] = 0.01;
+			income_from_rooms[2][2][1] = 0;
+			income_from_rooms[2][2][2] = 0;
+		}
+		//Оружейная
+		{
+			income_from_rooms[3][0][0] = 0;
+			income_from_rooms[3][0][1] = 0;
+			income_from_rooms[3][0][2] = -0.05;
+
+			income_from_rooms[3][1][0] = 0;
+			income_from_rooms[3][1][1] = 0;
+			income_from_rooms[3][1][2] = -0.15;
+
+			income_from_rooms[3][2][0] = 0;
+			income_from_rooms[3][2][1] = 0;
+			income_from_rooms[3][2][2] = -0.35;
 		}
 	}
 	//цена комнаты [тип][уровень][0.minhum,1.food,2.res]
@@ -421,6 +498,34 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			cost_rooms[1][2][0] = 50;
 			cost_rooms[1][2][1] = 100;
 			cost_rooms[1][2][2] = 30;
+		}
+		//Жилая комната
+		{
+			cost_rooms[2][0][0] = 50;
+			cost_rooms[2][0][1] = 100;
+			cost_rooms[2][0][2] = 35;
+
+			cost_rooms[2][1][0] = 100;
+			cost_rooms[2][1][1] = 200;
+			cost_rooms[2][1][2] = 50;
+
+			cost_rooms[2][2][0] = 150;
+			cost_rooms[2][2][1] = 250;
+			cost_rooms[2][2][2] = 80;
+		}
+		//Оружейная
+		{
+			cost_rooms[3][0][0] = 25;
+			cost_rooms[3][0][1] = 50;
+			cost_rooms[3][0][2] = 50;
+
+			cost_rooms[3][1][0] = 75;
+			cost_rooms[3][1][1] = 50;
+			cost_rooms[3][1][2] = 200;
+
+			cost_rooms[3][2][0] = 125;
+			cost_rooms[3][2][1] = 100;
+			cost_rooms[3][2][2] = 300;
 		}
 	}
 	//Заполняем массив комнат из глобального массива комнат
@@ -591,14 +696,72 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 				}
 				break;
 			}
+			case 9: { //Нажатие на иконку жилых комнат
+				if (LKMPressed(event)) {
+					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0 &&
+						g_food - cost_rooms[2][0][1] >= 0 &&
+						g_humans >= cost_rooms[2][0][0] &&
+						g_resourses - cost_rooms[2][0][2] >= 0) {
+
+						rooms[choosed_room - 1].type = 3;
+						rooms[choosed_room - 1].texture = living1_texture;
+						rooms[choosed_room - 1].level = 1;
+						if (choosed_room - 1 < 3) {
+							g_rooms[0][choosed_room - 1][0] = 3;
+							g_rooms[0][choosed_room - 1][1] = 1;
+						}
+						else {
+							g_rooms[1][choosed_room - 4][0] = 3;
+							g_rooms[1][choosed_room - 4][1] = 1;
+						}
+						//вычитаеем цену комнаты
+						g_food -= cost_rooms[2][0][1];
+						g_resourses -= cost_rooms[2][0][2];
+
+						was_rooms_changed = true;
+						g_income_hum += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
+					}
+				}
+				break;
+			}
+			case 10: { //Нажатие на иконку оружейной
+				if (LKMPressed(event)) {
+					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0 &&
+						g_food - cost_rooms[3][0][1] >= 0 &&
+						g_humans >= cost_rooms[3][0][0] &&
+						g_resourses - cost_rooms[3][0][2] >= 0) {
+
+						rooms[choosed_room - 1].type = 4;
+						rooms[choosed_room - 1].texture = weapony1_texture;
+						rooms[choosed_room - 1].level = 1;
+						if (choosed_room - 1 < 3) {
+							g_rooms[0][choosed_room - 1][0] = 4;
+							g_rooms[0][choosed_room - 1][1] = 1;
+						}
+						else {
+							g_rooms[1][choosed_room - 4][0] = 4;
+							g_rooms[1][choosed_room - 4][1] = 1;
+						}
+						//вычитаеем цену комнаты
+						g_food -= cost_rooms[3][0][1];
+						g_resourses -= cost_rooms[3][0][2];
+
+						was_rooms_changed = true;
+						g_income_res += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
+					}
+				}
+				break;
+			}
 			case 13: 
 			{ //Нажатие на иконку апгрейда
 				if (LKMPressed(event)) {
-					if (choosed_room > -1 && rooms[choosed_room - 1].type != 0 && time(NULL)- time_last_update + 0.5 > 1 
-						&& rooms[choosed_room - 1].level < MAX_ROOM_LEVEL &&
-						g_food - cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][1] > 0 &&
-						g_humans >= cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][0] &&
-						g_resourses - cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][2] > 0) {
+					if (choosed_room > -1  //Команта выбрана
+						&& rooms[choosed_room - 1].type != 0 //Комната построена
+						&& time(NULL)- time_last_update + 0.5 > 1 //Не чаще раза в секунду
+						&& rooms[choosed_room - 1].level < MAX_ROOM_LEVEL //Если уровень меньше 3-его
+						&& g_food - cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][1] > 0 //Если хвататет ресурсов
+						&& g_humans >= cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][0]
+						&& g_resourses - cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][2] > 0) {
 
 						//rooms[choosed_room - 1].texture = 
 						Define_Rooms_Textures(&rooms[choosed_room - 1], room_textures);
@@ -610,8 +773,8 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 
 						rooms[choosed_room - 1].level += 1;
 						//вычитаем цену за апдейт
-						g_food -= cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][1];
-						g_resourses -= cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][2];
+						g_food -= cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
+						g_resourses -= cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
 
 						//изменение инкома после апгрейта
 						g_income_hum += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
