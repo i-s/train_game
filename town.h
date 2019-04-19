@@ -25,6 +25,25 @@ struct Room
 };
 
 
+//SDL_Texture* texture;SDL_Rect rectangle;bool shown;
+struct Room_Selecting {
+	SDL_Texture* texture;
+	SDL_Rect rectangle;
+	bool shown;
+};
+
+//SDL_Texture* texture;SDL_Rect rectangle;bool active;
+struct Alert {
+	SDL_Texture* texture;
+	SDL_Rect rectangle;
+	bool active;
+};
+
+struct Room_icon {
+	SDL_Texture* texture;
+	SDL_Rect rectangle;
+};
+
 
 //char path[100];char name[50];SDL_Texture* texture;bool chroma_key;
 struct Texture {

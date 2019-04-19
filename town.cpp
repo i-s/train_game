@@ -66,24 +66,7 @@ SDL_Rect g_rectresourses = { 66,99,197,49 };
 
 extern struct Background;
 
-//SDL_Texture* texture;SDL_Rect rectangle;bool shown;
-struct Room_Selecting {
-	SDL_Texture* texture;
-	SDL_Rect rectangle;
-	bool shown;
-};
 
-//SDL_Texture* texture;SDL_Rect rectangle;bool active;
-struct Alert {
-	SDL_Texture* texture;
-	SDL_Rect rectangle;
-	bool active;
-};
-
-struct Room_icon {
-	SDL_Texture* texture;
-	SDL_Rect rectangle;
-};
 
 //Рисует фон
 void draw_background(SDL_Renderer* renderer, Background background) {
@@ -576,7 +559,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		}
 	}
 	//цена комнаты [тип][уровень][0.minhum,1.food,2.res]
-	float cost_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
+	int cost_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
 	//TODO: отображение цены комнаты
 	//инициализация цены
 	{
@@ -667,7 +650,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	}
 	
 	//изменение комнатой ограничений [тип][уровень][0.maxhum,1.maxfood,2.maxres]
-	float change_cap_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
+	int change_cap_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
 
 	//инициализация изменений ограничений
 	{
