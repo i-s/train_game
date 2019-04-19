@@ -508,15 +508,15 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		{
 			income_from_rooms[1][0][0] = 0;
 			income_from_rooms[1][0][1] = 0;
-			income_from_rooms[1][0][2] = 0.2;
+			income_from_rooms[1][0][2] = 1;
 	
 			income_from_rooms[1][1][0] = 0;
 			income_from_rooms[1][1][1] = 0;
-			income_from_rooms[1][1][2] = 0.45;
+			income_from_rooms[1][1][2] = 2.45;
 	
 			income_from_rooms[1][2][0] = 0;
 			income_from_rooms[1][2][1] = 0;
-			income_from_rooms[1][2][2] = 1;
+			income_from_rooms[1][2][2] = 4;
 		}
 		//Жилая комната
 		{
@@ -1195,9 +1195,18 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_DestroyTexture(background_train_selected_texture);
 	SDL_DestroyTexture(room_selecting_texture);
 	SDL_DestroyTexture(alert_texture);
+	SDL_DestroyTexture(room_update_texture);
+	SDL_DestroyTexture(room_delete_texture);
+
+	for (int i = 0; i < 19; i++) {
+		SDL_DestroyTexture(room_textures[i]);
+	}
 	SDL_DestroyTexture(farm1_icon_texture);
-	SDL_DestroyTexture(farm1_texture);
-	
+	SDL_DestroyTexture(factory1_icon_texture);
+	SDL_DestroyTexture(living1_icon_texture);
+	SDL_DestroyTexture(weapony1_icon_texture);
+	SDL_DestroyTexture(storage1_icon_texture);
+	SDL_DestroyTexture(radio1_icon_texture);
 
 	// Попытка красиво выгружать текстуры из памяти
 	/*
