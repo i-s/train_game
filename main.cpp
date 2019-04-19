@@ -57,9 +57,9 @@ int main() {
 	//town_game(WINDOW, renderer, winsize_w, winsize_h)
 
 	//Запускаем меню
-	int menu_flag;
-	int train_flag;
-	int town_flag = -1;
+	int menu_flag = 1;
+	int train_flag = 1;
+	int town_flag = 1;
 	lever1_pulled = 0;
 	lever2_pulled = 0;
 	difficulty = 1; //Сложность игры
@@ -67,27 +67,37 @@ int main() {
 	extern int GAMESTARTTIME;
 	extern float TIMEUNTILTRAIN;
 	TIMEUNTILTRAIN = 10;
+	int quit = 0;
 
-	//Запускаем игру
-	menu_flag = menu(WINDOW, renderer, winsize_w, winsize_h);
-	if (menu_flag == 1) {
-		GAMESTARTTIME = int(time(NULL)); // время старта игры записываем
-		while (town_flag != 0) {
-			town_flag = town_game(WINDOW, renderer, winsize_w, winsize_h);
-			if (town_flag == 1) {
-				train_flag = train_game(WINDOW, renderer, winsize_w, winsize_h);
-				if (train_flag == 0) {
-					continue;
+	while (menu_flag != 0)
+	{
+		//TODO: доделать перезапуск из меню
+		menu_flag = menu(WINDOW, renderer, winsize_w, winsize_h);
+		if (menu_flag == 1) {
+			GAMESTARTTIME = int(time(NULL)); // время старта игры записываем
+			while (town_flag != 0) {
+				if (town_flag == -1 || train_flag == -1) {
+					break;//TODO: проигрыш(вывести что-нубидь
+				}
+					 
+				town_flag = town_game(WINDOW, renderer, winsize_w, winsize_h);
+				if (town_flag == 1) {
+					train_flag = train_game(WINDOW, renderer, winsize_w, winsize_h);
+					if (train_flag == 0) {
+						continue;
+					}
+					else {
+						break;
+					}
 				}
 				else {
 					break;
 				}
 			}
-			else {
-				break;
-			}
 		}
+
 	}
+	
 
 	//if (menu_flag == 1) {
 	//	//Запускаем поезд

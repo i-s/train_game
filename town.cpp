@@ -17,6 +17,8 @@
 #define MAX_ROOM_LEVEL 3
 #define COUNT_ROOMS 6
 
+int GAME_OVER = 0;
+
 //Объявление глобальных ресурсов:
 //глобальные люди
 float g_humans;
@@ -178,14 +180,19 @@ void Update_resourses() {
 	delta_humans = 0;
 
 	if (g_food < 0) { //Если еды меньше 0...
-		delta_humans = log(g_humans)*log(g_humans); //уменьшаем количество людей на
+		delta_humans = log(g_humans) + 0.1; //уменьшаем количество людей на
 		/*
 		( ln(количество людей) )^2
 		*/
 		g_food = 0;
 	}
-
-	g_humans -= delta_humans;
+	if (g_humans >= 0.99)
+		g_humans -= delta_humans;
+	else
+		GAME_OVER = 1;
+	
+	if (g_food / g_humans > 3)//если на одного человека еды больше чем 3
+		g_humans += log(g_humans)*0.5;
 	g_humans += g_income_hum;
 
 	//проверка на ограничения по максимуму
@@ -1101,7 +1108,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 						g_food_cap -= change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
 						g_resourses_cap -= change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
 						//возврат небольшого кол-ва ресурсов
-						g_resourses += cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2] * 0.1;
+						g_resourses += cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2] * 0.25;
 
 						rooms[choosed_room - 1].type = 0;
 						rooms[choosed_room - 1].level = 0;
@@ -1163,6 +1170,8 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			one_second -= DELTA * 0.001;
 			if (one_second < 0) { //Каждую секунду
 				Update_resourses(); //Пересчёт количества ресурсов
+				if (GAME_OVER)
+					return -1;
 				Update_difficulty(); //Пересчёт сложности игры
 				one_second = 1;
 			}

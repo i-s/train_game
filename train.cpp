@@ -11,7 +11,9 @@
 #include "train.h"
 #include "main.h"
 
+
 //Загружаем глобальные переменные из town.cpp
+extern int GAME_OVER;
 extern float g_humans, g_resourses, g_food;
 extern int difficulty;
 extern int lever1_pulled, lever2_pulled;
@@ -494,8 +496,11 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		one_second -= DELTA * 0.001;
 		if (one_second < 0) {
 			Update_resourses();
+			if (GAME_OVER)
+				return -1;
 			Update_difficulty();; //Пересчёт сложности игры
 			one_second = 1;
+
 		}
 
 		Update(window, renderer, train, background, lever1, lever2, texts, text_box, town_block);
