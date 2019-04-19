@@ -15,11 +15,11 @@
 #define INCOME_FROM_FACTORY_2 0.4
 #define INCOME_FROM_FERM_1 1
 #define MAX_ROOM_LEVEL 3
+#define COUNT_ROOMS 6
 
 //Объявление глобальных ресурсов:
 //глобальные люди
 float g_humans;
-int g_humans_cap = 100; //Максимальное количество людей, проживающих в бункере
 //глобальные материалы
 float g_resourses;
 //глобальная еда
@@ -34,6 +34,10 @@ int g_rooms[2][3][2]; //2 ряда по 3 колонки по 2 числа в я
 float g_income_food;
 float g_income_res;
 float g_income_hum;
+
+float g_humans_cap = 100; //Максимальное количество людей, проживающих в бункере
+float g_resourses_cap = 60; //Максимальное количество ресурсов, находящихся в бункере
+float g_food_cap = 60; //Максимальное количество еды, находящейся в бункере
 
 
 //Загрузка глобальных ресурсов
@@ -125,7 +129,20 @@ void Define_Rooms_Textures(Room* room, SDL_Texture* room_textures[]) {
 		case 3: (*room).texture = room_textures[12]; break;
 		}
 		break; }
-	case 5: break;
+	case 5: { //склад
+		switch ((*room).level) { //Уровни жилой комната
+		case 1: (*room).texture = room_textures[13]; break;
+		case 2: (*room).texture = room_textures[14]; break;
+		case 3: (*room).texture = room_textures[15]; break;
+		}
+		break; }
+	case 6: { //Радиоточка
+		switch ((*room).level) { //Уровни жилой комната
+		case 1: (*room).texture = room_textures[16]; break;
+		case 2: (*room).texture = room_textures[17]; break;
+		case 3: (*room).texture = room_textures[18]; break;
+		}
+		break; }
 	default: break;
 	}
 }
@@ -156,7 +173,7 @@ void Update_resourses() {
 	g_food -= delta_food;
 	g_food += g_income_food;
 	g_resourses -= delta_resourses;
-	g_resourses += g_income_res;
+	g_resourses += g_income_res; 
 	
 	delta_humans = 0;
 
@@ -170,7 +187,17 @@ void Update_resourses() {
 
 	g_humans -= delta_humans;
 	g_humans += g_income_hum;
+
+	//проверка на ограничения по максимуму
+	if (g_food > g_food_cap)
+		g_food = g_food_cap;
+	if (g_resourses > g_resourses_cap)
+		g_resourses = g_resourses_cap;
+	if (g_humans > g_humans_cap)
+		g_humans = g_humans_cap;
 }
+
+
 
 
 //Изменяет сложность игры по формулам
@@ -199,7 +226,10 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background
 	draw_room_icon(renderer, room_icons[1]); //ВРЕМЕННО
 	draw_room_icon(renderer, room_icons[2]); //ВРЕМЕННО
 	draw_room_icon(renderer, room_icons[3]); //ВРЕМЕННО
+	draw_room_icon(renderer, room_icons[4]); //ВРЕМЕННО
+	draw_room_icon(renderer, room_icons[5]); //ВРЕМЕННО
 	draw_room_icon(renderer, room_icons[6]); //ВРЕМЕННО
+	draw_room_icon(renderer, room_icons[7]); //ВРЕМЕННО
 
 
 	draw_text(window, renderer, texts[0], g_recthumans);
@@ -319,7 +349,42 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Texture* room_update_texture = SDL_CreateTextureFromSurface(renderer, room_update_surf);
 	SDL_FreeSurface(room_update_surf);
 
+	//Кнопка delete
+	SDL_Surface* room_delete_surf = SDL_LoadBMP("resourses/textures/rooms/delete.bmp");//тут поменять
+	SDL_Texture* room_delete_texture = SDL_CreateTextureFromSurface(renderer, room_delete_surf);
+	SDL_FreeSurface(room_delete_surf);
 
+	//Cклад
+	SDL_Surface* storage1_surf = SDL_LoadBMP("resourses/textures/rooms/storage_1.bmp");
+	SDL_Texture* storage1_texture = SDL_CreateTextureFromSurface(renderer, storage1_surf);
+	SDL_FreeSurface(storage1_surf);
+	SDL_Surface* storage2_surf = SDL_LoadBMP("resourses/textures/rooms/storage_2.bmp");
+	SDL_Texture* storage2_texture = SDL_CreateTextureFromSurface(renderer, storage2_surf);
+	SDL_FreeSurface(storage2_surf);
+	SDL_Surface* storage3_surf = SDL_LoadBMP("resourses/textures/rooms/storage_3.bmp");
+	SDL_Texture* storage3_texture = SDL_CreateTextureFromSurface(renderer, storage3_surf);
+	SDL_FreeSurface(storage3_surf);
+
+	//Иконка склада
+	SDL_Surface* storage1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/storage_1_icon.bmp");//тут поменять
+	SDL_Texture* storage1_icon_texture = SDL_CreateTextureFromSurface(renderer, storage1_icon_surf);
+	SDL_FreeSurface(storage1_icon_surf);
+
+	//Радио
+	SDL_Surface* radio1_surf = SDL_LoadBMP("resourses/textures/rooms/radio_1.bmp");
+	SDL_Texture* radio1_texture = SDL_CreateTextureFromSurface(renderer, radio1_surf);
+	SDL_FreeSurface(radio1_surf);
+	SDL_Surface* radio2_surf = SDL_LoadBMP("resourses/textures/rooms/radio_2.bmp");
+	SDL_Texture* radio2_texture = SDL_CreateTextureFromSurface(renderer, radio2_surf);
+	SDL_FreeSurface(radio2_surf);
+	SDL_Surface* radio3_surf = SDL_LoadBMP("resourses/textures/rooms/radio_3.bmp");
+	SDL_Texture* radio3_texture = SDL_CreateTextureFromSurface(renderer, radio3_surf);
+	SDL_FreeSurface(radio3_surf);
+
+	//Иконка радио
+	SDL_Surface* radio1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/radio_1_icon.bmp");//тут поменять
+	SDL_Texture* radio1_icon_texture = SDL_CreateTextureFromSurface(renderer, radio1_icon_surf);
+	SDL_FreeSurface(radio1_icon_surf);
 
 
 
@@ -327,7 +392,8 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Texture* room_textures[19] = {stock_texture,farm1_texture, farm2_texture, farm3_texture, factory1_texture,
 									  factory2_texture , factory3_texture, living1_texture,
 									  living2_texture , living3_texture, weapony1_texture,
-									  weapony2_texture , weapony3_texture };
+									  weapony2_texture , weapony3_texture, storage1_texture, storage2_texture,
+									  storage3_texture, radio1_texture, radio2_texture, radio3_texture};
 
 	//Рисуем задний план
 	SDL_Rect bground_rectangle = { 0,0,winsize_w,winsize_h };
@@ -377,24 +443,32 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Rect rect_room_icon_5 = { 363,504,56,56 };
 
 	SDL_Rect rect_room_update = { 430,504,56,56 };
+	SDL_Rect rect_room_delete = { 497,504,56,56 };
 
-	SDL_Rect buttons[14] = { rect_button_train,rect_room_0,rect_room_1,
+	SDL_Rect buttons[15] = { rect_button_train,rect_room_0,rect_room_1,
 		rect_room_2, rect_room_3,rect_room_4,rect_room_5,
 		rect_room_icon_0,rect_room_icon_1,rect_room_icon_2,rect_room_icon_3,rect_room_icon_4,rect_room_icon_5,
-		rect_room_update};
+		rect_room_update, rect_room_delete};
 	//Создаём иконки
-
-	Room_icon room_icons[7];
-	room_icons[0].rectangle = rect_room_icon_0;
-	room_icons[0].texture = farm1_icon_texture;
-	room_icons[1].rectangle = rect_room_icon_1;
-	room_icons[1].texture = factory1_icon_texture;
-	room_icons[2].rectangle = rect_room_icon_2;
-	room_icons[2].texture = living1_icon_texture;
-	room_icons[3].rectangle = rect_room_icon_3;
-	room_icons[3].texture = weapony1_icon_texture;
-	room_icons[6].rectangle = rect_room_update;
-	room_icons[6].texture = room_update_texture;
+	Room_icon room_icons[8];
+	{
+		room_icons[0].rectangle = rect_room_icon_0;
+		room_icons[0].texture = farm1_icon_texture;
+		room_icons[1].rectangle = rect_room_icon_1;
+		room_icons[1].texture = factory1_icon_texture;
+		room_icons[2].rectangle = rect_room_icon_2;
+		room_icons[2].texture = living1_icon_texture;
+		room_icons[3].rectangle = rect_room_icon_3;
+		room_icons[3].texture = weapony1_icon_texture;
+		room_icons[4].rectangle = rect_room_icon_4;
+		room_icons[4].texture = storage1_icon_texture;
+		room_icons[5].rectangle = rect_room_icon_5;
+		room_icons[5].texture = radio1_icon_texture;
+		room_icons[6].rectangle = rect_room_update;
+		room_icons[6].texture = room_update_texture;
+		room_icons[7].rectangle = rect_room_delete;
+		room_icons[7].texture = room_delete_texture;
+	}
 /* загрузка других комнат
 	
 	
@@ -405,7 +479,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	Room rooms[6];
 
 	//доход от комнаты [тип][уровень][0.hum,1.food,2.res]
-	float income_from_rooms[6][MAX_ROOM_LEVEL][3];
+	float income_from_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
 
 	//инициализация дохода
 	{
@@ -465,11 +539,39 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			income_from_rooms[3][2][1] = 0;
 			income_from_rooms[3][2][2] = -0.35;
 		}
+		//Cклад
+		{
+			income_from_rooms[4][0][0] = 0;
+			income_from_rooms[4][0][1] = 0;
+			income_from_rooms[4][0][2] = -0.05;
+
+			income_from_rooms[4][1][0] = 0;
+			income_from_rooms[4][1][1] = 0;
+			income_from_rooms[4][1][2] = -0.15;
+
+			income_from_rooms[4][2][0] = 0;
+			income_from_rooms[4][2][1] = 0;
+			income_from_rooms[4][2][2] = -0.35;
+		}
+		//Радио
+		{
+			income_from_rooms[5][0][0] = 0;
+			income_from_rooms[5][0][1] = 0;
+			income_from_rooms[5][0][2] = -0.05;
+
+			income_from_rooms[5][1][0] = 0;
+			income_from_rooms[5][1][1] = 0;
+			income_from_rooms[5][1][2] = -0.15;
+
+			income_from_rooms[5][2][0] = 0;
+			income_from_rooms[5][2][1] = 0;
+			income_from_rooms[5][2][2] = -0.35;
+		}
 	}
 	//цена комнаты [тип][уровень][0.minhum,1.food,2.res]
-	float cost_rooms[6][MAX_ROOM_LEVEL][3];
-
-	//инициализация дохода
+	float cost_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
+	//TODO: отображение цены комнаты
+	//инициализация цены
 	{
 		//ферма
 		{
@@ -527,7 +629,128 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			cost_rooms[3][2][1] = 100;
 			cost_rooms[3][2][2] = 300;
 		}
+		//склад
+		{
+			cost_rooms[4][0][0] = 25;
+			cost_rooms[4][0][1] = 50;
+			cost_rooms[4][0][2] = 25;
+
+			cost_rooms[4][1][0] = 75;
+			cost_rooms[4][1][1] = 50;
+			cost_rooms[4][1][2] = 50;
+
+			cost_rooms[4][2][0] = 125;
+			cost_rooms[4][2][1] = 100;
+			cost_rooms[4][2][2] = 75;
+		}
+		//радио
+		{
+			cost_rooms[5][0][0] = 25;
+			cost_rooms[5][0][1] = 50;
+			cost_rooms[5][0][2] = 150;
+
+			cost_rooms[5][1][0] = 75;
+			cost_rooms[5][1][1] = 50;
+			cost_rooms[5][1][2] = 200;
+
+			cost_rooms[5][2][0] = 125;
+			cost_rooms[5][2][1] = 100;
+			cost_rooms[5][2][2] = 300;
+		}
 	}
+	
+	//изменение комнатой ограничений [тип][уровень][0.maxhum,1.maxfood,2.maxres]
+	float change_cap_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
+
+	//инициализация изменений ограничений
+	{
+		//ферма
+		{
+			change_cap_rooms[0][0][0] = 0;
+			change_cap_rooms[0][0][1] = 0;
+			change_cap_rooms[0][0][2] = 0;
+
+			change_cap_rooms[0][1][0] = 0;
+			change_cap_rooms[0][1][1] = 0;
+			change_cap_rooms[0][1][2] = 0;
+
+			change_cap_rooms[0][2][0] = 0;
+			change_cap_rooms[0][2][1] = 0;
+			change_cap_rooms[0][2][2] = 0;
+		}
+		//фабрика
+		{
+			change_cap_rooms[1][0][0] = 0;
+			change_cap_rooms[1][0][1] = 0;
+			change_cap_rooms[1][0][2] = 0;
+
+			change_cap_rooms[1][1][0] = 0;
+			change_cap_rooms[1][1][1] = 0;
+			change_cap_rooms[1][1][2] = 0;
+
+			change_cap_rooms[1][2][0] = 0;
+			change_cap_rooms[1][2][1] = 0;
+			change_cap_rooms[1][2][2] = 0;
+		}
+		//жилая комната
+		{
+			change_cap_rooms[2][0][0] = 20;
+			change_cap_rooms[2][0][1] = 0;
+			change_cap_rooms[2][0][2] = 0;
+
+			change_cap_rooms[2][1][0] = 50;
+			change_cap_rooms[2][1][1] = 0;
+			change_cap_rooms[2][1][2] = 0;
+
+			change_cap_rooms[2][2][0] = 100;
+			change_cap_rooms[2][2][1] = 0;
+			change_cap_rooms[2][2][2] = 0;
+		}
+		//оружейная
+		{
+			change_cap_rooms[3][0][0] = 00;
+			change_cap_rooms[3][0][1] = 0;
+			change_cap_rooms[3][0][2] = 0;
+
+			change_cap_rooms[3][1][0] = 00;
+			change_cap_rooms[3][1][1] = 0;
+			change_cap_rooms[3][1][2] = 0;
+
+			change_cap_rooms[3][2][0] = 0;
+			change_cap_rooms[3][2][1] = 0;
+			change_cap_rooms[3][2][2] = 0;
+		}
+		//склад
+		{
+			change_cap_rooms[4][0][0] = 0;
+			change_cap_rooms[4][0][1] = 50;
+			change_cap_rooms[4][0][2] = 50;
+
+			change_cap_rooms[4][1][0] = 0;
+			change_cap_rooms[4][1][1] = 150;
+			change_cap_rooms[4][1][2] = 110;
+
+			change_cap_rooms[4][2][0] = 0;
+			change_cap_rooms[4][2][1] = 250;
+			change_cap_rooms[4][2][2] = 175;
+		}
+		//радио
+		{
+			change_cap_rooms[5][0][0] = 0;
+			change_cap_rooms[5][0][1] = 0;
+			change_cap_rooms[5][0][2] = 0;
+
+			change_cap_rooms[5][1][0] = 0;
+			change_cap_rooms[5][1][1] = 0;
+			change_cap_rooms[5][1][2] = 0;
+
+			change_cap_rooms[5][2][0] = 0;
+			change_cap_rooms[5][2][1] = 0;
+			change_cap_rooms[5][2][2] = 0;
+		}
+		
+	}
+	
 	//Заполняем массив комнат из глобального массива комнат
 	for (int i = 0; i < 6; i++) {
 		if (i < 3) {
@@ -719,7 +942,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 						g_resourses -= cost_rooms[2][0][2];
 
 						was_rooms_changed = true;
-						g_income_hum += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
+						g_humans_cap += change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
 					}
 				}
 				break;
@@ -752,12 +975,70 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 				}
 				break;
 			}
+			case 11: { //Нажатие на иконку склада
+				if (LKMPressed(event)) {
+					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0 &&
+						g_food - cost_rooms[4][0][1] >= 0 &&
+						g_humans >= cost_rooms[4][0][0] &&
+						g_resourses - cost_rooms[4][0][2] >= 0) {
+
+						rooms[choosed_room - 1].type = 5;
+						rooms[choosed_room - 1].texture = storage1_texture;
+						rooms[choosed_room - 1].level = 1;
+						if (choosed_room - 1 < 3) {
+							g_rooms[0][choosed_room - 1][0] = 5;
+							g_rooms[0][choosed_room - 1][1] = 1;
+						}
+						else {
+							g_rooms[1][choosed_room - 4][0] = 5;
+							g_rooms[1][choosed_room - 4][1] = 1;
+						}
+						//вычитаеем цену комнаты
+						g_food -= cost_rooms[4][0][1];
+						g_resourses -= cost_rooms[4][0][2];
+
+						was_rooms_changed = true;
+						g_resourses_cap += change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
+						g_food_cap += change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
+					}
+				}
+				break;
+			}
+			case 12: { //Нажатие на иконку радио
+				if (LKMPressed(event)) {
+					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0 &&
+						g_food - cost_rooms[5][0][1] >= 0 &&
+						g_humans >= cost_rooms[5][0][0] &&
+						g_resourses - cost_rooms[5][0][2] >= 0) {
+
+						rooms[choosed_room - 1].type = 6;
+						rooms[choosed_room - 1].texture = radio1_texture;
+						rooms[choosed_room - 1].level = 1;
+						if (choosed_room - 1 < 3) {
+							g_rooms[0][choosed_room - 1][0] = 6;
+							g_rooms[0][choosed_room - 1][1] = 1;
+						}
+						else {
+							g_rooms[1][choosed_room - 4][0] = 6;
+							g_rooms[1][choosed_room - 4][1] = 1;
+						}
+						//вычитаеем цену комнаты
+						g_food -= cost_rooms[5][0][1];
+						g_resourses -= cost_rooms[5][0][2];
+
+						was_rooms_changed = true;
+						//TODO: доделать радио
+
+					}
+				}
+				break;
+			}
 			case 13: 
 			{ //Нажатие на иконку апгрейда
 				if (LKMPressed(event)) {
 					if (choosed_room > -1  //Команта выбрана
 						&& rooms[choosed_room - 1].type != 0 //Комната построена
-						&& time(NULL)- time_last_update + 0.5 > 1 //Не чаще раза в секунду
+						&& time(NULL) - time_last_update + 0.5 > 1 //Не чаще раза в секунду
 						&& rooms[choosed_room - 1].level < MAX_ROOM_LEVEL //Если уровень меньше 3-его
 						&& g_food - cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][1] > 0 //Если хвататет ресурсов
 						&& g_humans >= cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][0]
@@ -770,6 +1051,11 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 						g_income_hum -= income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
 						g_income_food -= income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
 						g_income_res -= income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
+						//изменение ограничений до 
+						g_humans_cap -= change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
+						g_food_cap -= change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
+						g_resourses_cap -= change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
+
 
 						rooms[choosed_room - 1].level += 1;
 						//вычитаем цену за апдейт
@@ -780,13 +1066,55 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 						g_income_hum += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
 						g_income_food += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
 						g_income_res += income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
+						//изменение ограничений после
+						g_humans_cap += change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
+						g_food_cap += change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
+						g_resourses_cap += change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
 
-						
+
 						if (choosed_room - 1 < 3) {
 							g_rooms[0][choosed_room - 1][1] = rooms[choosed_room - 1].level;
 						}
 						else {
 							g_rooms[1][choosed_room - 4][1] = rooms[choosed_room - 1].level;
+						}
+						was_rooms_changed = true;
+						time_last_update = time(NULL);
+					}
+				}
+				break;
+			}
+			case 14:
+			{ //Нажатие на иконку удаления
+				if (LKMPressed(event)) {
+					if (choosed_room > -1  //Команта выбрана
+						&& rooms[choosed_room - 1].type != 0 //Комната построена
+						&& time(NULL) - time_last_update + 0.5 > 1 //Не чаще раза в секунду
+						) {
+
+						//изменение инкома  
+						g_income_hum -= income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
+						g_income_food -= income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
+						g_income_res -= income_from_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
+						//изменение макс ограничений
+						g_humans_cap -= change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][0];
+						g_food_cap -= change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][1];
+						g_resourses_cap -= change_cap_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2];
+						//возврат небольшого кол-ва ресурсов
+						g_resourses += cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level - 1][2] * 0.1;
+
+						rooms[choosed_room - 1].type = 0;
+						rooms[choosed_room - 1].level = 0;
+						Define_Rooms_Textures(&rooms[choosed_room - 1], room_textures);
+
+
+						if (choosed_room - 1 < 3) {
+							g_rooms[0][choosed_room - 1][1] = rooms[choosed_room - 1].level;
+							g_rooms[0][choosed_room - 1][0] = rooms[choosed_room - 1].type;
+						}
+						else {
+							g_rooms[1][choosed_room - 4][1] = rooms[choosed_room - 1].level;
+							g_rooms[0][choosed_room - 1][0] = rooms[choosed_room - 1].type;
 						}
 						was_rooms_changed = true;
 						time_last_update = time(NULL);
@@ -825,7 +1153,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		}
 
 		//Работа с временем
-		{
+		
 			SDL_Delay(10);
 			GAMETIME = time(NULL) - GAMESTARTTIME;
 			int tick_time = SDL_GetTicks();
@@ -850,7 +1178,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 				TIMEUNTILTRAIN = get_new_train_time();
 				alert.active = false;
 			}
-		}
+		
 		printf_s("time = %d, tut= %.1f\n", GAMETIME, TIMEUNTILTRAIN);
 	}
 

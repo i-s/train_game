@@ -484,12 +484,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		_itoa_s(int(g_food), text_food, 10, 10);
 		_itoa_s(int(g_resourses), text_resourses, 10, 10);
 
-		Update(window, renderer, train, background, lever1, lever2, texts, text_box, town_block);
-
-		GAMETIME = time(NULL) - GAMESTARTTIME;
 		
-		//Вывод дебаг-информации
-		printf_s("time = %d : x = %.0f, y = %.0f, way = %d, time_arrive = %.1f, tut= %.1f\n", GAMETIME, train.coord.x, train.coord.y, current_path, train.time_before_arrive, TIMEUNTILTRAIN);
 		
 		//Считаем время
 		int tick_time = SDL_GetTicks();
@@ -502,6 +497,13 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 			Update_difficulty();; //Пересчёт сложности игры
 			one_second = 1;
 		}
+
+		Update(window, renderer, train, background, lever1, lever2, texts, text_box, town_block);
+
+		GAMETIME = time(NULL) - GAMESTARTTIME;
+
+		//Вывод дебаг-информации
+		printf_s("time = %d : x = %.0f, y = %.0f, way = %d, time_arrive = %.1f, tut= %.1f\n", GAMETIME, train.coord.x, train.coord.y, current_path, train.time_before_arrive, TIMEUNTILTRAIN);
 
 		//Если время до прибытия поезда > 0, отнимаем из него прошедшее время за цикл
 		if (TIMEUNTILTRAIN > 0) {
