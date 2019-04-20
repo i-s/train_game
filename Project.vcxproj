@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="battle.cpp" />
     <ClCompile Include="rooms.cpp" />
     <ClCompile Include="textures.cpp" />
     <ClCompile Include="town.cpp" />
@@ -156,6 +157,7 @@
     <None Include="settings.json" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="battle.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="textures.h" />
     <ClInclude Include="town.h" />
