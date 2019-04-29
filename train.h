@@ -53,6 +53,6 @@ struct Line {
 //Возврат 0 -> была нажата кнопка город
 int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h);
 
-
+//возвращаю время до нового поезда
 int get_new_train_time();
 

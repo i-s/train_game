@@ -1,9 +1,12 @@
 #pragma once
 //Экран "город".
+//Возарат 2 -> переход к экрану "сражение"
 //Возврат 1 -> переход к экрану "поезд"
 //Возврат 0 -> завершение программы
 int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h);
 
+//Структура заднего фона
+//SDL_Texture* texture;SDL_Rect rectangle;
 struct Background {
 	SDL_Texture* texture;
 	SDL_Rect rectangle;
@@ -60,4 +63,6 @@ void Update_resourses();
 
 //Изменяет сложность игры по формулам
 void Update_difficulty();
-//
+
+//Определяет время до следующего рейда
+void define_new_battle_time();

@@ -1,6 +1,5 @@
 #pragma once
 
-
 //глобальное время
 int GAMESTARTTIME;
 int LASTTICKTIME = 0;

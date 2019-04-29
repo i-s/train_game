@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include "train.h"
 #include "main.h"
+#include "battle.h"
 
 
 //Загружаем глобальные переменные из town.cpp
@@ -32,7 +33,7 @@ extern SDL_Rect g_rectresourses;
 //возвращаю время до нового поезда
 int get_new_train_time()
 {
-	//TODO: придумать что-нибудь с временем до появления поезда
+	//TODO: придумать что-нибудь с временем до поезда
 	return 15;
 }
 //Рисует поезд
@@ -486,6 +487,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		_itoa_s(int(g_food), text_food, 10, 10);
 		_itoa_s(int(g_resourses), text_resourses, 10, 10);
 
+		
 		
 		//Считаем время
 		int tick_time = SDL_GetTicks();

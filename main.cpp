@@ -3,6 +3,7 @@
 #include "train.h"
 #include "town.h"
 #include <time.h>
+#include "battle.h"
 #define START_FOOD 1500
 #define START_HUMANS 1150
 #define START_RESOURSES 1200
@@ -13,6 +14,7 @@ extern float g_humans,g_resourses,g_food;
 extern int lever1_pulled, lever2_pulled;
 extern int difficulty;
 extern float one_second;
+extern float g_time_before_raid;
 extern int g_rooms[2][3][2];
 extern float g_income_food, g_income_res, g_income_hum;
 extern int GAME_OVER;
@@ -58,6 +60,7 @@ int main() {
 		g_income_hum = 0;
 		int train_flag = 1;
 		int town_flag = 1;
+		int battle_flag = 1;
 
 		//Делаем все комнаты пустыми
 		for (int i = 0; i < 2; i++) {
@@ -73,28 +76,35 @@ int main() {
 		difficulty = 1; //Сложность игры
 		one_second = 1;
 		TIMEUNTILTRAIN = 10;
+		g_time_before_raid = 10; //10 секунд до перехода в экран рейда
 		GAME_OVER = 0;
 		int quit = 0;
-
+		//TODO: доделать перезапуск из меню
 		menu_flag = menu(WINDOW, renderer, winsize_w, winsize_h);
 		if (menu_flag == 1) {
 			GAMESTARTTIME = int(time(NULL)); // время старта игры записываем
-			while (town_flag != 0) {
-				if (town_flag == -1 || train_flag == -1) {
-					break;//TODO: проигрыш(вывести что-нубудь)
+			while (town_flag != 0) { //Если не вышли из программы
+				if (town_flag == -1 || train_flag == -1) { //Если проиграли
+					break;//TODO: проигрыш(вывести что-нубидь
 				}
-				town_flag = town_game(WINDOW, renderer, winsize_w, winsize_h);
-				if (town_flag == 1) {
-					train_flag = train_game(WINDOW, renderer, winsize_w, winsize_h);
-					if (train_flag == 0) {
-						continue;
+				town_flag = town_game(WINDOW, renderer, winsize_w, winsize_h); //Запускаем город
+				if (town_flag == 1) { //Если перешли к поезду
+					train_flag = train_game(WINDOW, renderer, winsize_w, winsize_h); //Запускаем поезд
+					if (train_flag == 0) { //Если вышли из поезда
+						continue; //Переходим к городу
 					}
-					else {
-						break;
+					else { //Иначе...
+						break; //Выходим из игры
 					}
 				}
-				else {
-					break;
+				else if (town_flag == 2) { //Если перешли к битве
+					battle_flag = battle_game(WINDOW, renderer, winsize_w, winsize_h);
+					if (battle_flag == 0) { //Если вышли из битвы
+						continue; //Переходим к городу
+					}
+				}
+				else { //Если вышли из города
+					break; //Выходим в меню
 				}
 			}
 		}
