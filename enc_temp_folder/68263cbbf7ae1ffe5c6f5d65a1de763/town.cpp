@@ -163,7 +163,6 @@ void Update_resourses() {
 	
 	delta_humans = 0;
 
-	//ограничение на уменьшение меньше 0
 	if (g_food < 0) { //Если еды меньше 0...
 		delta_humans = log(g_humans) + 0.1; //уменьшаем количество людей на
 		/*
@@ -171,14 +170,11 @@ void Update_resourses() {
 		*/
 		g_food = 0;
 	}
-	if (g_resourses < 0)
-		g_resourses = 0;
 	if (g_humans >= 0.99)
 		g_humans -= delta_humans;
 	else
 		GAME_OVER = 1;
-
-	//прирост людей
+	
 	if (g_food / g_humans > 3)//если на одного человека еды больше чем 3
 		g_humans += log(g_humans)*0.5;
 	g_humans += g_income_hum;
@@ -190,7 +186,6 @@ void Update_resourses() {
 		g_resourses = g_resourses_cap;
 	if (g_humans > g_humans_cap)
 		g_humans = g_humans_cap;
-	
 }
 
 
@@ -1174,7 +1169,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			_itoa_s(int(cost_rooms[room_type - 1][0][2]), text_cost_resourses, 10, 10);
 			draw_cost_yes = true;
 		}
-		if (draw_update_cost && choosed_room > 0 && rooms[choosed_room - 1].type != 0 && rooms[choosed_room - 1].level != 3) {//цена апгрейда
+		if (draw_update_cost && rooms[choosed_room - 1].type != 0 && rooms[choosed_room - 1].level != 3) {//цена апгрейда
 			_itoa_s(int(cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][0]), text_cost_humans, 10, 10);
 			_itoa_s(int(cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][1]), text_cost_food, 10, 10);
 			_itoa_s(int(cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][2]), text_cost_resourses, 10, 10);

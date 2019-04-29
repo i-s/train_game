@@ -487,6 +487,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		_itoa_s(int(g_resourses), text_resourses, 10, 10);
 
 		
+		
 		//Считаем время
 		int tick_time = SDL_GetTicks();
 		DELTA = tick_time - LASTTICKTIME;

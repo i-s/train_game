@@ -163,7 +163,6 @@ void Update_resourses() {
 	
 	delta_humans = 0;
 
-	//ограничение на уменьшение меньше 0
 	if (g_food < 0) { //Если еды меньше 0...
 		delta_humans = log(g_humans) + 0.1; //уменьшаем количество людей на
 		/*
@@ -171,14 +170,11 @@ void Update_resourses() {
 		*/
 		g_food = 0;
 	}
-	if (g_resourses < 0)
-		g_resourses = 0;
 	if (g_humans >= 0.99)
 		g_humans -= delta_humans;
 	else
 		GAME_OVER = 1;
-
-	//прирост людей
+	
 	if (g_food / g_humans > 3)//если на одного человека еды больше чем 3
 		g_humans += log(g_humans)*0.5;
 	g_humans += g_income_hum;
@@ -190,7 +186,6 @@ void Update_resourses() {
 		g_resourses = g_resourses_cap;
 	if (g_humans > g_humans_cap)
 		g_humans = g_humans_cap;
-	
 }
 
 

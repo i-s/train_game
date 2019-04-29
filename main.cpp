@@ -75,13 +75,13 @@ int main() {
 		TIMEUNTILTRAIN = 10;
 		GAME_OVER = 0;
 		int quit = 0;
-		//TODO: доделать перезапуск из меню
+
 		menu_flag = menu(WINDOW, renderer, winsize_w, winsize_h);
 		if (menu_flag == 1) {
 			GAMESTARTTIME = int(time(NULL)); // время старта игры записываем
 			while (town_flag != 0) {
 				if (town_flag == -1 || train_flag == -1) {
-					break;//TODO: проигрыш(вывести что-нубидь
+					break;//TODO: проигрыш(вывести что-нубудь)
 				}
 				town_flag = town_game(WINDOW, renderer, winsize_w, winsize_h);
 				if (town_flag == 1) {
