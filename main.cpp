@@ -1,3 +1,4 @@
+#pragma once
 #include <SDL.h>
 #include "menu.h"
 #include "train.h"
@@ -19,7 +20,7 @@ extern int g_rooms[2][3][2];
 extern float g_income_food, g_income_res, g_income_hum;
 extern int GAME_OVER;
 
-
+extern bool QUIT;
 
 /*To-do:
 V Нажимаемые кнопки в меню
@@ -33,6 +34,10 @@ V Нажимаемые кнопки в меню
 //menu(WINDOW, renderer, winsize_w, winsize_h)
 //train_game(WINDOW, renderer, winsize_w, winsize_h)
 //town_game(WINDOW, renderer, winsize_w, winsize_h)
+
+//Проверяет значение переменной QUIT, и если она истинна, то выходит из программы.
+//bool CheckForQUIT() {
+//}
 
 int main() {
 	//Создаём окно
@@ -83,7 +88,7 @@ int main() {
 		menu_flag = menu(WINDOW, renderer, winsize_w, winsize_h);
 		if (menu_flag == 1) {
 			GAMESTARTTIME = int(time(NULL)); // время старта игры записываем
-			while (town_flag != 0) { //Если не вышли из программы
+			while (town_flag != 0 && !QUIT) { //Если не вышли из программы
 				if (town_flag == -1 || train_flag == -1) { //Если проиграли
 					break;//TODO: проигрыш(вывести что-нубидь
 				}
@@ -108,7 +113,8 @@ int main() {
 				}
 			}
 		}
-
+		if (QUIT) //Если нажали кнопку "закрыть" (крестик), выходим из программы.
+			break;
 	}
 	
 

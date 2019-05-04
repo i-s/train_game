@@ -53,6 +53,9 @@ struct Line {
 //Возврат 0 -> была нажата кнопка город
 int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h);
 
+//Рисует Town_block, если town_block.shown == истина.
+void draw_town_block(SDL_Renderer* renderer, Town_block town_block);
+
 //возвращаю время до нового поезда
 int get_new_train_time();
 

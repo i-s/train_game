@@ -9,7 +9,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "train.h"
-#include "main.h"
+//#include "main.h"
 #include "battle.h"
 
 
@@ -24,6 +24,7 @@ extern int GAMESTARTTIME;
 extern int GAMETIME; //Время со старта программы
 extern float TIMEUNTILTRAIN;//время до поезда
 extern float one_second;
+extern bool QUIT;
 
 //Загружаем глобальные RECT-ы
 extern SDL_Rect g_recthumans;
@@ -46,8 +47,9 @@ void draw_text_box(SDL_Renderer* renderer, Text_box text_box) {
 	SDL_RenderCopy(renderer, text_box.texture, NULL, &text_box.rectangle);
 }
 
+//Рисует Town_block, если town_block.shown == истина.
 void draw_town_block(SDL_Renderer* renderer, Town_block town_block) {
-	SDL_RenderCopy(renderer, town_block.texture, NULL, &town_block.rectangle);
+	if (town_block.shown) { SDL_RenderCopy(renderer, town_block.texture, NULL, &town_block.rectangle); }
 }
 
 //Рисуем рычаг
@@ -100,7 +102,7 @@ void Move_Train(float speed_x, float speed_y, Point* train_position) {
 void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background background, Lever lever1, Lever lever2, char* texts[], Text_box text_box, Town_block town_block) {
 	draw_background(renderer, background);
 	if(train.shown){ draw_train(renderer, train); }	//Не отрисовываем поезд, если он не должен быть виден
-	if (town_block.shown) { draw_town_block(renderer,town_block); }
+	draw_town_block(renderer,town_block);
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
 	if (train.shown) { draw_text_box(renderer, text_box); }
@@ -335,8 +337,10 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 			train.shown = true;
 		}
 		SDL_PollEvent(&event);
-		if (event.type == SDL_QUIT)
+		if (event.type == SDL_QUIT) {
+			QUIT = true;
 			quit = true;
+		}
 
 
 

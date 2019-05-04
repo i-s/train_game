@@ -6,6 +6,7 @@
 #include "text.h"
 #include "town.h"
 #include "menu.h"
+//#include "main.h"
 //#include "textures.h"
 #include <stdlib.h>
 #include <SDL_mixer.h>
@@ -51,6 +52,7 @@ extern int DELTA; //Разница во времени
 extern int GAMESTARTTIME;
 extern int GAMETIME; //Время со старта программы
 extern float TIMEUNTILTRAIN;//время до поезда
+extern bool QUIT;
 
 //Запускался ли экран "город" до этого момента
 bool g_have_open_town_before = false;
@@ -215,27 +217,24 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background
 			bool draw_cost = false) {
 	draw_background(renderer, background);
 
+	//Рисуем все комнаты
 	for (int i = 0; i < 6; i++) {
 		draw_room(renderer, rooms[i]);
 	}
-	//draw_room(renderer, rooms[0]); //ВРЕМЕННО
 
 	if (alert.active) {
 		draw_alert(renderer, alert);
 	}
 
+	//Рисуем рамку выделения комнаты
 	if (room_selecting.shown) {
 		draw_room_selecting(renderer, room_selecting);
 	}
 
-	draw_room_icon(renderer, room_icons[0]); //ВРЕМЕННО
-	draw_room_icon(renderer, room_icons[1]); //ВРЕМЕННО
-	draw_room_icon(renderer, room_icons[2]); //ВРЕМЕННО
-	draw_room_icon(renderer, room_icons[3]); //ВРЕМЕННО
-	draw_room_icon(renderer, room_icons[4]); //ВРЕМЕННО
-	draw_room_icon(renderer, room_icons[5]); //ВРЕМЕННО
-	draw_room_icon(renderer, room_icons[6]); //ВРЕМЕННО
-	draw_room_icon(renderer, room_icons[7]); //ВРЕМЕННО
+	//Рисуем все иконки из массива сразу
+	for (int i = 0; i <= 7; i++) {
+		draw_room_icon(renderer, room_icons[i]);
+	}
 
 	//рисуем рессурсы
 	draw_text(window, renderer, texts[0], g_recthumans);
@@ -490,7 +489,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	room_icons[3].rectangle = rect_room_icon_3;
 	room_icons[3].texture = farm1_icon_texture;
 */
-	//Создаём комнаты
+	//Массив комнат
 	Room rooms[6];
 
 	//доход от комнаты [тип][уровень][0.hum,1.food,2.res]
@@ -820,8 +819,10 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	//ГЛАВНЫЙ ЦИКЛ
 	while (!quit && !go_to_train && !raid_started) {
 		SDL_PollEvent(&event);
-		if (event.type == SDL_QUIT)
+		if (event.type == SDL_QUIT) {
+			QUIT = true;
 			quit = true;
+		}
 
 		bool was_background_changed = false; //Был ли фон изменён?
 		bool was_button_room_pressed = false; //Была ли нажата какая-либо комната?
