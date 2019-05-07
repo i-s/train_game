@@ -184,7 +184,7 @@ void Update_resourses() {
 	if (g_humans >= 0.99)
 		g_humans -= delta_humans;
 	else
-		GAME_OVER = 1;
+		GameOver();
 	
 	if (g_resourses < 0)
 		g_resourses = 0;
@@ -203,7 +203,12 @@ void Update_resourses() {
 		g_humans = g_humans_cap;
 }
 
-
+//Заканчивает игру.
+//В планах: выводит максимальные успехи игрока, количество убитых зомби, даёт сохранить картинку базы
+void GameOver() {
+	QUIT = true;
+	printf_s("You are dead! Not big surprise.\n");
+}
 
 
 //Изменяет сложность игры по формулам
@@ -817,7 +822,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	//int time_of_last_click = GAMESTARTTIME; //Время предыдущего клика
 	
 	//ГЛАВНЫЙ ЦИКЛ
-	while (!quit && !go_to_train && !raid_started) {
+	while (!quit && !go_to_train && !raid_started && !QUIT) {
 		SDL_PollEvent(&event);
 		if (event.type == SDL_QUIT) {
 			QUIT = true;
