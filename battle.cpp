@@ -16,6 +16,10 @@
 //bool active = false; Активен ли враг (нужно ли его отрисовывать, приближать?)
 //int spawn_point;
 //int hp; здоровье
+//Потери ресурсов в порядке: еда, ресурсы, люди
+//int loss_food;
+//int loss_resourses;
+//int loss_humans;
 struct Enemy {
 	SDL_Texture* texture;
 	SDL_Rect rectangle;
@@ -155,7 +159,7 @@ int check_mouse_on_enemy(Enemy enemies[], int i, SDL_Event event)
 int Attack_Enemy(Enemy *enemy, int gun_type)
 {
 	int damage;
-	switch (gun_type)//TODO: как-то определить урон и отнять ресы
+	switch (gun_type)//TODO: как-то определить урон и звук выстрела какой-нибудь
 	{
 	case 1://пистолет
 	{
@@ -287,9 +291,11 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		}
 
 		//TODO: Доработать боёвку
-
+		//TODO: Продумать волну зомби
+		//TODO: выбор оружия и вывод времени перезарядки 
 		for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
 			if(enemies[i].active == false) Spawn(true, 0, spawn_places, &enemies[i], enemy_textures,enemies_hp,enemies_resourses_loss);
+			//
 		}
 
 		//Каждый раз в цикле говорим, что мышь не наведена ни на одну из кнопок
@@ -314,9 +320,8 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 				{
 					//проверка на время перезарядки
 					int time_now = time(NULL);
-					if (time_now - time_last_shot > gun_cooldown_list[gun_type - 1])
+					if (time_now - time_last_shot > gun_cooldown_list[gun_type - 1])//перезарядилось или нет
 					{
-						printf_s("пиупиу %d\n", time_now - time_last_shot);//время для отсчета перезарядки
 						time_last_shot = time_now;//время для отсчета перезарядки
 						if (Attack_Enemy(&enemies[button_flag], gun_type) == -1)//если зомби умер
 						{
@@ -339,6 +344,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		Update_EnemiesPosition(enemies, battle_rect, spawn_places);
 
 		Update(window, renderer, background, texts, button_block, enemies);
+		//TODO: баг с наложением
 
 		SDL_Delay(10);
 		
