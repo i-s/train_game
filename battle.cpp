@@ -1,6 +1,8 @@
 ﻿#pragma once
+#include <stdio.h>
 #include <SDL.h>
 #include "menu.h"
+#include <time.h>
 #include "town.h"
 #include "text.h"
 #include "main.h"
@@ -8,13 +10,18 @@
 #include <stdlib.h>
 #define NUMBER_OF_ENEMIES 3
 
-//Ситруктура "Враг"
+//Ситруктура "Враг" SDL_Texture* texture;SDL_Rect rectangle;
+//int type; //Тип врага: 0 - обычный зомби 
+//bool active = false; Активен ли враг (нужно ли его отрисовывать, приближать?)
+//int spawn_point;
+//int health; здоровье
 struct Enemy {
 	SDL_Texture* texture;
 	SDL_Rect rectangle;
 	int type; //Тип врага: 0 - обычный зомби
 	bool active = false; //Активен ли враг (нужно ли его отрисовывать, приближать?)
 	int spawn_point;
+	int health;//здоровье
 };
 
 struct SpawnPoint {
@@ -82,7 +89,7 @@ void Update_EnemiesPosition(Enemy enemies[], SDL_Rect battle_rect, SpawnPoint sp
 
 //"Спавнит" нового врага в случайной начальной точке
 //Это происходит, только при needness == true.
-void Spawn(bool needness, int type, SpawnPoint spawn_places[], Enemy* enemy, SDL_Texture* enemy_textures[]) {
+void Spawn(bool needness, int type, SpawnPoint spawn_places[], Enemy* enemy, SDL_Texture* enemy_textures[], int health) {
 	if (needness) {
 		int rand_spawnposition = rand() % 3; //Случайное место для спавна
 		if (spawn_places[rand_spawnposition].open == true) {
@@ -94,8 +101,65 @@ void Spawn(bool needness, int type, SpawnPoint spawn_places[], Enemy* enemy, SDL
 			(*enemy).rectangle.x = spawn_places[rand_spawnposition].point.x; //Отправляем врага в точку спавна
 			(*enemy).rectangle.y = spawn_places[rand_spawnposition].point.y;
 			(*enemy).spawn_point = rand_spawnposition;
+			(*enemy).health = health;
 		}
 	}
+}
+
+//наносим урон врагу, возвращает 1 , если зомби жив и 0 , если умер
+int cause_damage_enemy(Enemy *enemy, int damage)
+{
+	int new_health = enemy->health - damage;
+	if (new_health <= 0)
+		return 0;
+	enemy->health = new_health;
+	return 1;
+}
+
+//проверяет нахождение мышки на зомби, возвр номер зомби, если находится, и -1 , если нет
+int check_mouse_on_enemy(Enemy enemies[], int i, SDL_Event event)
+{
+	if (event.button.x >= enemies[i].rectangle.x && event.button.x <= enemies[i].rectangle.x + enemies[i].rectangle.w &&
+		event.button.y >= enemies[i].rectangle.y && event.button.y <= enemies[i].rectangle.y + enemies[i].rectangle.h)
+		return i;
+	return -1;
+}
+
+//атакуем зомби из оружия возвращает 1 , если зомби не умер после атаки, и -1 , если умер
+int Attack_Enemy(Enemy *enemy, int gun_type)
+{
+	int damage;
+	switch (gun_type)//TODO: как-то определить урон и отнять ресы
+	{
+	case 1://пистолет
+	{
+		damage = 1;
+		break;
+	}
+	case 2://дробовик
+	{
+		damage = 3;
+		break;
+	}
+	case 3://автомат
+	{
+		damage = 3;
+		break;
+	}
+	case 4://граната
+	{
+		damage = 5;
+		break;
+	}
+		
+	default:
+		damage = 0;
+		break;
+	}
+	
+	if (cause_damage_enemy(enemy, damage))
+		return 1;
+	return -1;
 }
 
 //Экран "сражение".
@@ -136,7 +200,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	SDL_Rect return_button = {304,5,118,46}; //Кнопка для возвращения к экрану "город"
 
 	//Массив кнопок
-	SDL_Rect buttons[1] = { return_button };
+	SDL_Rect buttons[1] = { return_button};
 
 	//Описание мест появление врагов
 	//TODO: Выбрать места для спавна зомби получше и побольше.
@@ -171,6 +235,11 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	bool raid_is_over = false; //Флаг окончания рейда
 	//TODO: Написать условия окончания рейда
 
+	int time_last_shot = 0;//время с выстрела для перезарядки
+	int gun_cooldown_list[4] = { 1, 3, 3, 10 };
+	//Текущее оружее 1 - пистолет, 2 - дробовик, 3 - автомат , 4 - граната
+	int gun_type = 1;
+
 	while (!quit) {
 		SDL_PollEvent(&event);
 		if (event.type == SDL_QUIT) {
@@ -181,13 +250,18 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		//TODO: Доработать боёвку
 
 		for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
-			if(enemies[i].active == false) Spawn(true, 0, spawn_places, &enemies[i], enemy_textures);
+
+			if (enemies[i].active == false) 
+				Spawn(true, 0, spawn_places, &enemies[i], enemy_textures, 2);
 		}
 
 		//Каждый раз в цикле говорим, что мышь не наведена ни на одну из кнопок
 		int button_flag = -1;
-		if (LKMPressed(event))
-			for (int i = 0; i <= 0; i++) {
+		if (LKMPressed(event))//обработка нажатий
+		{
+			printf_s("Z1: %d Z2: %d Z3: %d \n", enemies[0].health, enemies[1].health, enemies[2].health);
+			for (int i = 0; i <= 0; i++) 
+			{
 				button_flag = CheckIfMouseOnButton(event, i, buttons);
 				if (button_flag == 0 && !raid_is_over) { //Если нажали на кнопку "назад", но рейд ещё не окончен
 					button_block.shown = true; //...рисуем блок на кнопке.
@@ -196,7 +270,30 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 					goback_to_train = true; //...возвращаемся к "городу"
 				}
 			}
-
+			for (int i = 0; i <= NUMBER_OF_ENEMIES; i++) //проверим зомби
+			{
+				button_flag = check_mouse_on_enemy(enemies, i, event);
+				if (button_flag != -1)//если наведена на зомби, тогда стреляем
+				{
+					//проверка на время перезарядки
+					int time_now = time(NULL);
+					if (time_now - time_last_shot > gun_cooldown_list[gun_type - 1])
+					{
+						printf_s("пиупиу %d\n", time_now - time_last_shot);//время для отсчета перезарядки
+						time_last_shot = time_now;//время для отсчета перезарядки
+						if (Attack_Enemy(&enemies[button_flag], gun_type) == -1)//если зомби умер
+						{
+							enemies[button_flag].active = false;
+							spawn_places[enemies[i].spawn_point].open = true;
+						}
+						if (gun_type == 1 || gun_type == 2)// если пистолет или дробовик
+							break;//выйдем из цикла, чтобы выстрел был только по одному зомби, даже если их несколько, винтовка и граната пробьет всех
+					}
+					
+				}
+			}
+		}
+		
 		//Подготавливаем текст для вывода
 		_itoa_s(int(g_humans), text_humans, 10, 10);
 		_itoa_s(int(g_food), text_food, 10, 10);
@@ -207,12 +304,14 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		Update(window, renderer, background, texts, button_block, enemies);
 
 		SDL_Delay(10);
-	}
+		
 
-	//Считаем время
-	int tick_time = SDL_GetTicks();
-	DELTA = tick_time - LASTTICKTIME;
-	LASTTICKTIME = tick_time;
+		//Считаем время
+		int tick_time = SDL_GetTicks();
+		DELTA = tick_time - LASTTICKTIME;
+		LASTTICKTIME = tick_time;
+
+	}	
 
 	SDL_DestroyTexture(background_texture);
 	SDL_DestroyTexture(block_texture);
