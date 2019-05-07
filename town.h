@@ -5,6 +5,10 @@
 //Возврат 0 -> завершение программы
 int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h);
 
+//Заканчивает игру.
+//В планах: выводит максимальные успехи игрока, количество убитых зомби, даёт сохранить картинку базы
+void GameOver();
+
 //Структура заднего фона
 //SDL_Texture* texture;SDL_Rect rectangle;
 struct Background {

@@ -7,14 +7,20 @@
 #include "train.h"
 #include <stdlib.h>
 #define NUMBER_OF_ENEMIES 3
+#define NUMBER_OF_TYPES_OF_ENEMIES 1
 
-//Ситруктура "Враг"
+//Структура "Враг"
 struct Enemy {
 	SDL_Texture* texture;
 	SDL_Rect rectangle;
 	int type; //Тип врага: 0 - обычный зомби
 	bool active = false; //Активен ли враг (нужно ли его отрисовывать, приближать?)
 	int spawn_point;
+	int hp; //Жизни врага
+	//Потери ресурсов в порядке: еда, ресурсы, люди
+	int loss_food;
+	int loss_resourses;
+	int loss_humans;
 };
 
 struct SpawnPoint {
@@ -28,7 +34,7 @@ extern SDL_Rect g_recthumans, g_rectfood, g_rectresourses;
 extern int DELTA;
 extern int LASTTICKTIME;
 
-//Отрисовывает 
+//Отрисовывает врага
 void draw_enemy(SDL_Renderer* renderer, Enemy enemy) {
 	if (enemy.active) { SDL_RenderCopy(renderer, enemy.texture, NULL, &enemy.rectangle); }
 }
@@ -50,10 +56,23 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, Background background, c
 	SDL_RenderPresent(renderer);
 }
 
+//Проверяет, не ушли ли значения ресурсов в отрицательные значения, и если ушли - вернуть их к 0.
+//Если люди ушли в минус, закончить игру.
+void CheckForZeroResourses() {
+	if (g_food < 0)
+		g_food = 0;
+	if (g_resourses < 0)
+		g_resourses = 0;
+	if (g_humans < 0)
+		g_humans = 0;
+	if (g_humans == 0)
+		GameOver();
+}
+
 //Обновляет позиции врагов
 void Update_EnemiesPosition(Enemy enemies[], SDL_Rect battle_rect, SpawnPoint spawn_places[]) {
 	for (int i = 0; i < NUMBER_OF_ENEMIES; i++)
-		if (enemies[i].active) // Если проверяемый враг активен
+		if (enemies[i].active && !QUIT) // Если проверяемый враг активен и игра ещё не окончилась
 		{
 			//Двигаем зомби
 			//TODO: Зомби должны бежать медленнее
@@ -71,7 +90,11 @@ void Update_EnemiesPosition(Enemy enemies[], SDL_Rect battle_rect, SpawnPoint sp
 			else { //Если размеры зомби стали превышать высоту боевого окна
 				enemies[i].active = false;
 				spawn_places[enemies[i].spawn_point].open = true;
-				//TODO: Проходящий зомби должен нанести урон убежищу (желательно по какой-нибудь формуле)
+				//Наносим урон убежищу
+				g_food -= enemies[i].loss_food;
+				g_resourses -= enemies[i].loss_resourses;
+				g_humans -= enemies[i].loss_humans;
+				CheckForZeroResourses();
 			}
 			if (enemies[i].rectangle.x < battle_rect.x) // Левая граница
 				enemies[i].rectangle.x = battle_rect.x; // Выравниваем по левому краю
@@ -82,13 +105,18 @@ void Update_EnemiesPosition(Enemy enemies[], SDL_Rect battle_rect, SpawnPoint sp
 
 //"Спавнит" нового врага в случайной начальной точке
 //Это происходит, только при needness == true.
-void Spawn(bool needness, int type, SpawnPoint spawn_places[], Enemy* enemy, SDL_Texture* enemy_textures[]) {
+void Spawn(bool needness, int type, SpawnPoint spawn_places[], Enemy* enemy, SDL_Texture* enemy_textures[], int enemies_hp[], int enemies_resourses_loss[][3]) {
 	if (needness) {
 		int rand_spawnposition = rand() % 3; //Случайное место для спавна
-		if (spawn_places[rand_spawnposition].open == true) {
+		if (spawn_places[rand_spawnposition].open == true) { //Если место для спавна свободно
 			(*enemy).active = true;
 			(*enemy).type = (rand() % 1); //Делаем этого врага случайным типом
-			(*enemy).texture = enemy_textures[(*enemy).type]; //Присваиваем врагу текстуру в зависимости от его типа.
+			(*enemy).texture = enemy_textures[(*enemy).type]; //Присваиваем врагу текстуру в зависимости от его типа
+			(*enemy).hp = enemies_hp[(*enemy).type]; //Присваиваем врагу жизни в зависимости от его типа
+			//Присваиваем врагу потери ресурсов в зависимости от его типа
+			(*enemy).loss_food = enemies_resourses_loss[(*enemy).type][0];
+			(*enemy).loss_resourses = enemies_resourses_loss[(*enemy).type][1];
+			(*enemy).loss_humans = enemies_resourses_loss[(*enemy).type][2];
 			spawn_places[rand_spawnposition].open = false; // Запрещаем спавнить в этом месте ещё одного врага
 			(*enemy).rectangle.w = 0; (*enemy).rectangle.h = 0;
 			(*enemy).rectangle.x = spawn_places[rand_spawnposition].point.x; //Отправляем врага в точку спавна
@@ -149,6 +177,19 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 
 	//Массив врагов
 	Enemy enemies[NUMBER_OF_ENEMIES] = { {},{},{} };
+
+	//Массив здоровья врагов
+	//0-ой тип - первое значение, 1-ый тип - второе значение и т.д.
+	int enemies_hp[NUMBER_OF_TYPES_OF_ENEMIES] = {
+		1, //0-ой тип имеет 1 здоровье
+	};
+
+	//Массив урона ресурсам, которые наносит зомби, когда доходит до убежища
+	//0-ой тип - первый элемент массива, в котором расположены: урон_еде, урон_ресурсам, урон_людям
+	int enemies_resourses_loss[NUMBER_OF_TYPES_OF_ENEMIES][3] = {
+		{0,0,33}, //0-ой тип наносит 0, 0, 1 урона соответственно еде, ресурсам и людям
+	};
+
 	//Временно присваиваем всем врагам текстуры и тип обычного зомбо
 	/*
 	for (int i = 0; i <= NUMBER_OF_ENEMIES; i++)
@@ -171,7 +212,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	bool raid_is_over = false; //Флаг окончания рейда
 	//TODO: Написать условия окончания рейда
 
-	while (!quit) {
+	while (!quit && !QUIT) {
 		SDL_PollEvent(&event);
 		if (event.type == SDL_QUIT) {
 			QUIT = true;
@@ -181,7 +222,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		//TODO: Доработать боёвку
 
 		for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
-			if(enemies[i].active == false) Spawn(true, 0, spawn_places, &enemies[i], enemy_textures);
+			if(enemies[i].active == false) Spawn(true, 0, spawn_places, &enemies[i], enemy_textures,enemies_hp,enemies_resourses_loss);
 		}
 
 		//Каждый раз в цикле говорим, что мышь не наведена ни на одну из кнопок
