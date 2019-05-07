@@ -15,7 +15,7 @@
 //int type; //Тип врага: 0 - обычный зомби 
 //bool active = false; Активен ли враг (нужно ли его отрисовывать, приближать?)
 //int spawn_point;
-//int health; здоровье
+//int hp; здоровье
 struct Enemy {
 	SDL_Texture* texture;
 	SDL_Rect rectangle;
@@ -135,10 +135,10 @@ void Spawn(bool needness, int type, SpawnPoint spawn_places[], Enemy* enemy, SDL
 //наносим урон врагу, возвращает 1 , если зомби жив и 0 , если умер
 int cause_damage_enemy(Enemy *enemy, int damage)
 {
-	int new_health = enemy->health - damage;
-	if (new_health <= 0)
+	int new_hp = enemy->hp - damage;
+	if (new_hp <= 0)
 		return 0;
-	enemy->health = new_health;
+	enemy->hp = new_hp;
 	return 1;
 }
 
@@ -279,7 +279,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	//Текущее оружее 1 - пистолет, 2 - дробовик, 3 - автомат , 4 - граната
 	int gun_type = 1;
 
-	while (!quit) {
+	while (!quit && !QUIT) {
 		SDL_PollEvent(&event);
 		if (event.type == SDL_QUIT) {
 			QUIT = true;
@@ -296,7 +296,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		int button_flag = -1;
 		if (LKMPressed(event))//обработка нажатий
 		{
-			printf_s("Z1: %d Z2: %d Z3: %d \n", enemies[0].health, enemies[1].health, enemies[2].health);
+			printf_s("Z1: %d Z2: %d Z3: %d \n", enemies[0].hp, enemies[1].hp, enemies[2].hp);
 			for (int i = 0; i <= 0; i++) 
 			{
 				button_flag = CheckIfMouseOnButton(event, i, buttons);
