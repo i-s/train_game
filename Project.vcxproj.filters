@@ -21,9 +21,6 @@
     <ClCompile Include="menu.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="text.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="train.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -39,6 +36,9 @@
     <ClCompile Include="battle.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="notifications.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -48,9 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="menu.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="text.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="train.h">
@@ -66,6 +63,12 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="battle.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="notifications.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="rooms.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

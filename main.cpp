@@ -5,6 +5,7 @@
 #include "town.h"
 #include <time.h>
 #include "battle.h"
+#include "rooms.h"
 #define START_FOOD 1500
 #define START_HUMANS 1150
 #define START_RESOURSES 1200
@@ -85,6 +86,7 @@ int main() {
 		g_time_before_raid = 25; //10 секунд до перехода в экран рейда
 		GAME_OVER = 0;
 		int quit = 0;
+		initialize_rooms(); //Инициализируем массивы для создания комнат
 		//TODO: доделать перезапуск из меню
 		menu_flag = menu(WINDOW, renderer, winsize_w, winsize_h);
 		if (menu_flag == 1) {

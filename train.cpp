@@ -5,7 +5,7 @@
 #include <time.h>
 #include "menu.h"
 #include "town.h"
-#include "text.h"
+#include "notifications.h"
 #include <math.h>
 #include <stdlib.h>
 #include "train.h"

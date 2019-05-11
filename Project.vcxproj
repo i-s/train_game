@@ -150,7 +150,7 @@
     <ClCompile Include="train.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="menu.cpp" />
-    <ClCompile Include="text.cpp" />
+    <ClCompile Include="notifications.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -159,11 +159,12 @@
   <ItemGroup>
     <ClInclude Include="battle.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="rooms.h" />
     <ClInclude Include="textures.h" />
     <ClInclude Include="town.h" />
     <ClInclude Include="train.h" />
     <ClInclude Include="menu.h" />
-    <ClInclude Include="text.h" />
+    <ClInclude Include="notifications.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

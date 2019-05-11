@@ -4,7 +4,7 @@
 #include "menu.h"
 #include <time.h>
 #include "town.h"
-#include "text.h"
+#include "notifications.h"
 #include "main.h"
 #include "train.h"
 #include <stdlib.h>
@@ -217,9 +217,9 @@ int generate_wave(int difficulty, int *enemies_wave)
 	return enemies;
 }
 
-//Экран "сражение".
+//Экран "сражение". Если передать custom_difficulty != -1 ,то для ЭТОГО сражения будет использована специальная сложность
 //Возврат 0 -> окно закрыто
-int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
+int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h, int custom_difficulty = -1) {
 	//Загружаем текстуры
 	//Текстуры фона
 	SDL_Surface* background_surf = SDL_LoadBMP("resourses/textures/background_attack.bmp");
@@ -359,16 +359,21 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
 			if (enemies[i].active == false && time(NULL) - time_last_spawn > spawn_cooldown)
 			{
+				//type - тип врага
+				//Перебираем все типы врагов в массиве enemies_wave
 				for (int type = 0; type < NUMBER_OF_TYPES_OF_ENEMIES; type++)
 				{
+					//Если врагов типа type осталось больше 0
 					if (enemies_wave[type] > 0) 
 					{
+						//Пытаемся заспавнить врага
 						if (Spawn(true, type, spawn_places, &enemies[i], enemy_textures, 
 							enemies_hp, enemies_resourses_loss))//если спавн удачный
 						{
-							enemies_wave[type]--;
-							time_last_spawn = time(NULL);
-							spawn_cooldown = type * 2 + rand() % 3 + 1;//TODO: как-то задать время спавна
+							enemies_wave[type]--; //Вычитаем одного врага из данного типа врагов
+							time_last_spawn = time(NULL); //Устанавливаем время последнего спавна
+							spawn_cooldown = type * 2 + rand() % 3 + 1; //Устанавливаем время до следующего появления врагов
+							//TODO: как-то задать время спавна
 						}
 						
 					}
