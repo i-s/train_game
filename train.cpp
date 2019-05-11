@@ -42,6 +42,16 @@ void draw_train(SDL_Renderer* renderer, Train train) {
 	SDL_RenderCopyEx(renderer, train.texture, NULL, &train.rectangle, train.angle, NULL, SDL_FLIP_NONE);
 }
 
+struct Background_shelter {
+	SDL_Rect rectangle;
+	SDL_Texture* texture;
+};
+
+//Отрисовывает убежище
+void draw_background_shelter(SDL_Renderer* renderer, Background_shelter shelter) {
+	SDL_RenderCopy(renderer, shelter.texture, NULL, &shelter.rectangle);
+}
+
 //Рисует текстовый
 void draw_text_box(SDL_Renderer* renderer, Text_box text_box) {
 	SDL_RenderCopy(renderer, text_box.texture, NULL, &text_box.rectangle);
@@ -99,13 +109,14 @@ void Move_Train(float speed_x, float speed_y, Point* train_position) {
 }
 
 //Отрисовываем фон, поезд, рычаги.
-void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background background, Lever lever1, Lever lever2, char* texts[], Text_box text_box, Town_block town_block) {
+void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background background, Lever lever1, Lever lever2, char* texts[], Text_box text_box, Town_block town_block, Background_shelter background_shelter) {
 	draw_background(renderer, background);
 	if(train.shown){ draw_train(renderer, train); }	//Не отрисовываем поезд, если он не должен быть виден
 	draw_town_block(renderer,town_block);
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
 	if (train.shown) { draw_text_box(renderer, text_box); }
+	draw_background_shelter(renderer, background_shelter);
 
 	draw_text(window,renderer,texts[0],g_recthumans);
 	draw_text(window, renderer, texts[1], g_rectfood);
@@ -167,6 +178,11 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	SDL_Surface* background_surf = SDL_LoadBMP("resourses/textures/background.bmp");
 	SDL_Texture* background_texture = SDL_CreateTextureFromSurface(renderer, background_surf);
 	SDL_FreeSurface(background_surf);
+	//Убежища на фоне
+	SDL_Surface* background_shelter_surf = SDL_LoadBMP("resourses/textures/background_shelter.bmp");
+	SDL_SetColorKey(background_shelter_surf, 1, SDL_MapRGB(background_shelter_surf->format, 0, 255, 0));
+	SDL_Texture* background_shelter_texture = SDL_CreateTextureFromSurface(renderer, background_shelter_surf);
+	SDL_FreeSurface(background_shelter_surf);
 	//Поезда
 	SDL_Surface* train_type_0_surf = SDL_LoadBMP("resourses/textures/train_type_0.bmp");
 	SDL_SetColorKey(train_type_0_surf, 1, SDL_MapRGB(train_type_0_surf->format, 0, 255, 0));
@@ -232,6 +248,10 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	Lever lever2 = { { 305,370,40,50 },lever2_pulled,lever_texture,lever_switched_texture };
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
+
+	//Убежище
+	SDL_Rect background_shelter_rect = {448,199,256,208};
+	Background_shelter background_shelter = {background_shelter_rect,background_shelter_texture};
 
 	//Кнопка города
 	SDL_Rect town = {444,196,264,215};
@@ -511,7 +531,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 
 		}
 
-		Update(window, renderer, train, background, lever1, lever2, texts, text_box, town_block);
+		Update(window, renderer, train, background, lever1, lever2, texts, text_box, town_block, background_shelter);
 
 		GAMETIME = time(NULL) - GAMESTARTTIME;
 
