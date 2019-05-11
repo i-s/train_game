@@ -314,6 +314,9 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	SDL_Rect train_rectangle = { main_path[start_position].point1.x, main_path[start_position].point1.y,20,80 };
 	Train train;
 
+	//Играем музыку для поезда
+	play_music(2);
+
 	//Обработка ивентов
 	while (!quit) {
 		if (!traincreated) {

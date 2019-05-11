@@ -1,13 +1,5 @@
 #include <SDL.h>
 
-/*To-do:
-V Сделать объявление button-ов не глобальным для функции (работа с размерами окна)
-1) Избавиться от костылей в DrawButtons
-2) Высчитывать положение кнопок по размеру окна
-3) Добавить звук для кнопок
-4) Меню настроек?
-*/
-
 //Возвращает номер кнопки, на которую наведён курсор, или -1, если не наведена.
 int CheckIfMouseOnButton(SDL_Event event, int i, SDL_Rect buttons[]) {
 	if (event.button.x >= buttons[i].x && event.button.x <= buttons[i].x + buttons[i].w &&

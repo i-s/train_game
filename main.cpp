@@ -22,6 +22,9 @@ extern int GAME_OVER;
 
 extern bool QUIT;
 
+//Глобальные размеры окна
+int winsize_w = 800, winsize_h = 600;
+
 /*To-do:
 V Нажимаемые кнопки в меню
 1) Движение поезда
@@ -41,8 +44,6 @@ V Нажимаемые кнопки в меню
 
 int main() {
 	//Создаём окно
-	int winsize_w = 800, winsize_h = 600;
-
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Window* WINDOW = SDL_CreateWindow("Main window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		winsize_w, winsize_h, SDL_WINDOW_SHOWN);
@@ -81,7 +82,7 @@ int main() {
 		difficulty = 1; //Сложность игры
 		one_second = 1;
 		TIMEUNTILTRAIN = 10;
-		g_time_before_raid = 3; //10 секунд до перехода в экран рейда
+		g_time_before_raid = 25; //10 секунд до перехода в экран рейда
 		GAME_OVER = 0;
 		int quit = 0;
 		//TODO: доделать перезапуск из меню

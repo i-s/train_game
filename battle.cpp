@@ -342,6 +342,8 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	int time_last_spawn = 0;
 	int spawn_cooldown = 0;
 
+	//Играем боевую музыку
+	play_music(1);
 
 	while (!quit && !QUIT) {
 		SDL_PollEvent(&event);

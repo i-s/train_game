@@ -60,6 +60,9 @@ bool g_have_open_town_before = false;
 //Громкость музыки в игре. Должна принимать значения от 0 до 128.
 int g_music_volume= 10;
 
+//Позиция фоновой музыки в игре
+double g_music_position = 0;
+
 //Глобальная переменная, отвечающая за сложность приезда поезда. Чем больше: тем хуже игроку
 int difficulty;
 
@@ -259,6 +262,7 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background
 //Возврат 1 -> переход к экрану "поезд"
 //Возврат 0 -> завершение программы
 int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
+	//Mix_Init(MIX_INIT_MP3);
 
 	//Попытка красиво загружать текстуры в память
 	/*
@@ -786,25 +790,15 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 
 	int button_flag; //Перменная, хранящая номер нажатой кнопки
 
-	//Запуск SDL_Mixer-а, инициализация музыки и её запуск
-	Mix_Init(MIX_INIT_MP3);
-	if (g_have_open_town_before == false) {
-		if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
-			printf("Mix_OpenAudio: %s\n", Mix_GetError());
-			// Обработка ошибки
-		}
-		Mix_Music *music;
-		music = Mix_LoadMUS("resourses/music/music_test.MP3");
-		if (music == NULL) {
-			printf("Mix_LoadMUS: %s\n", Mix_GetError());
-			// Обработка ошибки
-		}
-		if (Mix_PlayMusic(music, -1) == -1) {
-			printf("Mix_PlayMusic: %s\n", Mix_GetError());
-			// Обработка ошибки
-		}
-		Mix_VolumeMusic(g_music_volume);
+	//Запуск фоновой музыки
+	if (g_have_open_town_before == false) { //Если город запускается впервые, то
+		play_music(0); //Сначала
 	}
+	else {
+		play_music(0, g_music_position); //С определённого момента
+	}
+
+	bool was_alarm_called = false; //Флаг, отвечающий за единократное выведение предупреждения о надвигающемся рейде
 
 	bool raid_started = false; //Флаг, отвечающий за начало рейда
 
@@ -1179,18 +1173,69 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			room_selecting.shown = true;
 		}
 
+		//Работа с временем		
+		SDL_Delay(10);
+		GAMETIME = time(NULL) - GAMESTARTTIME;
+		int tick_time = SDL_GetTicks(); //Время с момента инициализации SDL (запуска программы)
+		DELTA = tick_time - LASTTICKTIME;
+		if (g_have_open_town_before == false) { //Если город запускается впервые, то не нужно изменять время.
+			DELTA = 0;
+		}
+		LASTTICKTIME = tick_time;
+
+		g_music_position += DELTA * 0.001; //Сдвигаем сохранённую позицию музыки на DELTA
+
+		one_second -= DELTA * 0.001;
+		if (g_have_open_town_before == false) { //Если город запускается впервые
+			one_second = -1;
+		}
+		if (one_second < 0) { //Каждую секунду
+			Update_resourses(); //Пересчёт количества ресурсов
+			if (GAME_OVER)
+				return -1;
+			Update_difficulty(); //Пересчёт сложности игры
+			one_second = 1;
+		}
+
+		//Если время до прибытия поезда > 0, отнимаем из него прошедшее время за цикл
+		if (TIMEUNTILTRAIN > 0) {
+			TIMEUNTILTRAIN -= DELTA * 0.001;
+			if (TIMEUNTILTRAIN < 5) { //Время до получения уведомления о поезде
+				alert.active = true;
+			}
+		}
+		else {
+			TIMEUNTILTRAIN = get_new_train_time();
+			alert.active = false;
+		}
+
+		//Если время до прибытия рейда > 0, отнимаем от него прошедшее время за цикл
+		if (g_time_before_raid > 0) {
+			g_time_before_raid -= DELTA * 0.001;
+			if (g_time_before_raid < 3.2 && was_alarm_called == false) {
+				call_voice_notification();
+				was_alarm_called = true;
+				//TODO: Сделать сигнализацию о приближающемся рейде (звуки, текстуры)
+			}
+		}
+		else { //Если наступило время рейда
+			g_time_before_raid = get_new_battle_time();
+			raid_started = true;
+			//Отмена сигнализации
+		}
+
 		//Подготавливаем текст для вывода
 		_itoa_s(int(g_humans), text_humans, 10, 10);
 		_itoa_s(int(g_food), text_food, 10, 10);
 		_itoa_s(int(g_resourses), text_resourses, 10, 10);
-		
+
 		if (draw_cost) {//цена комнаты 1 лвл
 			_itoa_s(int(cost_rooms[room_type - 1][0][0]), text_cost_humans, 10, 10);
 			_itoa_s(int(cost_rooms[room_type - 1][0][1]), text_cost_food, 10, 10);
 			_itoa_s(int(cost_rooms[room_type - 1][0][2]), text_cost_resourses, 10, 10);
 			draw_cost_yes = true;
 		}
-		if (draw_update_cost && choosed_room>0 && rooms[choosed_room - 1].type != 0 && rooms[choosed_room - 1].level != 3 && choosed_room != -1) {//цена апгрейда
+		if (draw_update_cost && choosed_room > 0 && rooms[choosed_room - 1].type != 0 && rooms[choosed_room - 1].level != 3 && choosed_room != -1) {//цена апгрейда
 			_itoa_s(int(cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][0]), text_cost_humans, 10, 10);
 			_itoa_s(int(cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][1]), text_cost_food, 10, 10);
 			_itoa_s(int(cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][2]), text_cost_resourses, 10, 10);
@@ -1211,50 +1256,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			background.texture = background_texture;
 			was_background_changed = false;
 		}
-
-		//Работа с временем
-		
-			SDL_Delay(10);
-			GAMETIME = time(NULL) - GAMESTARTTIME;
-			int tick_time = SDL_GetTicks();
-			DELTA = tick_time - LASTTICKTIME;
-			LASTTICKTIME = tick_time;
-
-			one_second -= DELTA * 0.001;
-			if (one_second < 0) { //Каждую секунду
-				Update_resourses(); //Пересчёт количества ресурсов
-				if (GAME_OVER)
-					return -1;
-				Update_difficulty(); //Пересчёт сложности игры
-				one_second = 1;
-			}
-
-			//Если время до прибытия поезда > 0, отнимаем из него прошедшее время за цикл
-			if (TIMEUNTILTRAIN > 0) {
-				TIMEUNTILTRAIN -= DELTA * 0.001;
-				if (TIMEUNTILTRAIN < 5) { //Время до получения уведомления о поезде
-					alert.active = true;
-				}
-			}
-			else {
-				TIMEUNTILTRAIN = get_new_train_time();
-				alert.active = false;
-			}
-
-			//Если время до прибытия рейда > 0, отнимаем от него прошедшее время за цикл
-			if (g_time_before_raid > 0) {
-				g_time_before_raid -= DELTA * 0.001;
-				if (g_time_before_raid < 5) {
-					//TODO: Сделать сигнализацию о приближающемся рейде (звуки, текстуры)
-				}
-			}
-			else { //Если наступило время рейда
-				g_time_before_raid = get_new_battle_time();
-				raid_started = true;
-				//Отмена сигнализации
-			}
 		
 		printf_s("time = %d, tut= %.1f, raid = %.1f\n", GAMETIME, TIMEUNTILTRAIN, g_time_before_raid);
+		g_have_open_town_before = true; //Указываем, что все следующие запуски town-а будут НЕ первыми.
 	}
 
 	SDL_DestroyTexture(background_texture);
@@ -1285,10 +1289,11 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	while (Mix_Init(0))
 		Mix_Quit();
 
-	g_have_open_town_before = true; //Указываем, что все следующие запуски town-а будут НЕ первыми.
-
 	if (raid_started) {
 		raid_started = false;
+		char* notification_text = (char*)("We are under attack!");
+		call_voice_notification();
+		call_notificaton(window,renderer,notification_text); //Вызываем оповещение о начале рейда
 		return 2;
 	}
 
