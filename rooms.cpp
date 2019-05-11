@@ -1,20 +1,20 @@
-#define MAX_ROOM_LEVEL 3
+п»ї#define MAX_ROOM_LEVEL 3
 #define COUNT_ROOMS 6
 
-//доход от комнаты [тип][уровень][0.hum,1.food,2.res]
+//РґРѕС…РѕРґ РѕС‚ РєРѕРјРЅР°С‚С‹ [С‚РёРї][СѓСЂРѕРІРµРЅСЊ][0.hum,1.food,2.res]
 float income_from_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
 
-//цена комнаты [тип][уровень][0.minhum,1.food,2.res]
+//С†РµРЅР° РєРѕРјРЅР°С‚С‹ [С‚РёРї][СѓСЂРѕРІРµРЅСЊ][0.minhum,1.food,2.res]
 int cost_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
 
-//изменение комнатой ограничений [тип][уровень][0.maxhum,1.maxfood,2.maxres]
+//РёР·РјРµРЅРµРЅРёРµ РєРѕРјРЅР°С‚РѕР№ РѕРіСЂР°РЅРёС‡РµРЅРёР№ [С‚РёРї][СѓСЂРѕРІРµРЅСЊ][0.maxhum,1.maxfood,2.maxres]
 int change_cap_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
 
-//Инициализирует массивы для создания комнат
+//РРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚ РјР°СЃСЃРёРІС‹ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РєРѕРјРЅР°С‚
 void initialize_rooms() {
-	//инициализация дохода
+	//РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґРѕС…РѕРґР°
 	{
-		//ферма
+		//С„РµСЂРјР°
 		{
 			income_from_rooms[0][0][0] = 0;
 			income_from_rooms[0][0][1] = 1;
@@ -28,7 +28,7 @@ void initialize_rooms() {
 			income_from_rooms[0][2][1] = 7.5;
 			income_from_rooms[0][2][2] = 0;
 		}
-		//фабрика
+		//С„Р°Р±СЂРёРєР°
 		{
 			income_from_rooms[1][0][0] = 0;
 			income_from_rooms[1][0][1] = 0;
@@ -42,7 +42,7 @@ void initialize_rooms() {
 			income_from_rooms[1][2][1] = 0;
 			income_from_rooms[1][2][2] = 4;
 		}
-		//Жилая комната
+		//Р–РёР»Р°СЏ РєРѕРјРЅР°С‚Р°
 		{
 			income_from_rooms[2][0][0] = 0.001;
 			income_from_rooms[2][0][1] = 0;
@@ -56,7 +56,7 @@ void initialize_rooms() {
 			income_from_rooms[2][2][1] = 0;
 			income_from_rooms[2][2][2] = 0;
 		}
-		//Оружейная
+		//РћСЂСѓР¶РµР№РЅР°СЏ
 		{
 			income_from_rooms[3][0][0] = 0;
 			income_from_rooms[3][0][1] = 0;
@@ -70,7 +70,7 @@ void initialize_rooms() {
 			income_from_rooms[3][2][1] = 0;
 			income_from_rooms[3][2][2] = -0.35;
 		}
-		//Cклад
+		//CРєР»Р°Рґ
 		{
 			income_from_rooms[4][0][0] = 0;
 			income_from_rooms[4][0][1] = 0;
@@ -84,7 +84,7 @@ void initialize_rooms() {
 			income_from_rooms[4][2][1] = 0;
 			income_from_rooms[4][2][2] = -0.35;
 		}
-		//Радио
+		//Р Р°РґРёРѕ
 		{
 			income_from_rooms[5][0][0] = 0;
 			income_from_rooms[5][0][1] = 0;
@@ -99,9 +99,9 @@ void initialize_rooms() {
 			income_from_rooms[5][2][2] = -0.35;
 		}
 	}
-	//инициализация цены
+	//РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С†РµРЅС‹
 	{
-		//ферма
+		//С„РµСЂРјР°
 		{
 			cost_rooms[0][0][0] = 5;
 			cost_rooms[0][0][1] = 10;
@@ -115,7 +115,7 @@ void initialize_rooms() {
 			cost_rooms[0][2][1] = 100;
 			cost_rooms[0][2][2] = 6;
 		}
-		//фабрика
+		//С„Р°Р±СЂРёРєР°
 		{
 			cost_rooms[1][0][0] = 20;
 			cost_rooms[1][0][1] = 50;
@@ -129,7 +129,7 @@ void initialize_rooms() {
 			cost_rooms[1][2][1] = 100;
 			cost_rooms[1][2][2] = 30;
 		}
-		//Жилая комната
+		//Р–РёР»Р°СЏ РєРѕРјРЅР°С‚Р°
 		{
 			cost_rooms[2][0][0] = 50;
 			cost_rooms[2][0][1] = 100;
@@ -143,7 +143,7 @@ void initialize_rooms() {
 			cost_rooms[2][2][1] = 250;
 			cost_rooms[2][2][2] = 80;
 		}
-		//Оружейная
+		//РћСЂСѓР¶РµР№РЅР°СЏ
 		{
 			cost_rooms[3][0][0] = 25;
 			cost_rooms[3][0][1] = 50;
@@ -157,7 +157,7 @@ void initialize_rooms() {
 			cost_rooms[3][2][1] = 100;
 			cost_rooms[3][2][2] = 300;
 		}
-		//склад
+		//СЃРєР»Р°Рґ
 		{
 			cost_rooms[4][0][0] = 25;
 			cost_rooms[4][0][1] = 50;
@@ -171,7 +171,7 @@ void initialize_rooms() {
 			cost_rooms[4][2][1] = 100;
 			cost_rooms[4][2][2] = 75;
 		}
-		//радио
+		//СЂР°РґРёРѕ
 		{
 			cost_rooms[5][0][0] = 25;
 			cost_rooms[5][0][1] = 50;
@@ -186,9 +186,9 @@ void initialize_rooms() {
 			cost_rooms[5][2][2] = 300;
 		}
 	}
-	//инициализация изменений ограничений
+	//РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РёР·РјРµРЅРµРЅРёР№ РѕРіСЂР°РЅРёС‡РµРЅРёР№
 	{
-		//ферма
+		//С„РµСЂРјР°
 		{
 			change_cap_rooms[0][0][0] = 0;
 			change_cap_rooms[0][0][1] = 0;
@@ -202,7 +202,7 @@ void initialize_rooms() {
 			change_cap_rooms[0][2][1] = 0;
 			change_cap_rooms[0][2][2] = 0;
 		}
-		//фабрика
+		//С„Р°Р±СЂРёРєР°
 		{
 			change_cap_rooms[1][0][0] = 0;
 			change_cap_rooms[1][0][1] = 0;
@@ -216,7 +216,7 @@ void initialize_rooms() {
 			change_cap_rooms[1][2][1] = 0;
 			change_cap_rooms[1][2][2] = 0;
 		}
-		//жилая комната
+		//Р¶РёР»Р°СЏ РєРѕРјРЅР°С‚Р°
 		{
 			change_cap_rooms[2][0][0] = 20;
 			change_cap_rooms[2][0][1] = 0;
@@ -230,7 +230,7 @@ void initialize_rooms() {
 			change_cap_rooms[2][2][1] = 0;
 			change_cap_rooms[2][2][2] = 0;
 		}
-		//оружейная
+		//РѕСЂСѓР¶РµР№РЅР°СЏ
 		{
 			change_cap_rooms[3][0][0] = 00;
 			change_cap_rooms[3][0][1] = 0;
@@ -244,7 +244,7 @@ void initialize_rooms() {
 			change_cap_rooms[3][2][1] = 0;
 			change_cap_rooms[3][2][2] = 0;
 		}
-		//склад
+		//СЃРєР»Р°Рґ
 		{
 			change_cap_rooms[4][0][0] = 0;
 			change_cap_rooms[4][0][1] = 50;
@@ -258,7 +258,7 @@ void initialize_rooms() {
 			change_cap_rooms[4][2][1] = 250;
 			change_cap_rooms[4][2][2] = 175;
 		}
-		//радио
+		//СЂР°РґРёРѕ
 		{
 			change_cap_rooms[5][0][0] = 0;
 			change_cap_rooms[5][0][1] = 0;
