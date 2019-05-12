@@ -1,5 +1,8 @@
-﻿#define MAX_ROOM_LEVEL 3
-#define COUNT_ROOMS 6
+﻿#include "rooms.h"
+//#define MAX_ROOM_LEVEL 3
+//#define COUNT_ROOMS 6
+//const int MAX_ROOM_LEVEL = 3;
+//const int COUNT_ROOMS = 6;
 
 //доход от комнаты [тип][уровень][0.hum,1.food,2.res]
 float income_from_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];

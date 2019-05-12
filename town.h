@@ -67,6 +67,3 @@ void Update_resourses();
 
 //Изменяет сложность игры по формулам
 void Update_difficulty();
-
-//Определяет время до следующего рейда
-void define_new_battle_time();

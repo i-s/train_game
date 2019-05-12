@@ -1,4 +1,6 @@
 #include <SDL.h>
+#include "save.h"
+#define NUMBER_OF_BUTTONS 4
 
 //Возвращает номер кнопки, на которую наведён курсор, или -1, если не наведена.
 int CheckIfMouseOnButton(SDL_Event event, int i, SDL_Rect buttons[]) {
@@ -15,10 +17,13 @@ int LKMPressed(SDL_Event event) {
 	return 0;
 }
 
-void DrawButtons(SDL_Renderer* renderer,SDL_Rect buttons[], SDL_Texture* start_texture, SDL_Texture* setting_texture, SDL_Texture* exit_texture) {
-	SDL_RenderCopy(renderer, start_texture, NULL, &buttons[0]);
-	SDL_RenderCopy(renderer, setting_texture, NULL, &buttons[1]);
-	SDL_RenderCopy(renderer, exit_texture, NULL, &buttons[2]);
+void DrawButtons(SDL_Renderer* renderer,SDL_Rect buttons[], SDL_Texture* buttons_textures[]) {
+	for (int i = 0; i < NUMBER_OF_BUTTONS; i++) {
+		SDL_RenderCopy(renderer, buttons_textures[i], NULL, &buttons[i]);
+	}
+	//SDL_RenderCopy(renderer, start_texture, NULL, &buttons[0]);
+	//SDL_RenderCopy(renderer, setting_texture, NULL, &buttons[1]);
+	//SDL_RenderCopy(renderer, exit_texture, NULL, &buttons[2]);
 }
 
 //Экран "меню".
@@ -39,13 +44,15 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	SDL_Rect button_start = { 260,240,270,80 };
 	SDL_Rect button_setting = { 260,340,270,80 };
 	SDL_Rect button_exit = { 260, 440,270,80 };
+	SDL_Rect button_continue = { 260, 150,270,80 };
 
 	//Массив для хранения кнопок
-	SDL_Rect buttons[3] = {};
+	SDL_Rect buttons[NUMBER_OF_BUTTONS] = {};
 	//Понятное заполнение массива:
 	buttons[0] = button_start;
 	buttons[1] = button_setting;
 	buttons[2] = button_exit;
+	buttons[3] = button_continue;
 
 	//Загружаем текстуры
 	SDL_Surface* menu_surf = SDL_LoadBMP("resourses/textures/menu.bmp");
@@ -60,6 +67,9 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	SDL_Surface* exit_surf = SDL_LoadBMP("resourses/textures/exit.bmp");
 	SDL_Texture* exit_texture = SDL_CreateTextureFromSurface(renderer, exit_surf);
 	SDL_FreeSurface(exit_surf);
+	SDL_Surface* continue_surf = SDL_LoadBMP("resourses/textures/continue.bmp");
+	SDL_Texture* continue_texture = SDL_CreateTextureFromSurface(renderer, continue_surf);
+	SDL_FreeSurface(continue_surf);
 	SDL_Surface* start_surf_click = SDL_LoadBMP("resourses/textures/start_selected.bmp");
 	SDL_Texture* start_texture_click = SDL_CreateTextureFromSurface(renderer, start_surf_click);
 	SDL_FreeSurface(start_surf_click);
@@ -69,10 +79,15 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	SDL_Surface* exit_surf_click = SDL_LoadBMP("resourses/textures/exit_selected.bmp");
 	SDL_Texture* exit_texture_click = SDL_CreateTextureFromSurface(renderer, exit_surf_click);
 	SDL_FreeSurface(exit_surf_click);
+	SDL_Surface* continue_surf_click = SDL_LoadBMP("resourses/textures/continue_selected.bmp");
+	SDL_Texture* continue_texture_click = SDL_CreateTextureFromSurface(renderer, continue_surf_click);
+	SDL_FreeSurface(continue_surf_click);
+
+	SDL_Texture* buttons_textures[NUMBER_OF_BUTTONS] = { start_texture, setting_texture, exit_texture, continue_texture };
 
 	//Отрисовываем кнопки и фон
 	SDL_RenderCopy(renderer, menu_texture, NULL, &full_screen);
-	DrawButtons(renderer, buttons, start_texture, setting_texture, exit_texture);
+	DrawButtons(renderer, buttons, buttons_textures);
 	SDL_RenderPresent(renderer);
 
 	//Переменная для хранения номера кнопки
@@ -81,9 +96,11 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	int buttons_changed=0;
 	//Переменная, для хранения состояния игры: 1 - нажата кнопка Start
 	int game_started = 0;
+	//Была ли игра загружена
+	bool loaded = false;
 
 	//Основной цикл
-	while (!quit && !game_started) {
+	while (!quit && !game_started && !loaded) {
 		SDL_PollEvent(&event);
 		if (event.type == SDL_QUIT) {
 			quit = 1;
@@ -94,7 +111,7 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 		button_flag = -1;
 
 		//Цикл, проверяющий, наведена ли мышь на кнопку
-		for (int i = 0; i <= 2; i++) {
+		for (int i = 0; i < NUMBER_OF_BUTTONS; i++) {
 			button_flag = CheckIfMouseOnButton(event, i, buttons);
 			if (button_flag >= 0) {
 				switch (i)
@@ -114,6 +131,15 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 					if (LKMPressed(event))
 						quit = 1;
 					break;
+				case 3: {//Курсор на кнопке Continue?
+					SDL_RenderCopy(renderer, continue_texture_click, NULL, &button_continue);
+					if (LKMPressed(event)) { //Если нажали кнопку Continue
+						int load_flag = load_game();
+						 if(load_flag == 1)
+							 loaded = 1;
+					}
+					break;
+				}
 				default:
 					return -1; //Возврат -1 -> проблема с кнопкой
 				}
@@ -125,7 +151,7 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 
 		//Если не наведено ни на какую из кнопок - отрисовать кнопки в начальное положение
 		if (button_flag == -1 && buttons_changed == 1) {
-			DrawButtons(renderer, buttons, start_texture, setting_texture, exit_texture);
+			DrawButtons(renderer, buttons, buttons_textures);
 			SDL_RenderPresent(renderer);
 			buttons_changed = 0;
 		}
@@ -138,9 +164,11 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	SDL_DestroyTexture(start_texture);
 	SDL_DestroyTexture(setting_texture);
 	SDL_DestroyTexture(exit_texture);
+	SDL_DestroyTexture(continue_texture);
 	SDL_DestroyTexture(start_texture_click);
 	SDL_DestroyTexture(setting_texture_click);
 	SDL_DestroyTexture(exit_texture_click);
-	if (game_started) return 1; //Возврат 1 - нажата кнопка Start
+	SDL_DestroyTexture(continue_texture_click);
+	if (game_started || loaded) return 1; //Возврат 1 - нажата кнопка Start
 	return 0; //Возврат 0 -> программа закрыта
 }
