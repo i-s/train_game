@@ -1023,9 +1023,6 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 
 	if (raid_started) {
 		raid_started = false;
-		char* notification_text = (char*)("We are under attack!");
-		call_voice_notification();
-		call_notificaton(window,renderer,notification_text); //Вызываем оповещение о начале рейда
 		return 2;
 	}
 

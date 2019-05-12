@@ -220,6 +220,9 @@ int generate_wave(int difficulty, int *enemies_wave)
 //Экран "сражение". Если передать custom_difficulty != -1 ,то для ЭТОГО сражения будет использована специальная сложность
 //Возврат 0 -> окно закрыто
 int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h, int custom_difficulty = -1) {
+	//Вызываем оповещение о начале рейда
+	call_voice_notification();
+	call_notificaton(window, renderer, (char*)("We are under attack!")); 
 	//Загружаем текстуры
 	//Текстуры фона
 	SDL_Surface* background_surf = SDL_LoadBMP("resourses/textures/background_attack.bmp");

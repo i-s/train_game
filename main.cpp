@@ -101,6 +101,13 @@ int main() {
 					if (train_flag == 0) { //Если вышли из поезда
 						continue; //Переходим к городу
 					}
+					else if (train_flag == 1) { //Если на убежище напали
+						//Переходим к битве
+						battle_flag = battle_game(WINDOW, renderer, winsize_w, winsize_h);
+						if (battle_flag == 0) { //Если вышли из битвы
+							continue; //Переходим к городу
+						}
+					}
 					else { //Иначе...
 						break; //Выходим из игры
 					}

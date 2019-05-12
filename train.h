@@ -51,6 +51,7 @@ struct Line {
 //Экран "поезд".
 //Возврат -1 -> выход из программы с ошибкой (не нажата кнопка город)
 //Возврат 0 -> была нажата кнопка город
+//Возврат 1 -> на убежище напали
 int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h);
 
 //Рисует Town_block, если town_block.shown == истина.

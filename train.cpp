@@ -140,7 +140,7 @@ void Define_Train_Type_And_Delay_And_Speed(Train* train, int difficulty, SDL_Tex
 	int chance_type_0 = 5; //Шанс прибытия обычного (тип 0) поезда
 	int chance_type_1 = int(fmax(10 - difficulty, 2)); //Шанс прибытия торгового (тип 1) поезда
 	int chance_type_2 = int(fmax(10 - difficulty, 1)); //Шанс прибытия пассажирского (тип 2) поезда
-	int chance_type_3 = int(fmin(difficulty, 3)); //Шанс прибытия рейдерского (тип 3) поезда
+	int chance_type_3 = int(fmin(difficulty, 5)); //Шанс прибытия рейдерского (тип 3) поезда
 
 	int luckynumber = rand() % (chance_type_0 + chance_type_1 + chance_type_2 + chance_type_3);
 
@@ -166,6 +166,7 @@ void Define_Train_Type_And_Delay_And_Speed(Train* train, int difficulty, SDL_Tex
 //Экран "поезд".
 //Возврат -1 -> выход из программы с ошибкой (не нажата кнопка город)
 //Возврат 0 -> была нажата кнопка город
+//Возврат 1 -> на убежище напали
 int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
 	srand(int(time(NULL)));
 		
@@ -321,6 +322,8 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 
 	bool town_button_pressed = false; //Нажата ли кнопка "город"?
 
+	bool has_raid_started = false; //Началось ли нападение на убежище?
+
 	//Строки для хранения числовых значений людей, еды и ресурсов.
 	char* text_humans = new char[10];
 	char* text_food = new char[10];
@@ -338,7 +341,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	play_music(2);
 
 	//Обработка ивентов
-	while (!quit) {
+	while (!quit && !has_raid_started) {
 		if (!traincreated) {
 			train.rectangle = train_rectangle;
 			train.reached_town = false;
@@ -364,10 +367,6 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 			QUIT = true;
 			quit = true;
 		}
-
-
-
-		int time_of_one_cycle = 0;
 
 		//Каждый раз в цикле говорим, что мышь не наведена ни на одну из кнопок
 		int button_flag = -1;
@@ -504,9 +503,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 			case 3: {//Если прибыл рейдерский поезд, то...
 				call_voice_notification();
 				call_notificaton(window, renderer, (char*)("Прибыл поезд с засадой!"),NULL,3);
-				g_humans += -20 + rand() % 20;
-				g_food += -50 + rand() % 50;
-				g_resourses += -100 + rand() % 100;
+				has_raid_started = true;
 				break;
 			}
 			default: break;
@@ -578,6 +575,12 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		lever1_pulled = lever1.switched;
 		lever2_pulled = lever2.switched;
 		return 0;
+	}
+	else if (has_raid_started) {
+		//Возвращаем в глобальные переменные состояние рычагов
+		lever1_pulled = lever1.switched;
+		lever2_pulled = lever2.switched;
+		return 1;
 	}
 	else {
 		return -1;
