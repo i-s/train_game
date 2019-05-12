@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="battle.cpp" />
     <ClCompile Include="rooms.cpp" />
+    <ClCompile Include="save.cpp" />
     <ClCompile Include="textures.cpp" />
     <ClCompile Include="town.cpp" />
     <ClCompile Include="train.cpp" />
@@ -158,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="battle.h" />
+    <ClInclude Include="save.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="rooms.h" />
     <ClInclude Include="textures.h" />

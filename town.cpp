@@ -16,8 +16,10 @@
 #define INCOME_FROM_FACTORY_1 0.2
 #define INCOME_FROM_FACTORY_2 0.4
 #define INCOME_FROM_FERM_1 1
-#define MAX_ROOM_LEVEL 3
-#define COUNT_ROOMS 6
+//#define MAX_ROOM_LEVEL 3
+//#define COUNT_ROOMS 6
+//extern const int MAX_ROOM_LEVEL;
+//extern const int COUNT_ROOMS;
 
 int GAME_OVER = 0;
 

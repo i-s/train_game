@@ -6,6 +6,7 @@
 #include <time.h>
 #include "battle.h"
 #include "rooms.h"
+#include "save.h"
 #define START_FOOD 1500
 #define START_HUMANS 1150
 #define START_RESOURSES 1200
@@ -20,18 +21,12 @@ extern float g_time_before_raid;
 extern int g_rooms[2][3][2];
 extern float g_income_food, g_income_res, g_income_hum;
 extern int GAME_OVER;
+extern bool g_have_open_town_before;
 
 extern bool QUIT;
 
 //Глобальные размеры окна
 int winsize_w = 800, winsize_h = 600;
-
-/*To-do:
-V Нажимаемые кнопки в меню
-1) Движение поезда
-2) Звук в игре
-3) Экран города (переход из города в меню поезда)
-*/
 
 
 
@@ -139,5 +134,6 @@ int main() {
 
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(WINDOW);
+	if(g_have_open_town_before)save_game(); //Если игра открывалась, сохраняем её.
 	return 0;
 }
