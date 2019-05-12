@@ -483,22 +483,27 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		if (train.reached_town) {
 			switch (train.type) {
 			case 0: { //Если прибыл обычный поезд, то...
+				call_notificaton(window,renderer,(char*)("Прибыл поезд!"));
 				g_food += -10 + rand() % 50;
 				g_resourses += -10 + rand() % 50;
 				break;
 			}
 			case 1: {//Если прибыл торговый поезд, то...
+				call_notificaton(window, renderer, (char*)("Прибыл торговый поезд!"),(char*)("Ожидается получение ресурсов!"),2);
 				g_food += 10 + rand() % 100;
 				g_resourses += 10 + rand() % 100;
 				break;
 			}
 			case 2: {//Если прибыл пассажирский поезд, то...
+				call_notificaton(window, renderer, (char*)("Прибыл пассажирский поезд!"),(char*)("Ожидается пополнение численности!"),2);
 				g_humans += -1 + rand() % 10;
 				g_food += -50 + rand() % 60;
 				g_resourses += -10 + rand() % 20;
 				break;
 			}
 			case 3: {//Если прибыл рейдерский поезд, то...
+				call_voice_notification();
+				call_notificaton(window, renderer, (char*)("Прибыл поезд с засадой!"),NULL,3);
 				g_humans += -20 + rand() % 20;
 				g_food += -50 + rand() % 50;
 				g_resourses += -100 + rand() % 100;
@@ -553,7 +558,9 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		}
 	}
 
+	//Выгружаем текстуры из памяти
 	SDL_DestroyTexture(background_texture);
+	SDL_DestroyTexture(background_shelter_texture);
 	SDL_DestroyTexture(train_type_0_texture);
 	SDL_DestroyTexture(train_type_1_texture);
 	SDL_DestroyTexture(train_type_2_texture);
