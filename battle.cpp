@@ -63,21 +63,22 @@ void draw_enemy(SDL_Renderer* renderer, Enemy enemy) {
 }
 
 //рисует поверх кнопки красивое затемнение
-void draw_blackout(SDL_Window* window, SDL_Renderer* renderer, SDL_Rect rect, float percentage_of_recharge = 0)
+void draw_blackout(SDL_Window* window, SDL_Renderer* renderer, SDL_Rect rect, 
+	float percentage_of_recharge = 0, int blackout_level = 128)
 {
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND); //Разрешаем смешивание цветов
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, blackout_level);
 
-	SDL_Rect notification_background = rect; //Фон, размерами с кнопку
-	notification_background.h = rect.h - rect.h * percentage_of_recharge; //пересчет высоты только для перезарядки
-	SDL_RenderFillRect(renderer, &notification_background); //Отрисовываем затемнение окна
+	SDL_Rect blackout = rect; //затемнение, размерами с rect)
+	blackout.h = rect.h - rect.h * percentage_of_recharge; //пересчет высоты только для перезарядки
+	SDL_RenderFillRect(renderer, &blackout); //Отрисовываем затемнение окна
 
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE); //Хватит смешивать цвета!
 }
 
 
 void Update(SDL_Window* window, SDL_Renderer* renderer, Background background, char* texts[], Town_block button_block,
-	Enemy enemies[], SDL_Rect rect_zombi_text, SDL_Rect rectzombicount, Gun guns[]) {
+	Enemy enemies[], SDL_Rect rect_zombi_text, SDL_Rect rectzombicount, Gun guns[],int wearony_level) {
 	draw_background(renderer, background);
 
 
@@ -93,12 +94,17 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, Background background, c
 	for (int i = 0; i < NUMBER_OF_ENEMIES; i++)
 		draw_enemy(renderer, enemies[i]);
 
-	for (int gun_type = 1; gun_type < 4; gun_type++)// проверим кд у всего оружия
+	for (int gun_type = 1; gun_type < 5; gun_type++)// пройдемся по всему оружию
 	{
+		if (wearony_level < gun_type-1)
+			draw_blackout(window, renderer, guns[gun_type - 1].button_rect, 0, 160);
+
+
 		if (guns[gun_type - 1].time_end_reload <= guns[gun_type - 1].cooldown) {//если не перезарядилось
+			//считаем насколько проц перезарядилось
 			float percentage_of_recharge = guns[gun_type - 1].time_end_reload / guns[gun_type - 1].cooldown;
+			//рисуем затемнение на такой процент
 			draw_blackout(window, renderer, guns[gun_type - 1].button_rect, percentage_of_recharge);
-			printf_s("%lf, %lf\n", guns[gun_type - 1].time_end_reload, guns[gun_type - 1].time_end_reload / guns[gun_type - 1].cooldown);
 		}
 	}
 	SDL_RenderPresent(renderer);
@@ -198,11 +204,15 @@ int check_mouse_on_enemy(Enemy enemies[], int i, SDL_Event event)
 	return -1;
 }
 
-//атакуем зомби из оружия возвращает 1 , если зомби не умер после атаки, и -1 , если умер
-int Attack_Enemy(Enemy *enemy, Gun *gun)
+//атакуем зомби из оружия возвращает 1 , если зомби не умер после атаки, 
+// -1 , если умер, 
+// 0, если промах
+int Attack_Enemy(Gun *gun, Enemy *enemy = NULL)
 {
 	gun->time_end_reload = 0;
 	//TODO: как-то определить урон и звук выстрела какой-нибудь
+	if (enemy == NULL)//промах
+		return 0;
 	if (cause_damage_enemy(enemy, gun->damage))
 		return 1;
 	return -1;
@@ -276,10 +286,10 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 
 	//Описание кнопок
 	SDL_Rect return_button = { 304,5,118,46 }; //Кнопка для возвращения к экрану "город"
-	SDL_Rect gun_button1 = { 297,51,124,95 }; //Кнопка пистолета
-	SDL_Rect gun_button2 = { 422,51,124,95 }; //Кнопка автомата
-	SDL_Rect gun_button3 = { 547,51,124,95 }; //Кнопка пулемета
-	SDL_Rect gun_button4 = { 672,51,124,95 }; //Кнопка гранаты
+	SDL_Rect gun_button1 = { 297,54,124,95 }; //Кнопка пистолета
+	SDL_Rect gun_button2 = { 422,54,124,95 }; //Кнопка автомата
+	SDL_Rect gun_button3 = { 547,54,124,95 }; //Кнопка пулемета
+	SDL_Rect gun_button4 = { 672,54,124,95 }; //Кнопка гранаты
 
 	SDL_Rect rect_zombi_text = { 32,197,125,21 };
 	SDL_Rect rect_zombi_count = { 160,197,17,21 };
@@ -434,6 +444,8 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 
 		//Каждый раз в цикле говорим, что мышь не наведена ни на одну из кнопок
 		int button_flag = -1;
+		int zombie_flag = -1;
+
 		if (LKMPressed(event))//обработка нажатий
 		{
 			for (int i = 0; i <= 4; i++) 
@@ -484,29 +496,35 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 				}
 
 			}
-			for (int i = 0; i <= NUMBER_OF_ENEMIES; i++) //проверим зомби
+			
+			if (guns[gun_type - 1].active)//если перезарядилось оружие
 			{
-				button_flag = check_mouse_on_enemy(enemies, i, event);
-				if (button_flag != -1)//если наведена на зомби, тогда стреляем
+				//стрельнули по зомби или нет
+				bool gun_is_shot = false;
+				for (int i = 0; i <= NUMBER_OF_ENEMIES; i++) //проверим зомби
 				{
-					printf_s("Z1: %d Z2: %d Z3: %d \n", enemies[0].hp, enemies[1].hp, enemies[2].hp);
-					//проверка на время перезарядки
-					if (guns[gun_type - 1].active)//перезарядилось или нет
+					zombie_flag = check_mouse_on_enemy(enemies, i, event);
+					if (zombie_flag != -1)//если попали
 					{
-						if (Attack_Enemy(&enemies[button_flag], &guns[gun_type-1]) == -1)//если зомби умер
+						gun_is_shot = true;
+						//нанесли урон и если зомби умер
+						if (Attack_Enemy(&guns[gun_type - 1], &enemies[zombie_flag]) == -1)
 						{
-							enemies[button_flag].active = false;
+							enemies[zombie_flag].active = false;
 							spawn_places[enemies[i].spawn_point].open = true;
 							enemies_count_in_wave--;
 							printf_s("DEAD!\n");
-							guns[gun_type - 1].active = false;//оружие перезаряжется
 						}
+						//выйдем из цикла, чтобы выстрел был только по одному зомби, 
+						//даже если их несколько, винтовка и граната пробьет всех
 						if (gun_type == 1 || gun_type == 3)// если пистолет или пулемет
-							break;//выйдем из цикла, чтобы выстрел был только по одному зомби, даже если их несколько, винтовка и граната пробьет всех
+							break;
 					}
-					
 				}
-			}
+				if (!gun_is_shot)//если еще не стрельнули, тогда стреляем в воздух
+					Attack_Enemy(&guns[gun_type - 1]);
+				guns[gun_type - 1].active = false;//оружие перезаряжется
+			}		
 		}		
 		//Подготавливаем текст для вывода
 		_itoa_s(int(g_humans), text_humans, 10, 10);
@@ -517,7 +535,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 
 		Update_EnemiesPosition(enemies, battle_rect, spawn_places, enemies_count_in_wave);
 
-		Update(window, renderer, background, texts, button_block, enemies, rect_zombi_text, rect_zombi_count, guns);
+		Update(window, renderer, background, texts, button_block, enemies, rect_zombi_text, rect_zombi_count, guns, weapony_level);
 		//TODO: баг с наложением
 
 		SDL_Delay(10);
