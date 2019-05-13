@@ -86,8 +86,8 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, Background background, c
 	draw_text(window, renderer, texts[0], g_recthumans);
 	draw_text(window, renderer, texts[1], g_rectfood);
 	draw_text(window, renderer, texts[2], g_rectresourses);
-	draw_text(window, renderer, texts[3], rect_zombi_text);
-	draw_text(window, renderer, texts[4], rectzombicount);
+	draw_text(window, renderer, texts[3], rect_zombi_text,0,true);
+	draw_text(window, renderer, texts[4], rectzombicount,0,true);
 
 	draw_town_block(renderer, button_block);
 
@@ -210,6 +210,7 @@ int check_mouse_on_enemy(Enemy enemies[], int i, SDL_Event event)
 int Attack_Enemy(Gun *gun, Enemy *enemy = NULL)
 {
 	gun->time_end_reload = 0;
+	g_resourses -= gun->cost;
 	//TODO: как-то определить урон и звук выстрела какой-нибудь
 	if (enemy == NULL)//промах
 		return 0;
@@ -241,7 +242,7 @@ int generate_wave(int difficulty, int *enemies_wave)
 int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h, int custom_difficulty = -1) {
 	//Вызываем оповещение о начале рейда
 	call_voice_notification();
-	call_notificaton(window, renderer, (char*)("We are under attack!")); 
+	call_notificaton(window, renderer, (char*)(u8"Мы под атакой!")); 
 	//Загружаем текстуры
 	//Текстуры фона
 	SDL_Surface* background_surf = SDL_LoadBMP("resourses/textures/background_attack.bmp");
@@ -271,7 +272,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	char* text_food = new char[10];
 	char* text_resourses = new char[10];
 	//строки для хран инфо о кол-ве зомби
-	char* text_zombitext = (char*)"zombi remained: ";
+	char* text_zombitext = (char*)(u8"Врагов осталось: ");
 	char* text_zombicount = new char[10];
 
 	////строки для хран числ знач перезарядки
@@ -497,7 +498,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 
 			}
 			
-			if (guns[gun_type - 1].active)//если перезарядилось оружие
+			if (guns[gun_type - 1].active && g_resourses-guns[gun_type-1].cost >= 0)//если перезарядилось оружие
 			{
 				//стрельнули по зомби или нет
 				bool gun_is_shot = false;

@@ -83,7 +83,7 @@ int main() {
 		difficulty = 1; //Сложность игры
 		one_second = 1;
 		TIMEUNTILTRAIN = 10;
-		g_time_before_raid = 25; //10 секунд до перехода в экран рейда
+		g_time_before_raid = 10; //10 секунд до перехода в экран рейда
 		GAME_OVER = 0;
 		int quit = 0;
 		initialize_rooms(); //Инициализируем массивы для создания комнат
