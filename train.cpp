@@ -112,11 +112,11 @@ void Move_Train(float speed_x, float speed_y, Point* train_position) {
 void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background background, Lever lever1, Lever lever2, char* texts[], Text_box text_box, Town_block town_block, Background_shelter background_shelter) {
 	draw_background(renderer, background);
 	if(train.shown){ draw_train(renderer, train); }	//Не отрисовываем поезд, если он не должен быть виден
-	draw_town_block(renderer,town_block);
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
 	if (train.shown) { draw_text_box(renderer, text_box); }
 	draw_background_shelter(renderer, background_shelter);
+	draw_town_block(renderer, town_block);
 
 	draw_text(window,renderer,texts[0],g_recthumans);
 	draw_text(window, renderer, texts[1], g_rectfood);

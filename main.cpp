@@ -45,6 +45,11 @@ int main() {
 		winsize_w, winsize_h, SDL_WINDOW_SHOWN);
 	SDL_Renderer* renderer = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
+
+	//SDL_RenderSetScale(renderer,1.5,1.5);
+	SDL_RenderSetLogicalSize(renderer, winsize_w, winsize_h);
+	SDL_SetWindowSize(WINDOW,winsize_w*1.5,winsize_h*1.5);
+	SDL_SetWindowPosition(WINDOW, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	//Тестовые начальные значения ресурсов:
 	
 	
