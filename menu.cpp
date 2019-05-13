@@ -2,6 +2,9 @@
 #include "save.h"
 #define NUMBER_OF_BUTTONS 4
 
+//Имеется ли сохранение?
+bool is_there_save_file = check_for_save_file();
+
 //Возвращает номер кнопки, на которую наведён курсор, или -1, если не наведена.
 int CheckIfMouseOnButton(SDL_Event event, int i, SDL_Rect buttons[]) {
 	if (event.button.x >= buttons[i].x && event.button.x <= buttons[i].x + buttons[i].w &&
@@ -19,6 +22,8 @@ int LKMPressed(SDL_Event event) {
 
 void DrawButtons(SDL_Renderer* renderer,SDL_Rect buttons[], SDL_Texture* buttons_textures[]) {
 	for (int i = 0; i < NUMBER_OF_BUTTONS; i++) {
+		if (!is_there_save_file && i == 3) //Если сейв-файла нет, то пропускаем отрисовку кнопки "продолжить".
+			continue;
 		SDL_RenderCopy(renderer, buttons_textures[i], NULL, &buttons[i]);
 	}
 	//SDL_RenderCopy(renderer, start_texture, NULL, &buttons[0]);
@@ -132,11 +137,13 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 						quit = 1;
 					break;
 				case 3: {//Курсор на кнопке Continue?
-					SDL_RenderCopy(renderer, continue_texture_click, NULL, &button_continue);
-					if (LKMPressed(event)) { //Если нажали кнопку Continue
-						int load_flag = load_game();
-						 if(load_flag == 1)
-							 loaded = 1;
+					if (is_there_save_file) { //Проверять нажатие кнопки "Continue" только в случае, если сейв есть
+						SDL_RenderCopy(renderer, continue_texture_click, NULL, &button_continue);
+						if (LKMPressed(event)) { //Если нажали кнопку Continue
+							int load_flag = load_game();
+							if (load_flag == 1)
+								loaded = 1;
+						}
 					}
 					break;
 				}

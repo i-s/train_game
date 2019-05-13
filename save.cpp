@@ -1,4 +1,4 @@
-#include <stdio.h>
+п»ї#include <stdio.h>
 #include "rooms.h"
 #define FILE_NAME "save1.sav"
 
@@ -9,32 +9,32 @@ extern float g_time_before_raid, TIMEUNTILTRAIN;
 extern float g_humans_cap, g_resourses_cap, g_food_cap;
 extern float g_income_food,g_income_res,g_income_hum;
 
-//Сохраняет игру в файл
+//РЎРѕС…СЂР°РЅСЏРµС‚ РёРіСЂСѓ РІ С„Р°Р№Р»
 void save_game() {
 	FILE *write_file;
 	fopen_s(&write_file, FILE_NAME, "w");
-	//Записываем количество ресурсов
+	//Р—Р°РїРёСЃС‹РІР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЂРµСЃСѓСЂСЃРѕРІ
 	fprintf_s(write_file, "%d %d %d\n", int(g_humans), int(g_resourses), int(g_food));
 
-	//Записываем income всех ресурсов
+	//Р—Р°РїРёСЃС‹РІР°РµРј income РІСЃРµС… СЂРµСЃСѓСЂСЃРѕРІ
 	fprintf_s(write_file, "%.3f %.3f %.3f\n", g_income_food, g_income_res, g_income_hum);
 
-	//Записываем предел количества ресурсов
+	//Р—Р°РїРёСЃС‹РІР°РµРј РїСЂРµРґРµР» РєРѕР»РёС‡РµСЃС‚РІР° СЂРµСЃСѓСЂСЃРѕРІ
 	fprintf_s(write_file, "%d %d %d\n", int(g_humans_cap), int(g_resourses_cap), int(g_food_cap));
 
-	/*Записываем данные о комнатах в данном порядке:
-	/1-ая комната/ [её тип] [её уровень]
-	/2-ая комната/ [её тип] [её уровень]
+	/*Р—Р°РїРёСЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ Рѕ РєРѕРјРЅР°С‚Р°С… РІ РґР°РЅРЅРѕРј РїРѕСЂСЏРґРєРµ:
+	/1-Р°СЏ РєРѕРјРЅР°С‚Р°/ [РµС‘ С‚РёРї] [РµС‘ СѓСЂРѕРІРµРЅСЊ]
+	/2-Р°СЏ РєРѕРјРЅР°С‚Р°/ [РµС‘ С‚РёРї] [РµС‘ СѓСЂРѕРІРµРЅСЊ]
 	...
 	*/
 	for (int i = 0; i < COUNT_ROOMS; i++) {
 		fprintf_s(write_file, "%d %d\n", g_rooms[i/3][i%3][0], g_rooms[i / 3][i % 3][1]);
 	}
 	
-	//Записываем положение рычагов
+	//Р—Р°РїРёСЃС‹РІР°РµРј РїРѕР»РѕР¶РµРЅРёРµ СЂС‹С‡Р°РіРѕРІ
 	fprintf_s(write_file, "%d %d\n", lever1_pulled, lever2_pulled);
 	
-	//Записываем время до следующего рейда и поезда
+	//Р—Р°РїРёСЃС‹РІР°РµРј РІСЂРµРјСЏ РґРѕ СЃР»РµРґСѓСЋС‰РµРіРѕ СЂРµР№РґР° Рё РїРѕРµР·РґР°
 	fprintf_s(write_file, "%.1f %.1f\n", g_time_before_raid, TIMEUNTILTRAIN);
 
 	int control_sum = (int(g_humans) + int(g_resourses) + int(g_food) + int(g_humans_cap) + int(g_resourses_cap) + int(g_food_cap) + lever1_pulled + lever2_pulled)%10;
@@ -44,12 +44,12 @@ void save_game() {
 	fclose(write_file);
 }
 
-//Загружает игру из файла
-//Возвращает -1, если файл не был найден
-//Возвращает 0, если файл сейва неправильный или изменённый (не проходит проверку контрольной суммой)
-//Возвращает 1, если файл был успешно прочитан
+//Р—Р°РіСЂСѓР¶Р°РµС‚ РёРіСЂСѓ РёР· С„Р°Р№Р»Р°
+//Р’РѕР·РІСЂР°С‰Р°РµС‚ -1, РµСЃР»Рё С„Р°Р№Р» РЅРµ Р±С‹Р» РЅР°Р№РґРµРЅ
+//Р’РѕР·РІСЂР°С‰Р°РµС‚ 0, РµСЃР»Рё С„Р°Р№Р» СЃРµР№РІР° РЅРµРїСЂР°РІРёР»СЊРЅС‹Р№ РёР»Рё РёР·РјРµРЅС‘РЅРЅС‹Р№ (РЅРµ РїСЂРѕС…РѕРґРёС‚ РїСЂРѕРІРµСЂРєСѓ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№)
+//Р’РѕР·РІСЂР°С‰Р°РµС‚ 1, РµСЃР»Рё С„Р°Р№Р» Р±С‹Р» СѓСЃРїРµС€РЅРѕ РїСЂРѕС‡РёС‚Р°РЅ
 int load_game() {
-	//Временное хранение считанных значений
+	//Р’СЂРµРјРµРЅРЅРѕРµ С…СЂР°РЅРµРЅРёРµ СЃС‡РёС‚Р°РЅРЅС‹С… Р·РЅР°С‡РµРЅРёР№
 	float temp_humans, temp_resourses, temp_food, temp_humans_cap, temp_resourses_cap, temp_food_cap,
 		temp_time_before_raid, temp_TIMEUNTILTRAIN,temp_income_food, temp_income_res, temp_income_hum;
 	int temp_lever1_pulled, temp_lever2_pulled;
@@ -57,29 +57,29 @@ int load_game() {
 
 	FILE *read_file;
 	fopen_s(&read_file, FILE_NAME, "r");
-	if (read_file != NULL) { //Если файл загружен
-		//Загружаем количество ресурсов
+	if (read_file != NULL) { //Р•СЃР»Рё С„Р°Р№Р» Р·Р°РіСЂСѓР¶РµРЅ
+		//Р—Р°РіСЂСѓР¶Р°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЂРµСЃСѓСЂСЃРѕРІ
 		fscanf_s(read_file, "%f %f %f", &temp_humans, &temp_resourses, &temp_food);
-		//Записываем income всех ресурсов
+		//Р—Р°РїРёСЃС‹РІР°РµРј income РІСЃРµС… СЂРµСЃСѓСЂСЃРѕРІ
 		fscanf_s(read_file, "%f %f %f\n", &temp_income_food, &temp_income_res, &temp_income_hum);
-		//Загружаем предел количества ресурсов
+		//Р—Р°РіСЂСѓР¶Р°РµРј РїСЂРµРґРµР» РєРѕР»РёС‡РµСЃС‚РІР° СЂРµСЃСѓСЂСЃРѕРІ
 		fscanf_s(read_file, "%f %f %f", &temp_humans_cap, &temp_resourses_cap, &temp_food_cap);
-		//Загружаем комнаты
+		//Р—Р°РіСЂСѓР¶Р°РµРј РєРѕРјРЅР°С‚С‹
 		for (int i = 0; i < COUNT_ROOMS; i++) {
 			fscanf_s(read_file, "%d %d", &temp_rooms[i / 3][i % 3][0], &temp_rooms[i / 3][i % 3][1]);
 		}
-		//Загружаем положение рычагов
+		//Р—Р°РіСЂСѓР¶Р°РµРј РїРѕР»РѕР¶РµРЅРёРµ СЂС‹С‡Р°РіРѕРІ
 		fscanf_s(read_file, "%d %d", &temp_lever1_pulled, &temp_lever2_pulled);
-		//Загружаем время до следующего рейда и поезда
+		//Р—Р°РіСЂСѓР¶Р°РµРј РІСЂРµРјСЏ РґРѕ СЃР»РµРґСѓСЋС‰РµРіРѕ СЂРµР№РґР° Рё РїРѕРµР·РґР°
 		fscanf_s(read_file, "%f %f", &temp_time_before_raid, &temp_TIMEUNTILTRAIN);
-		//Загружаем контрольную сумму
+		//Р—Р°РіСЂСѓР¶Р°РµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ
 		int read_control_sum;
 		fscanf_s(read_file, "%d", &read_control_sum);
-		//Высчитываем контрольную сумму, используя считанные данные
+		//Р’С‹СЃС‡РёС‚С‹РІР°РµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ, РёСЃРїРѕР»СЊР·СѓСЏ СЃС‡РёС‚Р°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ
 		int control_sum = (int(temp_humans) + int(temp_resourses) + int(temp_food) + int(temp_humans_cap) + int(temp_resourses_cap) + int(temp_food_cap) + temp_lever1_pulled + temp_lever2_pulled) % 10;
 
-		if (control_sum == read_control_sum) { //Если вычисленная контрольная сумма совпадает с загруженной
-			//Присваиваем глобальным переменным их временные копии
+		if (control_sum == read_control_sum) { //Р•СЃР»Рё РІС‹С‡РёСЃР»РµРЅРЅР°СЏ РєРѕРЅС‚СЂРѕР»СЊРЅР°СЏ СЃСѓРјРјР° СЃРѕРІРїР°РґР°РµС‚ СЃ Р·Р°РіСЂСѓР¶РµРЅРЅРѕР№
+			//РџСЂРёСЃРІР°РёРІР°РµРј РіР»РѕР±Р°Р»СЊРЅС‹Рј РїРµСЂРµРјРµРЅРЅС‹Рј РёС… РІСЂРµРјРµРЅРЅС‹Рµ РєРѕРїРёРё
 			g_humans = temp_humans; g_resourses = temp_resourses; g_food = temp_food;
 			g_income_hum = temp_income_hum; g_income_res = temp_income_res; g_income_food = temp_income_food;
 			g_humans_cap = temp_humans_cap; g_resourses_cap = temp_resourses_cap; g_food_cap = temp_food_cap;
@@ -96,12 +96,24 @@ int load_game() {
 			fclose(read_file);
 			return 1;
 		}
-		else { //...иначе
+		else { //...РёРЅР°С‡Рµ
 			fclose(read_file);
-			return 0; //Возвращаем ошибку
+			return 0; //Р’РѕР·РІСЂР°С‰Р°РµРј РѕС€РёР±РєСѓ
 		}
 	}
-	else {//Если файл не загружен
-		return -1; //Возвращаем ошибку
+	else {//Р•СЃР»Рё С„Р°Р№Р» РЅРµ Р·Р°РіСЂСѓР¶РµРЅ
+		return -1; //Р’РѕР·РІСЂР°С‰Р°РµРј РѕС€РёР±РєСѓ
 	}
+}
+
+//РџСЂРѕРІРµСЂСЏРµС‚, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С„Р°Р№Р» СЃРµР№РІР° РІ РїР°РїРєРµ СЃ РёРіСЂРѕР№.
+//Р’РѕР·РІСЂР°Р·Р°РµС‚ false, РµСЃР»Рё РЅРµС‚, Рё true, РµСЃР»Рё РґР°.
+bool check_for_save_file() {
+	FILE *read_file;
+	fopen_s(&read_file, FILE_NAME, "r");
+	if (read_file != NULL) { //Р•СЃР»Рё С„Р°Р№Р» Р·Р°РіСЂСѓР¶РµРЅ
+		fclose(read_file);
+		return true; //Р’РѕР·РІСЂР°С‰Р°РµРј true
+	}
+	return false;  //Р’РѕР·РІСЂРІР°С‰Р°РµРј flase
 }
