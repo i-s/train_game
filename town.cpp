@@ -63,8 +63,9 @@ extern int change_cap_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
 //Запускался ли экран "город" до этого момента
 bool g_have_open_town_before = false;
 
-//Громкость музыки в игре. Должна принимать значения от 0 до 128.
-int g_music_volume= 10;
+//Громкость музыки и звука в игре. Должна принимать значения от 0 до 128.
+int g_music_volume = 100;
+int g_sound_volume = 100;
 
 //Позиция фоновой музыки в игре
 double g_music_position = 0;

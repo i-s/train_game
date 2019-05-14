@@ -7,47 +7,21 @@
 #include "notifications.h"
 #include "main.h"
 #include "train.h"
+#include "battle.h"
 #include <stdlib.h>
 #define NUMBER_OF_ENEMIES 3
 #define NUMBER_OF_TYPES_OF_ENEMIES 1
 
-//Ситруктура "Враг" SDL_Texture* texture;SDL_Rect rectangle;
-//int type; //Тип врага: 0 - обычный зомби 
-//bool active = false; Активен ли враг (нужно ли его отрисовывать, приближать?)
-//int spawn_point;
-//int hp; здоровье
-//Потери ресурсов в порядке: еда, ресурсы, люди
-//int loss_food;
-//int loss_resourses;
-//int loss_humans;
-struct Enemy {
+
+struct Grenade 
+{
+	bool draw = false;
+	int sound_number;
+	SDL_Rect init_rect;
+	SDL_Rect current_rect;
 	SDL_Texture* texture;
-	SDL_Rect rectangle;
-	int type; //Тип врага: 0 - обычный зомби
-	bool active = false; //Активен ли враг (нужно ли его отрисовывать, приближать?)
-	int spawn_point;
-	int hp; //Жизни врага
-	//Потери ресурсов в порядке: еда, ресурсы, люди
-	int loss_food;
-	int loss_resourses;
-	int loss_humans;
 };
 
-struct SpawnPoint {
-	SDL_Point point;
-	bool open = true; //Свободно ли место для спавна
-};
-
-struct Gun {
-	int damage;
-	float cooldown;
-	SDL_Rect cooldown_rect;
-	SDL_Rect button_rect;
-	float time_end_reload = 100;// просто лишнее значение
-	float cost;
-	bool active = false;
-	//звук
-};
 
 //Загружаем глобальные переменные из town.cpp
 extern float g_humans, g_resourses, g_food;
@@ -204,6 +178,16 @@ int check_mouse_on_enemy(Enemy enemies[], int i, SDL_Event event)
 	return -1;
 }
 
+//проверяет нахождение мышки в прямоугольнике, возвр 1, если находится, и 0 , если нет
+int check_mouse_on_rect(SDL_Rect rectangle, SDL_Event event)
+{
+	if (event.button.x >= rectangle.x && event.button.x <= rectangle.x + rectangle.w &&
+		event.button.y >= rectangle.y && event.button.y <= rectangle.y + rectangle.h)
+		return 1;
+	return 0;
+}
+
+
 //атакуем зомби из оружия возвращает 1 , если зомби не умер после атаки, 
 // -1 , если умер, 
 // 0, если промах
@@ -211,6 +195,7 @@ int Attack_Enemy(Gun *gun, Enemy *enemy = NULL)
 {
 	gun->time_end_reload = 0;
 	g_resourses -= gun->cost;
+	play_sound(gun->sound_number);
 	//TODO: как-то определить урон и звук выстрела какой-нибудь
 	if (enemy == NULL)//промах
 		return 0;
@@ -239,7 +224,7 @@ int generate_wave(int difficulty, int *enemies_wave)
 
 //Экран "сражение". Если передать custom_difficulty != -1 ,то для ЭТОГО сражения будет использована специальная сложность
 //Возврат 0 -> окно закрыто
-int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h, int custom_difficulty = -1) {
+int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h, int custom_difficulty) {
 	//Вызываем оповещение о начале рейда
 	call_voice_notification();
 	call_notificaton(window, renderer, (char*)(u8"Мы под атакой!")); 
@@ -253,6 +238,11 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	SDL_SetColorKey(block_surf, 1, SDL_MapRGB(block_surf->format, 0, 255, 0));
 	SDL_Texture* block_texture = SDL_CreateTextureFromSurface(renderer, block_surf);
 	SDL_FreeSurface(block_surf);
+	//текстура гранаты
+	SDL_Surface* grenade_surf = SDL_LoadBMP("resourses/textures/grenade.bmp");
+	SDL_SetColorKey(grenade_surf, 1, SDL_MapRGB(grenade_surf->format, 0, 255, 0));
+	SDL_Texture* grenade_texture = SDL_CreateTextureFromSurface(renderer, grenade_surf);
+	SDL_FreeSurface(grenade_surf);
 	//Текстуры врагов
 	SDL_Surface* zombie1_surf = SDL_LoadBMP("resourses/textures/enemies/zombie1.bmp");
 	SDL_SetColorKey(zombie1_surf, 1, SDL_MapRGB(zombie1_surf->format, 0, 255, 0));
@@ -325,15 +315,6 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	//[тип] - кол-во зомби
 	int enemies_wave[NUMBER_OF_TYPES_OF_ENEMIES];
 
-	//Временно присваиваем всем врагам текстуры и тип обычного зомбо
-	/*
-	for (int i = 0; i <= NUMBER_OF_ENEMIES; i++)
-	{
-		enemies[i].texture = zombie1_texture; 
-		enemies[i].type = 0;
-	}
-	*/
-
 	//Блокиратор кнопки "назад"
 	Town_block button_block;
 	button_block.rectangle = return_button;
@@ -350,30 +331,34 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	Gun guns[4];
 	{
 		//пистолет
-		guns[0].active = true;
 		guns[0].cooldown = 2;
 		guns[0].cost = 2;
 		guns[0].damage = 2;
 		guns[0].cooldown_rect = { 303,135,34,10 };
 		guns[0].button_rect = gun_button1;
+		guns[0].sound_number = 1;
+
 		//автомат
 		guns[1].cooldown = 3;
 		guns[1].cost = 3;
 		guns[1].damage = 3;
 		guns[1].cooldown_rect = { 426,135,34,10 };
 		guns[1].button_rect = gun_button2;
+		guns[1].sound_number = 2;
 		//пулемет
 		guns[2].cooldown = 0.3;
 		guns[2].cost = 1;
 		guns[2].damage = 1;
 		guns[2].cooldown_rect = { 551,135,34,10 };
 		guns[2].button_rect = gun_button3;
+		guns[2].sound_number = 3;
 		//граната
 		guns[3].cooldown = 10;
 		guns[3].cost = 10;
 		guns[3].damage = 10;
 		guns[3].cooldown_rect = { 676,135,34,10 };
 		guns[3].button_rect = gun_button4;
+		guns[3].sound_number = 4;
 	}
 	//Текущее оружее 1 - пистолет, 2 - автомат, 3 - пулемет , 4 - граната
 	int gun_type = 1;
@@ -386,6 +371,9 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 				weapony_level = g_rooms[i][j][1]; // установим уровень оружейной
 		}
 	}
+	Grenade grenage;
+	grenage.init_rect = {};
+	grenage.texture = grenade_texture;
 
 	//здесь хранится кол-во оставшихся в волне зомби 
 	int enemies_count_in_wave;
@@ -415,9 +403,6 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		}
 
 		//TODO: Доработать боёвку
-		
-		
-		//TODO: выбор оружия и вывод времени перезарядки 
 		for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
 			if (enemies[i].active == false && time(NULL) - time_last_spawn > spawn_cooldown)
 			{
@@ -465,43 +450,38 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 				case 1://кнопка пистолета
 				{
 					gun_type = 1;
-					//TODO: выбор оружия ( рамочку около выбранного и затемнение недоступного)
 					break;
 				}
 				case 2://кнопка автомата
 				{
 					if(weapony_level >= 1)//если построкна оруж 1 уровня
-					{
 						gun_type = 2;
-					}
 					break;
 				}
 				case 3://кнопка пулемета
 				{
 					if (weapony_level >= 2)//если построкна оруж 2 уровня
-					{
 						gun_type = 3;
-					}
 					break;
 				}
 				case 4://кнопка гранаты
 				{
 					if (weapony_level >= 3)//если построкна оруж 3 уровня
-					{
 						gun_type = 4;
-					}
 					break;
 				}
 				default:
 					break;
 				}
-
 			}
 			
-			if (guns[gun_type - 1].active && g_resourses-guns[gun_type-1].cost >= 0)//если перезарядилось оружие
+			//если перезарядилось оружие и есть ресурсы на выстрел и вообще стреляем где-то в поле
+			if (guns[gun_type - 1].active && g_resourses-guns[gun_type-1].cost >= 0 
+				&& check_mouse_on_rect(battle_rect, event))
 			{
 				//стрельнули по зомби или нет
 				bool gun_is_shot = false;
+				
 				for (int i = 0; i <= NUMBER_OF_ENEMIES; i++) //проверим зомби
 				{
 					zombie_flag = check_mouse_on_enemy(enemies, i, event);
@@ -547,7 +527,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		DELTA = tick_time - LASTTICKTIME;
 		LASTTICKTIME = tick_time;
 
-		for (int gun_type = 1; gun_type < 4; gun_type++)// проверим кд у всего оружия
+		for (int gun_type = 1; gun_type < 5; gun_type++)// проверим кд у всего оружия
 		{
 			if (guns[gun_type - 1].time_end_reload < guns[gun_type - 1].cooldown)
 				guns[gun_type - 1].time_end_reload += DELTA * 0.001;  // время с последнего выстрела
@@ -569,5 +549,6 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	SDL_DestroyTexture(background_texture);
 	SDL_DestroyTexture(block_texture);
 	SDL_DestroyTexture(zombie1_texture);
+	SDL_DestroyTexture(grenade_texture);
 	return 0;
 }

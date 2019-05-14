@@ -24,3 +24,4 @@ void call_voice_notification(int sound_number = 0);
 //2 - Поезд
 //default - Город
 void play_music(int music_number, double position = 0);
+void play_sound(int sound_number, double position = 0);
