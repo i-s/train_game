@@ -1,7 +1,7 @@
 #pragma once
 
 //глобальное время
-int GAMESTARTTIME;
+int GAMESTARTTIME; //Время старта программы
 int LASTTICKTIME = 0;
 int DELTA = 0;
 int GAMETIME;

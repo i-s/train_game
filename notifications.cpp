@@ -89,10 +89,10 @@ void call_notificaton(SDL_Window* window, SDL_Renderer* renderer, char* text, ch
 	SDL_DestroyTexture(notification_box_texture);
 }
 
-//Вызывает звуковое оповещение
+//Вызывает голосовое оповещение
 //Если не передать номер звука, будет пищать в течении 3-х секунд
 //Звуки: 
-//default - Баззер
+//default
 void call_voice_notification(int sound_number = 0) {
 	Mix_Init(MIX_INIT_MP3);
 	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
@@ -157,6 +157,7 @@ void play_music(int music_number, double position = 0) {
 //3 - пулемет
 //4- чека гранаты
 //5 взрыв гранаты
+//101 - баззер
 //default - 0
 void play_sound(int sound_number, double position = 0) {
 	Mix_Init(MIX_INIT_MP3);
@@ -172,7 +173,7 @@ void play_sound(int sound_number, double position = 0) {
 	case 3: sound = Mix_LoadMUS("resourses/sound/sound_machinegun.mp3"); break; //звук для пулемета
 	case 4: sound = Mix_LoadMUS("resourses/sound/sound_grenade1.mp3"); break; //звук для гранаты 1-ый
 	case 5: sound = Mix_LoadMUS("resourses/sound/sound_grenade2.mp3"); break; //звук для гранаты 2-ой
-
+	case 101: sound = Mix_LoadMUS("resourses/sound/buzzer.mp3"); break; //Баззер, оповещение
 	default: sound = Mix_LoadMUS("resourses/sound/sound_test.mp3"); break;
 	}
 	if (sound == NULL) {
@@ -180,7 +181,7 @@ void play_sound(int sound_number, double position = 0) {
 		// Обработка ошибки
 	}
 	Mix_RewindMusic();
-	if (Mix_FadeInMusic(sound, 1, 500) == -1) {
+	if (Mix_FadeInMusic(sound, 1, 250) == -1) {
 		printf("Mix_Playsound: %s\n", Mix_GetError());
 		// Обработка ошибки
 	}

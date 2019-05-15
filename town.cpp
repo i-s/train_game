@@ -948,7 +948,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		if (g_time_before_raid > 0) {
 			g_time_before_raid -= DELTA * 0.001;
 			if (g_time_before_raid < 3.2 && was_alarm_called == false) {
-				call_voice_notification();
+				play_sound(101);
 				was_alarm_called = true;
 				//TODO: Сделать сигнализацию о приближающемся рейде (звуки, текстуры)
 			}

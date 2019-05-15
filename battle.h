@@ -45,3 +45,7 @@ struct Gun {
 	int sound_number;
 	//звук
 };
+
+//рисует поверх кнопки красивое затемнение
+void draw_blackout(SDL_Window* window, SDL_Renderer* renderer, SDL_Rect rect,
+	float percentage_of_recharge, int blackout_level);

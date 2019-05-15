@@ -7,6 +7,7 @@
 #include "battle.h"
 #include "rooms.h"
 #include "save.h"
+#include "intro.h"
 #define START_FOOD 1500
 #define START_HUMANS 1150
 #define START_RESOURSES 1200
@@ -22,6 +23,7 @@ extern int g_rooms[2][3][2];
 extern float g_income_food, g_income_res, g_income_hum;
 extern int GAME_OVER;
 extern bool g_have_open_town_before;
+extern bool g_was_game_loaded;
 
 extern bool QUIT;
 
@@ -90,6 +92,9 @@ int main() {
 		//TODO: доделать перезапуск из меню
 		menu_flag = menu(WINDOW, renderer, winsize_w, winsize_h);
 		if (menu_flag == 1) {
+			if (!g_was_game_loaded) { //Если игра была продолжена, то НЕ нужно воспроизводить интро.
+				Intro(WINDOW, renderer);
+			}
 			GAMESTARTTIME = int(time(NULL)); // время старта игры записываем
 			while (town_flag != 0 && !QUIT) { //Если не вышли из программы
 				if (town_flag == -1 || train_flag == -1) { //Если проиграли

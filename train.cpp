@@ -501,7 +501,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 				break;
 			}
 			case 3: {//Если прибыл рейдерский поезд, то...
-				call_voice_notification();
+				play_sound(101);
 				call_notificaton(window, renderer, (char*)("Прибыл поезд с засадой!"),NULL,3);
 				has_raid_started = true;
 				break;
