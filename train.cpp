@@ -123,7 +123,7 @@ void Move_Train(Train *train) {
 }
 
 //Отрисовываем фон, поезд, рычаги.
-void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background background, Lever lever1, Lever lever2, char* texts[], Text_box text_box, Town_block town_block, Background_shelter background_shelter) {
+void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background background, Lever lever1, Lever lever2, Text_box text_box, Town_block town_block, Background_shelter background_shelter) {
 	draw_background(renderer, background);
 	if(train.shown){ draw_train(renderer, train); }	//Не отрисовываем поезд, если он не должен быть виден
 	draw_lever(renderer, lever1);
@@ -132,9 +132,9 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background b
 	draw_background_shelter(renderer, background_shelter);
 	draw_town_block(renderer, town_block);
 
-	draw_text(window,renderer,texts[0],g_recthumans);
-	draw_text(window, renderer, texts[1], g_rectfood);
-	draw_text(window, renderer, texts[2], g_rectresourses);
+	draw_number_text(window, renderer, g_humans, g_recthumans);
+	draw_number_text(window, renderer, g_food, g_rectfood);
+	draw_number_text(window, renderer, g_resourses, g_rectresourses);
 
 	SDL_RenderPresent(renderer);
 }
@@ -351,14 +351,6 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 
 	bool has_raid_started = false; //Началось ли нападение на убежище?
 
-	//Строки для хранения числовых значений людей, еды и ресурсов.
-	char* text_humans = new char[10];
-	char* text_food = new char[10];
-	char* text_resourses = new char[10];
-
-	//Массив строк для удобной передачи в ф-ию
-	char* texts[3] = {text_humans, text_food, text_resourses};
-
 	int steps = 0; //Количество проходов while
 
 	SDL_Rect train_rectangle = { main_path[start_position].point1.x, main_path[start_position].point1.y,20,80 };
@@ -561,13 +553,6 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 			}
 			train.reached_town = false;
 		}
-
-		//Подготовка к выводу цифр на экран
-		_itoa_s(int(g_humans), text_humans, 10, 10);
-		_itoa_s(int(g_food), text_food, 10, 10);
-		_itoa_s(int(g_resourses), text_resourses, 10, 10);
-
-		
 		
 		//Считаем время
 		int tick_time = SDL_GetTicks();
@@ -584,7 +569,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 
 		}
 
-		Update(window, renderer, train, background, lever1, lever2, texts, text_box, town_block, background_shelter);
+		Update(window, renderer, train, background, lever1, lever2, text_box, town_block, background_shelter);
 
 		GAMETIME = time(NULL) - GAMESTARTTIME;
 

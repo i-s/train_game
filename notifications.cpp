@@ -1,6 +1,7 @@
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "town.h"
 
 //Рисует текст text в окне window и на рендерере renderer на rect-e rect.
@@ -55,6 +56,26 @@ void draw_text(SDL_Window* window, SDL_Renderer* renderer, char* text, SDL_Rect 
 	SDL_FreeSurface(textSurface);
 	TTF_CloseFont(my_font);
 	TTF_Quit();
+}
+
+//Рисует счётчики ресурсов с поправкой на размер Rect-а.
+void draw_number_text(SDL_Window* window, SDL_Renderer* renderer, int number, SDL_Rect rect) {
+	SDL_Rect new_rect = rect;
+	if (number / 10 < 1) { //Если число одноразрядное
+		new_rect.w /= 3;
+	}
+	else if (number / 100 < 1) { //Если число двухразрядное
+		new_rect.w /= 2;
+	}
+	else if (number / 1000 < 1) { //Если число трёхразрядное
+		new_rect.w = int(new_rect.w / 1.5);
+	}
+	else { //Если число других размеров
+		//...ничего не делаем
+	}
+	char* text = new char[10];
+	_itoa_s(number, text, 10, 10);
+	draw_text(window,renderer,text,new_rect);
 }
 
 extern int winsize_w, winsize_h;

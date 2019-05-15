@@ -61,9 +61,9 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, Background background, c
 
 
 	//Рисуем ресурсы
-	draw_text(window, renderer, texts[0], g_recthumans);
-	draw_text(window, renderer, texts[1], g_rectfood);
-	draw_text(window, renderer, texts[2], g_rectresourses);
+	draw_number_text(window, renderer, g_humans, g_recthumans);
+	draw_number_text(window, renderer, g_food, g_rectfood);
+	draw_number_text(window, renderer, g_resourses, g_rectresourses);
 	draw_text(window, renderer, texts[3], rect_zombi_text,0,true);
 	draw_text(window, renderer, texts[4], rectzombicount,0,true);
 
@@ -258,11 +258,6 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	Background background = {background_texture,background_rect};
 	
 	SDL_Rect battle_rect = {19,184,758,400}; //Прямоугольник места сражения
-
-	//Строки для хранения числовых значений людей, еды и ресурсов.
-	char* text_humans = new char[10];
-	char* text_food = new char[10];
-	char* text_resourses = new char[10];
 	//строки для хран инфо о кол-ве зомби
 	char* text_zombitext = (char*)(u8"Врагов осталось: ");
 	char* text_zombicount = new char[10];
@@ -275,7 +270,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	
 
 	//Массив строк для удобной передачи в ф-ию
-	char* texts[5] = { text_humans, text_food, text_resourses, text_zombitext, text_zombicount};
+	char* texts[5] = { NULL, NULL, NULL, text_zombitext, text_zombicount};
 
 	//Описание кнопок
 	SDL_Rect return_button = { 304,5,118,46 }; //Кнопка для возвращения к экрану "город"
@@ -503,9 +498,6 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 			}		
 		}		
 		//Подготавливаем текст для вывода
-		_itoa_s(int(g_humans), text_humans, 10, 10);
-		_itoa_s(int(g_food), text_food, 10, 10);
-		_itoa_s(int(g_resourses), text_resourses, 10, 10);
 		_itoa_s(int(enemies_count_in_wave), text_zombicount, 10, 10);
 
 

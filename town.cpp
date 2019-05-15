@@ -399,9 +399,9 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Backgroun
 	}
 
 	//рисуем рессурсы
-	draw_text(window, renderer, texts[0], g_recthumans);
-	draw_text(window, renderer, texts[1], g_rectfood);
-	draw_text(window, renderer, texts[2], g_rectresourses);
+	draw_number_text(window, renderer, g_humans, g_recthumans);
+	draw_number_text(window, renderer, g_food, g_rectfood);
+	draw_number_text(window, renderer, g_resourses, g_rectresourses);
 	//рисует кол-во рессурсов нужное для апгрейта/строительства комнаты
 	if (draw_cost) {
 		draw_text(window, renderer, texts[3], rect_cost_humans);
@@ -936,9 +936,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		}
 
 		//Подготавливаем текст для вывода
-		_itoa_s(int(g_humans), text_humans, 10, 10);
-		_itoa_s(int(g_food), text_food, 10, 10);
-		_itoa_s(int(g_resourses), text_resourses, 10, 10);
+		//_itoa_s(int(g_humans), text_humans, 10, 10);
+		//_itoa_s(int(g_food), text_food, 10, 10);
+		//_itoa_s(int(g_resourses), text_resourses, 10, 10);
 
 		if (draw_cost) {//цена комнаты 1 лвл
 			_itoa_s(int(cost_rooms[room_type - 1][0][0]), text_cost_humans, 10, 10);
