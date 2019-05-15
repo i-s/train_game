@@ -37,7 +37,7 @@ void save_game() {
 	//Записываем время до следующего рейда и поезда
 	fprintf_s(write_file, "%.1f %.1f\n", g_time_before_raid, TIMEUNTILTRAIN);
 
-	int control_sum = (int(g_humans) + int(g_resourses) + int(g_food) + int(g_humans_cap) + int(g_resourses_cap) + int(g_food_cap) + lever1_pulled + lever2_pulled)%10;
+	int control_sum = (int(g_humans) + int(g_resourses) + int(g_food) + int(g_humans_cap) + int(g_resourses_cap) + int(g_food_cap) + lever1_pulled + lever2_pulled)%33;
 
 	fprintf_s(write_file, "%d\n", control_sum);
 
@@ -76,7 +76,7 @@ int load_game() {
 		int read_control_sum;
 		fscanf_s(read_file, "%d", &read_control_sum);
 		//Высчитываем контрольную сумму, используя считанные данные
-		int control_sum = (int(temp_humans) + int(temp_resourses) + int(temp_food) + int(temp_humans_cap) + int(temp_resourses_cap) + int(temp_food_cap) + temp_lever1_pulled + temp_lever2_pulled) % 10;
+		int control_sum = (int(temp_humans) + int(temp_resourses) + int(temp_food) + int(temp_humans_cap) + int(temp_resourses_cap) + int(temp_food_cap) + temp_lever1_pulled + temp_lever2_pulled) % 33;
 
 		if (control_sum == read_control_sum) { //Если вычисленная контрольная сумма совпадает с загруженной
 			//Присваиваем глобальным переменным их временные копии

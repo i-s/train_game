@@ -248,7 +248,7 @@ bool destroy_room(Room *room, int choosed_room, Room *rooms)
 	}
 	else {
 		g_rooms[1][choosed_room - 4][1] = 0;
-		g_rooms[0][choosed_room - 4][0] = 0;
+		g_rooms[1][choosed_room - 4][0] = 0;
 	}
 	return true;
 }
