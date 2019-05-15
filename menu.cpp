@@ -2,6 +2,9 @@
 #include "save.h"
 #define NUMBER_OF_BUTTONS 4
 
+//Была ли игра загружена из сохранения?
+bool g_was_game_loaded = false;
+
 //Имеется ли сохранение?
 bool is_there_save_file = check_for_save_file();
 
@@ -141,8 +144,10 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 						SDL_RenderCopy(renderer, continue_texture_click, NULL, &button_continue);
 						if (LKMPressed(event)) { //Если нажали кнопку Continue
 							int load_flag = load_game();
-							if (load_flag == 1)
+							if (load_flag == 1) {
+								g_was_game_loaded = true;
 								loaded = 1;
+							}
 						}
 					}
 					break;

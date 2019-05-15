@@ -11,10 +11,10 @@ void draw_text(SDL_Window* window, SDL_Renderer* renderer, char* text, SDL_Rect 
 //Если задать subtext, будет выведен дополнительный текст с цветом color
 void call_notificaton(SDL_Window* window, SDL_Renderer* renderer, char* text, char* subtext = NULL, int color = -1);
 
-//Вызывает звуковое оповещение
+//Вызывает голосовое оповещение
 //Если не передать номер звука, будет пищать в течении 3-х секунд
 //Звуки: 
-//default - Баззер
+//default
 void call_voice_notification(int sound_number = 0);
 
 //Воспроизводит определённую музыку с определённого момента
@@ -24,4 +24,14 @@ void call_voice_notification(int sound_number = 0);
 //2 - Поезд
 //default - Город
 void play_music(int music_number, double position = 0);
+
+//Воспроизводит определённый звук с определённого момента
+//Если позиция не указана, то воспроизводится с начала
+//Звуки: 1 - пистолет
+//2 - автомат
+//3 - пулемет
+//4- чека гранаты
+//5 взрыв гранаты
+//101 - баззер
+//default - 0
 void play_sound(int sound_number, double position = 0);
