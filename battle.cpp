@@ -199,7 +199,6 @@ int Attack_Enemy(Gun *gun, Enemy *enemy = NULL)
 	gun->time_end_reload = 0;
 	g_resourses -= gun->cost;
 	play_sound(gun->sound_number);
-	//TODO: как-то определить урон и звук выстрела какой-нибудь
 	if (enemy == NULL)//промах
 		return 0;
 	if (cause_damage_enemy(enemy, gun->damage))
@@ -229,6 +228,7 @@ int generate_wave(int difficulty, int *enemies_wave)
 int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h, int custom_difficulty) {
 	//Вызываем оповещение о начале рейда
 	play_sound(101);
+	draw_blackout(window, renderer, { 0, 0, winsize_w, winsize_h }, 0, 128);
 	call_notificaton(window, renderer, (char*)(u8"Мы под атакой!")); 
 	//Загружаем текстуры
 	//Текстуры фона

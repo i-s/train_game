@@ -64,8 +64,8 @@ extern int change_cap_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
 bool g_have_open_town_before = false;
 
 //Громкость музыки и звука в игре. Должна принимать значения от 0 до 128.
-int g_music_volume = 100;
-int g_sound_volume = 100;
+int g_music_volume = 50;
+int g_sound_volume = 50;
 
 //Позиция фоновой музыки в игре
 double g_music_position = 0;
@@ -253,6 +253,18 @@ bool destroy_room(Room *room, int choosed_room, Room *rooms)
 	return true;
 }
 
+
+int get_type_room(Room rooms[], int button_flag)
+{
+	return rooms[button_flag - 1].type;
+}
+
+
+int get_level_room(Room rooms[], int button_flag)
+{
+	return rooms[button_flag - 1].level;
+}
+
 //работает с глобальной переменной g_rooms и ресурсами
 //возвращает:
 // уровень уникального(оружейная , связной) здания , если оно построено 
@@ -360,28 +372,30 @@ void Update_difficulty() {
 }
 
 //Отрисовывает все изображения на экран
-void Update(SDL_Window* window,SDL_Renderer* renderer, char* texts[], Background background, Room_Selecting room_selecting,
-			Alert alert, Room_icon room_icons[], Room rooms[], 
-			bool draw_cost = false) {
+void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Background background, Room_Selecting room_selecting,
+			Alert alert, Room_icon room_icons[], Room rooms[], SDL_Rect room_name_rect, 
+			int draw_room_name_level = -1, int draw_room_name_type = -1, bool draw_cost = false) {
 	draw_background(renderer, background);
 
 	//Рисуем все комнаты
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < 6; i++) 
 		draw_room(renderer, rooms[i]);
-	}
-
-	if (alert.active) {
+	
+	if (alert.active) 
 		draw_alert(renderer, alert);
-	}
-
 	//Рисуем рамку выделения комнаты
-	if (room_selecting.shown) {
+	if (room_selecting.shown) 
 		draw_room_selecting(renderer, room_selecting);
-	}
 
 	//Рисуем все иконки из массива сразу
-	for (int i = 0; i <= 7; i++) {
+	for (int i = 0; i <= 7; i++) 
 		draw_room_icon(renderer, room_icons[i]);
+
+	//рисуем имя выделенной комнаты
+	if (draw_room_name_level != -1 && draw_room_name_type != -1)
+	{
+		draw_text(window, renderer, texts[6 + draw_room_name_type], room_name_rect, 0, true);
+		//TODO: выводить вместе с именем уровень 
 	}
 
 	//рисуем рессурсы
@@ -559,6 +573,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	draw_background(renderer, background);
 
 	//Выделение комнаты
+	SDL_Rect room_selecting_name_rect = {574, 563, 165, 34};
 	SDL_Rect room_selecting_rect = { 0,0,231,150 };
 	Room_Selecting room_selecting;
 	room_selecting.rectangle = room_selecting_rect;
@@ -583,9 +598,19 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	char* text_cost_humans = new char[10];
 	char* text_cost_food = new char[10];
 	char* text_cost_resourses = new char[10];
+	char* text_room_level = new char[10];
+
+	char* farm_name = (char*)"Ферма";
+	char* factory_name = (char*)"Мастерская";
+	char* live_name = (char*)"Общага";
+	char* wearony_name = (char*)"Оружейная";
+	char* stock_name = (char*)"Склад";
+	char* radio_name = (char*)"Радио";
+	char* empty_name = (char*)"Пустая";
 
 	//Массив строк для удобной передачи в ф-ию
-	char* texts[6] = { text_humans, text_food, text_resourses, text_cost_humans, text_cost_food, text_cost_resourses };
+	char* texts[14] = { text_humans, text_food, text_resourses, text_cost_humans, text_cost_food, text_cost_resourses,
+		empty_name, farm_name, factory_name, live_name, wearony_name, stock_name, radio_name, text_room_level };
 
 	//Описание всех кнопок
 	SDL_Rect rect_button_train = { 289,68,52,74 };
@@ -632,17 +657,13 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		room_icons[7].rectangle = rect_room_delete;
 		room_icons[7].texture = room_delete_texture;
 	}
-/* загрузка других комнат
-	
-	
-	room_icons[3].rectangle = rect_room_icon_3;
-	room_icons[3].texture = farm1_icon_texture;
-*/
+
 	//Массив комнат
 	Room rooms[6];
 
-	//char* room_name{}
-		
+	
+
+	
 	//Заполняем массив комнат из глобального массива комнат
 	for (int i = 0; i < 6; i++) {
 		if (i < 3) {
@@ -674,6 +695,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	
 	int choosed_room = -1; //Какая комната выбрана в данный момент
 	bool draw_cost = false; // флаг вывода цены комнаты 1 лвла
+	int draw_room_name = -1; // какое имя комнаты печатать
+	int draw_room_name_type = -1;
+	int draw_room_name_level = -1;
 	bool draw_update_cost = false; // флаг вывода цены комнаты 2-3 лвла
 	int room_type = 0;//тип комнаты , для которой выводить цену
 	bool draw_cost_yes = false;//рисовать ли цену комнаты сейчас
@@ -715,7 +739,10 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			case 4:
 			case 5:
 			case 6: {
+				draw_room_name_type = get_type_room(rooms, button_flag);
+				draw_room_name_level = get_level_room(rooms, button_flag);
 				if (LKMPressed(event)) {
+					
 					choosed_room = button_flag;
 					was_button_room_pressed = true;
 				}
@@ -807,7 +834,6 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 
 						was_rooms_changed = build_room(&rooms[choosed_room - 1], room_type, choosed_room);
 						Define_Rooms_Textures(&rooms[choosed_room - 1], room_textures);
-						//TODO: доделать радио
 					}
 				}
 				break;
@@ -898,10 +924,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		//Если время до прибытия рейда > 0, отнимаем от него прошедшее время за цикл
 		if (g_time_before_raid > 0) {
 			g_time_before_raid -= DELTA * 0.001;
-			if (g_time_before_raid < 3.2 && was_alarm_called == false) {
+			if (g_time_before_raid < 3.2 && was_alarm_called == false && get_building_level(4) >= 1) {
 				play_sound(101);
 				was_alarm_called = true;
-				//TODO: Сделать сигнализацию о приближающемся рейде (звуки, текстуры)
 			}
 		}
 		else { //Если наступило время рейда
@@ -929,13 +954,16 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		}
 
 		//Отрисовываем кадр
-		Update(window,renderer, texts, background, room_selecting, alert,room_icons,rooms, 
-			draw_cost=draw_cost_yes);
+		Update(window,renderer, texts, background, room_selecting, alert,room_icons,rooms, room_selecting_name_rect,
+			draw_room_name_level, draw_room_name_type, draw_cost=draw_cost_yes);
 
-		//возвращаем флаги рисования цен назад
+		//возвращаем флаги назад
 		draw_cost = false;
 		draw_update_cost = false;
 		draw_cost_yes = false;
+		draw_room_name = -1;
+		draw_room_name_type = -1;
+		draw_room_name_level = -1;
 		
 		//Возвращаем нормальную текстуру фона, если никакая кнопка не нажата и фон изменялся
 		if (was_background_changed == true) {

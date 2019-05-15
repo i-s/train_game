@@ -57,6 +57,20 @@ void draw_text_box(SDL_Renderer* renderer, Text_box text_box) {
 	SDL_RenderCopy(renderer, text_box.texture, NULL, &text_box.rectangle);
 }
 
+
+void draw_res(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect texture_rect, int res_count)
+{
+	SDL_RenderCopy(renderer, texture, NULL, &texture_rect);
+
+	texture_rect.x += texture_rect.w;//двигаем прямоугольник, чтобы справа напечатать текст
+	char* text = new char[10];
+	_itoa_s(res_count, text, 10, 10);
+	int text_color;
+	if (res_count>=0)
+
+	draw_text(window, renderer, text, texture_rect, 4);
+}
+
 //Рисует Town_block, если town_block.shown == истина.
 void draw_town_block(SDL_Renderer* renderer, Town_block town_block) {
 	if (town_block.shown) { SDL_RenderCopy(renderer, town_block.texture, NULL, &town_block.rectangle); }
@@ -114,7 +128,7 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background b
 	if(train.shown){ draw_train(renderer, train); }	//Не отрисовываем поезд, если он не должен быть виден
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
-	if (train.shown) { draw_text_box(renderer, text_box); }
+	if (train.shown && get_building_level(4) >= 3){ draw_text_box(renderer, text_box); }
 	draw_background_shelter(renderer, background_shelter);
 	draw_town_block(renderer, town_block);
 
@@ -162,9 +176,6 @@ void Define_Train_Type_And_Delay_And_Speed(Train* train, int difficulty, SDL_Tex
 	(*train).speed = 1 + rand() % 30 / float(10);
 	//printf_s("train_type = %d\n", (*train).type);
 }
-
-
-char* get_delta();
 
 //Экран "поезд".
 //Возврат -1 -> выход из программы с ошибкой (не нажата кнопка город)
@@ -241,6 +252,20 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	SDL_Texture* town_block_texture = SDL_CreateTextureFromSurface(renderer, town_block_surf);
 	SDL_FreeSurface(town_block_surf);
 
+	//картиночки ресурсов
+	SDL_Surface* people_surf = SDL_LoadBMP("resourses/textures/people.bmp");
+	SDL_SetColorKey(people_surf, 1, SDL_MapRGB(people_surf->format, 0, 255, 0));
+	SDL_Texture* people_texture = SDL_CreateTextureFromSurface(renderer, people_surf);
+	SDL_FreeSurface(people_surf);
+	SDL_Surface* food_surf = SDL_LoadBMP("resourses/textures/food.bmp");
+	SDL_SetColorKey(food_surf, 1, SDL_MapRGB(food_surf->format, 0, 255, 0));
+	SDL_Texture* food_texture = SDL_CreateTextureFromSurface(renderer, food_surf);
+	SDL_FreeSurface(food_surf);
+	SDL_Surface* res_surf = SDL_LoadBMP("resourses/textures/res.bmp");
+	SDL_SetColorKey(res_surf, 1, SDL_MapRGB(res_surf->format, 0, 255, 0));
+	SDL_Texture* res_texture = SDL_CreateTextureFromSurface(renderer, res_surf);
+	SDL_FreeSurface(res_surf);
+
 
 	//Рисуем задний план
 	SDL_Rect bground_rectangle = { 0,0,winsize_w,winsize_h };
@@ -313,10 +338,10 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	int flag_line = 0; //Флаг, который равен 1, когда мы дошли до конца пути.
 	int current_path = start_position; //Хранит номер текущего пути.
 
-	//Начальное положение поезда:
-	/*train.coord.x = main_path[current_path].point1.x;
-	train.coord.y = main_path[current_path].point1.y;*/
-
+	//отображение изменения рессурсов от поезда 
+	SDL_Rect people_rect = {160, 445, 50, 50 };
+	SDL_Rect food_rect = {320, 445, 50, 50 };
+	SDL_Rect res_rect = {480, 445, 50, 50 };
 	//Время запуска программы
 	bool traincreated = false;
 
@@ -339,6 +364,8 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 
 	SDL_Rect train_rectangle = { main_path[start_position].point1.x, main_path[start_position].point1.y,20,80 };
 	Train train;
+
+	int radio_level = get_building_level(4);
 
 	//Играем музыку для поезда
 	play_music(2);
@@ -485,29 +512,48 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		if (train.reached_town) {
 			switch (train.type) {
 			case 0: { //Если прибыл обычный поезд, то...
-				call_notificaton(window,renderer,(char*)("Прибыл поезд!"),(char*)("Результат:"), 2);
 				int delta_food = -10 + rand() % 50;
 				int delta_res = -10 + rand() % 50;
+
+				draw_blackout(window, renderer, { 0, 0, winsize_w, winsize_h }, 0, 128);
+				draw_res(window, renderer, food_texture, food_rect, delta_food);
+				draw_res(window, renderer, res_texture, res_rect, delta_res);
+				call_notificaton(window,renderer,(char*)("Прибыл поезд!"),(char*)("Результат:"), 2);
 
 				g_food += delta_food;
 				g_resourses += delta_res;
 				break;
 			}
 			case 1: {//Если прибыл торговый поезд, то...
+				int delta_food = 10 + rand() % 100;
+				int delta_res = 10 + rand() % 100;
+
+				draw_blackout(window, renderer, { 0, 0, winsize_w, winsize_h }, 0, 128);
+				draw_res(window, renderer, food_texture, food_rect, delta_food);
+				draw_res(window, renderer, res_texture, res_rect, delta_res);
 				call_notificaton(window, renderer, (char*)("Прибыл торговый поезд!"),(char*)("Произведен обмен:"),2);
-				g_food += 10 + rand() % 100;
-				g_resourses += 10 + rand() % 100;
+				g_food += delta_food;
+				g_resourses += delta_res;
 				break;
 			}
 			case 2: {//Если прибыл пассажирский поезд, то...
+				int delta_people = -1 + rand() % 10;
+				int delta_food = -50 + rand() % 60;
+				int delta_res = -10 + rand() % 20;
+
+				draw_blackout(window, renderer, { 0, 0, winsize_w, winsize_h }, 0, 128);
+				draw_res(window, renderer, people_texture, people_rect, delta_people);
+				draw_res(window, renderer, food_texture, food_rect, delta_food);
+				draw_res(window, renderer, res_texture, res_rect, delta_res);
 				call_notificaton(window, renderer, (char*)("Прибыл пассажирский поезд!"),(char*)("Результат:"),2);
-				g_humans += -1 + rand() % 10;
-				g_food += -50 + rand() % 60;
-				g_resourses += -10 + rand() % 20;
+				g_humans += delta_people;
+				g_food += delta_food;
+				g_resourses += delta_res;
 				break;
 			}
 			case 3: {//Если прибыл рейдерский поезд, то...
 				play_sound(101);
+				draw_blackout(window, renderer, { 0, 0, winsize_w, winsize_h }, 0, 128);
 				call_notificaton(window, renderer, (char*)("Прибыл поезд с засадой!"),NULL,3);
 				has_raid_started = true;
 				break;
@@ -575,6 +621,9 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	SDL_DestroyTexture(lever_texture);
 	SDL_DestroyTexture(lever_switched_texture);
 	SDL_DestroyTexture(town_block_texture);
+	SDL_DestroyTexture(food_texture);
+	SDL_DestroyTexture(res_texture);
+	SDL_DestroyTexture(people_texture);
 
 	if (town_button_pressed) {
 		//Возвращаем в глобальные переменные состояние рычагов

@@ -33,6 +33,11 @@ void draw_text(SDL_Window* window, SDL_Renderer* renderer, char* text, SDL_Rect 
 		back_color = { 245, 245, 245 };
 		break;
 	}
+	case 4: { //Вывод черного текста на белом фоне
+		fore_color = { 0,0,0 };
+		back_color = { 255, 255, 255 };
+		break;
+	}
 	default: { //Если цвет не определён специально (text_color = 0) выводим жёлые буквы на сером фоне
 		fore_color = { 255,216,0 };
 		back_color = { 128, 128, 128 };
@@ -65,11 +70,6 @@ void call_notificaton(SDL_Window* window, SDL_Renderer* renderer, char* text, ch
 	SDL_Texture* notification_box_texture = SDL_CreateTextureFromSurface(renderer, notification_box_surf);
 	SDL_FreeSurface(notification_box_surf);
 
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND); //Разрешаем смешивание цветов
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
-	SDL_Rect notification_background = {0,0,winsize_w,winsize_h}; //Фон, размерами с окно
-	SDL_RenderFillRect(renderer, &notification_background); //Отрисовываем затемнение окна
-
 	SDL_Rect notification_box = {200,250,400,100}; //Окошко для текста
 	SDL_RenderCopy(renderer, notification_box_texture, NULL, &notification_box);
 	//После отрисовки границы немного уменьшаем размеры box-а, чтобы текст на заходил на рамки
@@ -84,7 +84,6 @@ void call_notificaton(SDL_Window* window, SDL_Renderer* renderer, char* text, ch
 	}
 	SDL_RenderPresent(renderer);
 	SDL_Delay(3000); //Задержка на 3 секунды
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE); //Хватит смешивать цвета!
 	//Выгружаем текстуры
 	SDL_DestroyTexture(notification_box_texture);
 }
