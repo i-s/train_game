@@ -36,6 +36,8 @@ struct Train {
 	float angle;
 	Point coord;
 	float speed;
+	float speed_x;
+	float speed_y;
 	bool shown; //Нужно ли отображать\двигать поезд: 0 - нет, 1 - да
 	int type; // Тип поезда: 0 - обычный, 1 - торговый, 2 - с людьми, 3 - рейдерский
 	bool reached_town; //Достиг ли поезд города

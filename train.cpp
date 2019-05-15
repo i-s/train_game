@@ -85,13 +85,13 @@ void draw_lever(SDL_Renderer* renderer, Lever lever) {
 }
 
 //Считаем скорость
-void CountSpeed(Line path, float speed, float* speed_x, float* speed_y, float* angle) {
+void CountSpeed(Line path, Train *train) {
 	float sin_a, cos_a; // a - угол между скоростью и осью oY
 
 	//Считаем синус и косинус угла
 	sin_a = (fabsf(path.point2.x - path.point1.x)) / (sqrt((path.point2.x - path.point1.x)*(path.point2.x - path.point1.x) + (path.point2.y - path.point1.y)*(path.point2.y - path.point1.y)));
 	cos_a = sqrt(1 - (sin_a * sin_a));
-	*angle = asin(sin_a) * 180 / M_PI;
+	train->angle = asin(sin_a) * 180 / M_PI;
 
 	//Выясняем, куда движется поезд. Если "znak" = 1, то в сторону увеличения этой координаты, если = -1, то в сторону уменьшения.
 	int znak_x, znak_y;
@@ -105,8 +105,8 @@ void CountSpeed(Line path, float speed, float* speed_x, float* speed_y, float* a
 		znak_y = -1;
 
 	//Считаем проекции скорости
-	*speed_x = speed * sin_a * znak_x;
-	*speed_y = speed * cos_a * znak_y;
+	train->speed_x = train->speed * sin_a * znak_x;
+	train->speed_y = train->speed * cos_a * znak_y;
 }
 
 //Возвращает расстояние до конца пути
@@ -117,9 +117,9 @@ float Rast_to_End(Line path, Point current_coord, float speed) {
 }
 
 //Двигает поезд на speed_x и speed_y.
-void Move_Train(float speed_x, float speed_y, Point* train_position) {
-	train_position->x += speed_x;
-	train_position->y += speed_y;
+void Move_Train(Train *train) {
+	train->coord.x += train->speed_x;
+	train->coord.y += train->speed_y;
 }
 
 //Отрисовываем фон, поезд, рычаги.
@@ -345,7 +345,6 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	//Время запуска программы
 	bool traincreated = false;
 
-	float speed_x, speed_y; //Скорость по x и y для поезда
 	float rast; //Расстояние до конечной точки маршрута
 
 	bool town_button_pressed = false; //Нажата ли кнопка "город"?
@@ -485,13 +484,13 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 			}
 
 			if (!have_counted_speed) {
-				CountSpeed(main_path[current_path], train.speed, &speed_x, &speed_y, &train.angle);
-				if (speed_x > 0) {
-					if (speed_y >= 0) {
+				CountSpeed(main_path[current_path], &train);
+				if (train.speed_x > 0) {
+					if (train.speed_y >= 0) {
 						train.angle = 360 - train.angle;
 					}
 				}
-				if (speed_y < 0) {
+				if (train.speed_y < 0) {
 					train.angle = train.angle + 180;
 				}
 				have_counted_speed = true;
@@ -502,7 +501,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 				flag_line = 1;
 			}
 			else {
-				Move_Train(speed_x, speed_y, &train.coord);
+				Move_Train(&train);
 				train.rectangle.x = train.coord.x;
 				train.rectangle.y = train.coord.y;
 				flag_line = 0;
