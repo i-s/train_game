@@ -1,4 +1,4 @@
-#include <SDL.h>
+п»ї#include <SDL.h>
 #include <stdio.h>
 #include "battle.h"
 //#include <time.h>
@@ -6,10 +6,10 @@
 extern bool QUIT;
 extern int winsize_w, winsize_h;
 
-//Проигрывает интро
+//РџСЂРѕРёРіСЂС‹РІР°РµС‚ РёРЅС‚СЂРѕ
 void Intro(SDL_Window* window, SDL_Renderer* renderer) {
-	//Загружаем текстуры
-	//Фоны кадров
+	//Р—Р°РіСЂСѓР¶Р°РµРј С‚РµРєСЃС‚СѓСЂС‹
+	//Р¤РѕРЅС‹ РєР°РґСЂРѕРІ
 	SDL_Surface* frame1_surf = SDL_LoadBMP("resourses/textures/intro/frame1.bmp");
 	SDL_SetColorKey(frame1_surf, 1, SDL_MapRGB(frame1_surf->format, 0, 255, 0));
 	SDL_Texture* frame1_texture = SDL_CreateTextureFromSurface(renderer, frame1_surf);
@@ -34,7 +34,7 @@ void Intro(SDL_Window* window, SDL_Renderer* renderer) {
 	SDL_SetColorKey(frame6_surf, 1, SDL_MapRGB(frame6_surf->format, 0, 255, 0));
 	SDL_Texture* frame6_texture = SDL_CreateTextureFromSurface(renderer, frame6_surf);
 	SDL_FreeSurface(frame6_surf);
-	//Картинок
+	//РљР°СЂС‚РёРЅРѕРє
 	SDL_Surface* picture1_surf = SDL_LoadBMP("resourses/textures/intro/picture1.bmp");
 	SDL_SetColorKey(picture1_surf, 1, SDL_MapRGB(picture1_surf->format, 0, 255, 0));
 	SDL_Texture* picture1_texture = SDL_CreateTextureFromSurface(renderer, picture1_surf);
@@ -52,26 +52,26 @@ void Intro(SDL_Window* window, SDL_Renderer* renderer) {
 	SDL_Texture* picture4_texture = SDL_CreateTextureFromSurface(renderer, picture4_surf);
 	SDL_FreeSurface(picture4_surf);
 	
-	//Массив текстур кадров
+	//РњР°СЃСЃРёРІ С‚РµРєСЃС‚СѓСЂ РєР°РґСЂРѕРІ
 	SDL_Texture* frames[6] = { frame1_texture ,frame2_texture ,frame3_texture ,frame4_texture ,frame5_texture ,frame6_texture };
-	//Массив текстур картинок
+	//РњР°СЃСЃРёРІ С‚РµРєСЃС‚СѓСЂ РєР°СЂС‚РёРЅРѕРє
 	SDL_Texture* pictures[6] = { picture1_texture,picture2_texture,picture3_texture,picture4_texture,picture4_texture,picture4_texture };
 
-	//Сколько миллисекунд должен показываться тот или иной кадр.
+	//РЎРєРѕР»СЊРєРѕ РјРёР»Р»РёСЃРµРєСѓРЅРґ РґРѕР»Р¶РµРЅ РїРѕРєР°Р·С‹РІР°С‚СЊСЃСЏ С‚РѕС‚ РёР»Рё РёРЅРѕР№ РєР°РґСЂ.
 	int frame_time[6] = {6000,3000,6000,6000,6000,6000};
 
-	int current_frame = 0; //Текущий кадр
+	int current_frame = 0; //РўРµРєСѓС‰РёР№ РєР°РґСЂ
 
 	SDL_Event event;
 
-	bool quit = false; //Флаг выхода из цикла (завершения интро)
+	bool quit = false; //Р¤Р»Р°Рі РІС‹С…РѕРґР° РёР· С†РёРєР»Р° (Р·Р°РІРµСЂС€РµРЅРёСЏ РёРЅС‚СЂРѕ)
 
-	int start_intro_time = SDL_GetTicks(); //Время начала показа интро
-	int current_time; //Текущее время
-	int last_time = start_intro_time; //Последнее хранимое время
-	int last_frame_time=0; //Сколько уже показывается последний кадр
-	int time_since_intro_started = 0; //Сколько времени прошло с начала интро
-	int delta_time; //Разница во времени
+	int start_intro_time = SDL_GetTicks(); //Р’СЂРµРјСЏ РЅР°С‡Р°Р»Р° РїРѕРєР°Р·Р° РёРЅС‚СЂРѕ
+	int current_time; //РўРµРєСѓС‰РµРµ РІСЂРµРјСЏ
+	int last_time = start_intro_time; //РџРѕСЃР»РµРґРЅРµРµ С…СЂР°РЅРёРјРѕРµ РІСЂРµРјСЏ
+	int last_frame_time=0; //РЎРєРѕР»СЊРєРѕ СѓР¶Рµ РїРѕРєР°Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»РµРґРЅРёР№ РєР°РґСЂ
+	int time_since_intro_started = 0; //РЎРєРѕР»СЊРєРѕ РІСЂРµРјРµРЅРё РїСЂРѕС€Р»Рѕ СЃ РЅР°С‡Р°Р»Р° РёРЅС‚СЂРѕ
+	int delta_time; //Р Р°Р·РЅРёС†Р° РІРѕ РІСЂРµРјРµРЅРё
 
 	SDL_Rect full_screen = { 0,0,winsize_w,winsize_h };
 	SDL_Rect picture_rect = {200,100,400,199};
@@ -86,56 +86,55 @@ void Intro(SDL_Window* window, SDL_Renderer* renderer) {
 			quit = true;
 		}
 
-		bool need_to_change_frame = false; //Флаг, отвечающий за смену кадра
+		bool need_to_change_frame = false; //Р¤Р»Р°Рі, РѕС‚РІРµС‡Р°СЋС‰РёР№ Р·Р° СЃРјРµРЅСѓ РєР°РґСЂР°
 
-		if (last_frame_time < frame_time[current_frame]){ //Если текущий кадр показывают меньше, чем нужно
-			//Показываем кадр
+		if (last_frame_time < frame_time[current_frame]){ //Р•СЃР»Рё С‚РµРєСѓС‰РёР№ РєР°РґСЂ РїРѕРєР°Р·С‹РІР°СЋС‚ РјРµРЅСЊС€Рµ, С‡РµРј РЅСѓР¶РЅРѕ
+			//РџРѕРєР°Р·С‹РІР°РµРј РєР°РґСЂ
 			SDL_RenderCopy(renderer, frames[current_frame], NULL, &full_screen);
 			SDL_RenderCopy(renderer, pictures[current_frame], NULL, &picture_rect);
 		}
 		else {
 			need_to_change_frame = true;
-			if (current_frame < 6) { //Если остались кадры для отрисовки
-				current_frame++; //...меняем кадр
+			if (current_frame < 6) { //Р•СЃР»Рё РѕСЃС‚Р°Р»РёСЃСЊ РєР°РґСЂС‹ РґР»СЏ РѕС‚СЂРёСЃРѕРІРєРё
+				current_frame++; //...РјРµРЅСЏРµРј РєР°РґСЂ
 			}
 			else {
-				quit = true; //Выходим из отрисовки
+				quit = true; //Р’С‹С…РѕРґРёРј РёР· РѕС‚СЂРёСЃРѕРІРєРё
 			}
 		}
 
-		if (time_since_intro_started < 1000) { //Плавный переход из чёрного в картинку в течении первых полторы секунды интро
+		if (time_since_intro_started < 1000) { //РџР»Р°РІРЅС‹Р№ РїРµСЂРµС…РѕРґ РёР· С‡С‘СЂРЅРѕРіРѕ РІ РєР°СЂС‚РёРЅРєСѓ РІ С‚РµС‡РµРЅРёРё РїРµСЂРІС‹С… РїРѕР»С‚РѕСЂС‹ СЃРµРєСѓРЅРґС‹ РёРЅС‚СЂРѕ
 			int i = 255 - int((float(time_since_intro_started) / 1000) * 255);
 			draw_blackout(window, renderer, full_screen, 0, i);
 			//printf_s("%d %d\n", time_since_intro_started,i);
 		}
 		SDL_RenderPresent(renderer);
 
-		//Работа с временем		
+		//Р Р°Р±РѕС‚Р° СЃ РІСЂРµРјРµРЅРµРј		
 		SDL_Delay(10);
-		current_time = SDL_GetTicks(); //Обновляем текущее время
-		delta_time = current_time - last_time; //Высчитываем разницу между последним сохранённым временем и текущим
-		last_time = current_time; //Запоминаем текущее время
-		if (need_to_change_frame) { //Если нужно сменить кадр
-			last_frame_time = 0; //...сбрасываем время этого кадра на 0
+		current_time = SDL_GetTicks(); //РћР±РЅРѕРІР»СЏРµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ
+		delta_time = current_time - last_time; //Р’С‹СЃС‡РёС‚С‹РІР°РµРј СЂР°Р·РЅРёС†Сѓ РјРµР¶РґСѓ РїРѕСЃР»РµРґРЅРёРј СЃРѕС…СЂР°РЅС‘РЅРЅС‹Рј РІСЂРµРјРµРЅРµРј Рё С‚РµРєСѓС‰РёРј
+		last_time = current_time; //Р—Р°РїРѕРјРёРЅР°РµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ
+		if (need_to_change_frame) { //Р•СЃР»Рё РЅСѓР¶РЅРѕ СЃРјРµРЅРёС‚СЊ РєР°РґСЂ
+			last_frame_time = 0; //...СЃР±СЂР°СЃС‹РІР°РµРј РІСЂРµРјСЏ СЌС‚РѕРіРѕ РєР°РґСЂР° РЅР° 0
 		}
 		else {
-			last_frame_time += delta_time; //Увеличиваем время текущего кадра
+			last_frame_time += delta_time; //РЈРІРµР»РёС‡РёРІР°РµРј РІСЂРµРјСЏ С‚РµРєСѓС‰РµРіРѕ РєР°РґСЂР°
 		}
-		time_since_intro_started += delta_time;//Увеличиваем общее время интро
+		time_since_intro_started += delta_time;//РЈРІРµР»РёС‡РёРІР°РµРј РѕР±С‰РµРµ РІСЂРµРјСЏ РёРЅС‚СЂРѕ
 		//printf_s("%d\n", last_frame_time);
 	}
 
-	//Уход в чёрное
+	//РЈС…РѕРґ РІ С‡С‘СЂРЅРѕРµ
 	int i = 0;
 	while (i < 45) {
 		i++;
-		printf_s("%d\n",i);
 		draw_blackout(window, renderer, full_screen, 0, i);
 		SDL_RenderPresent(renderer);
 		SDL_Delay(10);
 	}
 
-	//Выгружаем текстуры из памяти
+	//Р’С‹РіСЂСѓР¶Р°РµРј С‚РµРєСЃС‚СѓСЂС‹ РёР· РїР°РјСЏС‚Рё
 	for (int i = 0; i < 6; i++) {
 		SDL_DestroyTexture(frames[i]);
 	}

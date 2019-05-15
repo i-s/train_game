@@ -77,7 +77,7 @@ void CountSpeed(Line path, Train *train) {
 	//Считаем синус и косинус угла
 	sin_a = (fabsf(path.point2.x - path.point1.x)) / (sqrt((path.point2.x - path.point1.x)*(path.point2.x - path.point1.x) + (path.point2.y - path.point1.y)*(path.point2.y - path.point1.y)));
 	cos_a = sqrt(1 - (sin_a * sin_a));
-	(*train).angle = asin(sin_a) * 180 / M_PI;
+	train->angle = asin(sin_a) * 180 / M_PI;
 
 	//Выясняем, куда движется поезд. Если "znak" = 1, то в сторону увеличения этой координаты, если = -1, то в сторону уменьшения.
 	int znak_x, znak_y;
@@ -91,8 +91,8 @@ void CountSpeed(Line path, Train *train) {
 		znak_y = -1;
 
 	//Считаем проекции скорости
-	(*train).speed_x = (*train).speed * sin_a * znak_x;
-	(*train).speed_y = (*train).speed * cos_a * znak_y;
+	train->speed_x = train->speed * sin_a * znak_x;
+	train->speed_y = train->speed * cos_a * znak_y;
 }
 
 //Возвращает расстояние до конца пути

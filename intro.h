@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
-//Проигрывает интро
+//РџСЂРѕРёРіСЂС‹РІР°РµС‚ РёРЅС‚СЂРѕ
 void Intro(SDL_Window* window, SDL_Renderer* renderer);
