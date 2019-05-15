@@ -12,7 +12,11 @@
 #define NUMBER_OF_ENEMIES 3
 #define NUMBER_OF_TYPES_OF_ENEMIES 1
 
-
+//bool draw = false; // рисоваить ее или нет
+//int sound_number; номер звука
+//SDL_Rect init_rect; // где свавнится
+//SDL_Rect current_rect; // где сейчас
+//SDL_Texture* texture; // текстура
 struct Grenade 
 {
 	bool draw = false;
@@ -187,7 +191,6 @@ int check_mouse_on_rect(SDL_Rect rectangle, SDL_Event event)
 	return 0;
 }
 
-
 //атакуем зомби из оружия возвращает 1 , если зомби не умер после атаки, 
 // -1 , если умер, 
 // 0, если промах
@@ -218,7 +221,6 @@ int generate_wave(int difficulty, int *enemies_wave)
 		enemies_wave[i] =  rand() % (range_max - range_min + 1) + range_min;
 		enemies += enemies_wave[i];
 	}
-
 	return enemies;
 }
 
@@ -362,15 +364,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	}
 	//Текущее оружее 1 - пистолет, 2 - автомат, 3 - пулемет , 4 - граната
 	int gun_type = 1;
-	int weapony_level = 0;//уровень оружейной
-	for (int i = 0; i < 2; i++)//обходим все комнаты
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			if (g_rooms[i][j][0] == 4)//если построена оружейная
-				weapony_level = g_rooms[i][j][1]; // установим уровень оружейной
-		}
-	}
+	int weapony_level = get_building_level(4);//уровень оружейной
 	Grenade grenage;
 	grenage.init_rect = {};
 	grenage.texture = grenade_texture;
@@ -434,6 +428,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 
 		if (LKMPressed(event))//обработка нажатий
 		{
+			//кнопки
 			for (int i = 0; i <= 4; i++) 
 			{
 				button_flag = CheckIfMouseOnButton(event, i, buttons);

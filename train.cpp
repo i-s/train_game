@@ -163,6 +163,9 @@ void Define_Train_Type_And_Delay_And_Speed(Train* train, int difficulty, SDL_Tex
 	//printf_s("train_type = %d\n", (*train).type);
 }
 
+
+char* get_delta();
+
 //Экран "поезд".
 //Возврат -1 -> выход из программы с ошибкой (не нажата кнопка город)
 //Возврат 0 -> была нажата кнопка город
@@ -482,19 +485,22 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		if (train.reached_town) {
 			switch (train.type) {
 			case 0: { //Если прибыл обычный поезд, то...
-				call_notificaton(window,renderer,(char*)("Прибыл поезд!"));
-				g_food += -10 + rand() % 50;
-				g_resourses += -10 + rand() % 50;
+				call_notificaton(window,renderer,(char*)("Прибыл поезд!"),(char*)("Результат:"), 2);
+				int delta_food = -10 + rand() % 50;
+				int delta_res = -10 + rand() % 50;
+
+				g_food += delta_food;
+				g_resourses += delta_res;
 				break;
 			}
 			case 1: {//Если прибыл торговый поезд, то...
-				call_notificaton(window, renderer, (char*)("Прибыл торговый поезд!"),(char*)("Ожидается получение ресурсов!"),2);
+				call_notificaton(window, renderer, (char*)("Прибыл торговый поезд!"),(char*)("Произведен обмен:"),2);
 				g_food += 10 + rand() % 100;
 				g_resourses += 10 + rand() % 100;
 				break;
 			}
 			case 2: {//Если прибыл пассажирский поезд, то...
-				call_notificaton(window, renderer, (char*)("Прибыл пассажирский поезд!"),(char*)("Ожидается пополнение численности!"),2);
+				call_notificaton(window, renderer, (char*)("Прибыл пассажирский поезд!"),(char*)("Результат:"),2);
 				g_humans += -1 + rand() % 10;
 				g_food += -50 + rand() % 60;
 				g_resourses += -10 + rand() % 20;

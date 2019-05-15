@@ -16,22 +16,6 @@ struct Background {
 	SDL_Rect rectangle;
 };
 
-//SDL_Texture* texture;SDL_Rect rectangle;int level;int type;int min_humans;int cost_humans;int cost_humans;
-//min_humans - мин кол-во людей для постройки
-//cost_foods - сколько еды стоит
-//cost_resourses - сколько ресурсов стоит
-struct Room
-{
-	SDL_Texture* texture;
-	SDL_Rect rectangle;
-	int level;
-	int type;
-	int min_humans;
-	int cost_foods;
-	int cost_resourses;
-};
-
-
 //SDL_Texture* texture;SDL_Rect rectangle;bool shown;
 struct Room_Selecting {
 	SDL_Texture* texture;
@@ -51,6 +35,20 @@ struct Room_icon {
 	SDL_Rect rectangle;
 };
 
+//SDL_Texture* texture;SDL_Rect rectangle;int level;int type;int min_humans;int cost_humans;int cost_humans;
+//min_humans - мин кол-во людей для постройки
+//cost_foods - сколько еды стоит
+//cost_resourses - сколько ресурсов стоит
+struct Room
+{
+	SDL_Texture* texture;
+	SDL_Rect rectangle;
+	int level;
+	int type;
+	int min_humans;
+	int cost_foods;
+	int cost_resourses;
+};
 
 //char path[100];char name[50];SDL_Texture* texture;bool chroma_key;
 struct Texture {
@@ -67,3 +65,9 @@ void Update_resourses();
 
 //Изменяет сложность игры по формулам
 void Update_difficulty();
+
+//работает с глобальной переменной g_rooms
+//возвращает:
+// уровень уникального(оружейная , связной) здания , если оно построено 
+// 0, если нет  
+int get_building_level(int building_type);
