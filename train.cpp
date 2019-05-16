@@ -132,9 +132,9 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background b
 	draw_background_shelter(renderer, background_shelter);
 	draw_town_block(renderer, town_block);
 
-	draw_number_text(window, renderer, g_humans, g_recthumans);
-	draw_number_text(window, renderer, g_food, g_rectfood);
-	draw_number_text(window, renderer, g_resourses, g_rectresourses);
+	draw_number_text(window, renderer, g_humans, g_recthumans, check_full_stock(0) + 2, true);
+	draw_number_text(window, renderer, g_food, g_rectfood, check_full_stock(1) + 2, true);
+	draw_number_text(window, renderer, g_resourses, g_rectresourses, check_full_stock(2) + 2, true);
 
 	SDL_RenderPresent(renderer);
 }

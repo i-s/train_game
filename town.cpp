@@ -59,6 +59,7 @@ extern bool QUIT;
 extern float income_from_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
 extern int cost_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
 extern int change_cap_rooms[COUNT_ROOMS][MAX_ROOM_LEVEL][3];
+extern Room_info room_info[6];
 
 //Запускался ли экран "город" до этого момента
 bool g_have_open_town_before = false;
@@ -294,6 +295,22 @@ int check_availability_res(int room_type, int room_level = 1)
 	return 0;
 }
 
+//проверяет склад на переполнение, принимает номер рес-а 
+//если он забит ,возвращает 1, иначе -2
+int check_full_stock(int res)
+{
+	if (res == 0 && g_humans >= g_humans_cap) {
+		return 1;
+	}
+	else if (res == 1 && g_food >= g_food_cap) {
+		return 1;
+	}
+	else if (res == 2 && g_resourses >= g_resourses_cap){
+		return 1;
+	}
+	return -2;
+}
+
 //Определяет время до следующего рейда
 int get_new_battle_time() {
 	return 10;
@@ -374,7 +391,8 @@ void Update_difficulty() {
 //Отрисовывает все изображения на экран
 void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Background background, Room_Selecting room_selecting,
 			Alert alert, Room_icon room_icons[], Room rooms[], SDL_Rect room_name_rect, 
-			int draw_room_name_level = -1, int draw_room_name_type = -1, bool draw_cost = false) {
+			int draw_room_name_level = -1, int draw_room_name_type = -1, bool draw_cost = false,
+			int draw_nores = 0,int draw_room_info = -1) {
 	draw_background(renderer, background);
 
 	//Рисуем все комнаты
@@ -397,16 +415,23 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Backgroun
 		draw_text(window, renderer, texts[6 + draw_room_name_type], room_name_rect, 0, true);
 		//TODO: выводить вместе с именем уровень 
 	}
+	if (draw_room_info != -1)
+	{
+		//TODO: рисуем картиночки информации где-то над иконкой
+	}
 
 	//рисуем рессурсы
-	draw_number_text(window, renderer, g_humans, g_recthumans);
-	draw_number_text(window, renderer, g_food, g_rectfood);
-	draw_number_text(window, renderer, g_resourses, g_rectresourses);
+	draw_number_text(window, renderer, g_humans, g_recthumans, check_full_stock(0) + 2, true);
+	draw_number_text(window, renderer, g_food, g_rectfood, check_full_stock(1) + 2, true);
+	draw_number_text(window, renderer, g_resourses, g_rectresourses, check_full_stock(2) +2, true);
 	//рисует кол-во рессурсов нужное для апгрейта/строительства комнаты
 	if (draw_cost) {
-		draw_text(window, renderer, texts[3], rect_cost_humans,0,true);
-		draw_text(window, renderer, texts[4], rect_cost_food,0,true);
-		draw_text(window, renderer, texts[5], rect_cost_resourses,0,true);
+		if(draw_nores)
+			draw_text(window, renderer, texts[13 + draw_nores], room_name_rect, 0, true);
+
+		draw_text(window, renderer, texts[3], rect_cost_humans, 0,true);
+		draw_text(window, renderer, texts[4], rect_cost_food, 0,true);
+		draw_text(window, renderer, texts[5], rect_cost_resourses, 0,true);
 	}
 	SDL_RenderPresent(renderer);
 }
@@ -608,9 +633,14 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	char* radio_name = (char*)"Радио";
 	char* empty_name = (char*)"Пустая";
 
+	char* text_nofood = (char*)"Мало еды";
+	char* text_nopeople = (char*)"Мало людей";
+	char* text_nores = (char*)"Мало рес-ов";
+
 	//Массив строк для удобной передачи в ф-ию
-	char* texts[14] = { text_humans, text_food, text_resourses, text_cost_humans, text_cost_food, text_cost_resourses,
-		empty_name, farm_name, factory_name, live_name, wearony_name, stock_name, radio_name, text_room_level };
+	char* texts[17] = { text_humans, text_food, text_resourses, text_cost_humans, text_cost_food, text_cost_resourses,
+		empty_name, farm_name, factory_name, live_name, wearony_name, stock_name, radio_name, text_room_level,
+		text_nopeople, text_nofood, text_nores};
 
 	//Описание всех кнопок
 	SDL_Rect rect_button_train = { 289,68,52,74 };
@@ -694,6 +724,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	int go_to_train = false; //Флаг, отвечающий за переход к экрану "поезд"
 	
 	int choosed_room = -1; //Какая комната выбрана в данный момент
+	int draw_room_info = -1;//для вывода инфо о комнта опре типа
 	bool draw_cost = false; // флаг вывода цены комнаты 1 лвла
 	int draw_room_name = -1; // какое имя комнаты печатать
 	int draw_room_name_type = -1;
@@ -701,6 +732,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	bool draw_update_cost = false; // флаг вывода цены комнаты 2-3 лвла
 	int room_type = 0;//тип комнаты , для которой выводить цену
 	bool draw_cost_yes = false;//рисовать ли цену комнаты сейчас
+	int draw_nores = -1; //флаг нехватки какого-то ресурса для отрисовки его на экран
 
 	int radio_level = get_building_level(6);
 	
@@ -840,6 +872,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			}
 			case 13: 
 			{ 
+				room_type = rooms[choosed_room - 1].type;
 				draw_update_cost = true;
 				if (LKMPressed(event)) {//Нажатие на иконку апгрейда
 					if (choosed_room > -1  //Команта выбрана
@@ -941,24 +974,30 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		//_itoa_s(int(g_resourses), text_resourses, 10, 10);
 
 		if (draw_cost) {//цена комнаты 1 лвл
+			draw_room_info = room_type;//если просят цену покажеи и другую инфу о комнате
 			_itoa_s(int(cost_rooms[room_type - 1][0][0]), text_cost_humans, 10, 10);
 			_itoa_s(int(cost_rooms[room_type - 1][0][1]), text_cost_food, 10, 10);
 			_itoa_s(int(cost_rooms[room_type - 1][0][2]), text_cost_resourses, 10, 10);
 			draw_cost_yes = true;
+			//если ресурсов не хватает
+			draw_nores = check_availability_res(room_type);
 		}
 		if (draw_update_cost && choosed_room > 0 && rooms[choosed_room - 1].type != 0 && rooms[choosed_room - 1].level != 3 && choosed_room != -1) {//цена апгрейда
 			_itoa_s(int(cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][0]), text_cost_humans, 10, 10);
 			_itoa_s(int(cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][1]), text_cost_food, 10, 10);
 			_itoa_s(int(cost_rooms[rooms[choosed_room - 1].type - 1][rooms[choosed_room - 1].level][2]), text_cost_resourses, 10, 10);
 			draw_cost_yes = true;
+			draw_nores = check_availability_res((room_type), rooms[choosed_room - 1].level + 1);
 		}
+		
 
 		//Отрисовываем кадр
 		Update(window,renderer, texts, background, room_selecting, alert,room_icons,rooms, room_selecting_name_rect,
-			draw_room_name_level, draw_room_name_type, draw_cost=draw_cost_yes);
+			draw_room_name_level, draw_room_name_type, draw_cost=draw_cost_yes, draw_nores, draw_room_info);
 
 		//возвращаем флаги назад
 		draw_cost = false;
+		draw_room_info = -1;
 		draw_update_cost = false;
 		draw_cost_yes = false;
 		draw_room_name = -1;

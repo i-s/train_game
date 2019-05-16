@@ -59,7 +59,7 @@ void draw_text(SDL_Window* window, SDL_Renderer* renderer, char* text, SDL_Rect 
 }
 
 //Рисует счётчики ресурсов с поправкой на размер Rect-а.
-void draw_number_text(SDL_Window* window, SDL_Renderer* renderer, int number, SDL_Rect rect) {
+void draw_number_text(SDL_Window* window, SDL_Renderer* renderer, int number, SDL_Rect rect, int color = 0, bool transparent = false) {
 	SDL_Rect new_rect = rect;
 	if (number / 10 < 1) { //Если число одноразрядное
 		new_rect.x += new_rect.w * 2 / 3;
@@ -78,7 +78,7 @@ void draw_number_text(SDL_Window* window, SDL_Renderer* renderer, int number, SD
 	}
 	char* text = new char[10];
 	_itoa_s(number, text, 10, 10);
-	draw_text(window,renderer,text,new_rect);
+	draw_text(window,renderer,text,new_rect, color, transparent);
 }
 
 extern int winsize_w, winsize_h;

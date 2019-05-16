@@ -46,6 +46,7 @@ struct Room
 	int level;
 	int type;
 	int min_humans;
+	SDL_Texture* info_texture;
 	int cost_foods;
 	int cost_resourses;
 };
@@ -71,3 +72,7 @@ void Update_difficulty();
 // уровень уникального(оружейная , связной) здания , если оно построено 
 // 0, если нет  
 int get_building_level(int building_type);
+
+//проверяет склад на переполнение, принимает номер рес-а 
+//если он забит ,возвращает 1, иначе -2
+int check_full_stock(int res);
