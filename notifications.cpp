@@ -62,12 +62,15 @@ void draw_text(SDL_Window* window, SDL_Renderer* renderer, char* text, SDL_Rect 
 void draw_number_text(SDL_Window* window, SDL_Renderer* renderer, int number, SDL_Rect rect) {
 	SDL_Rect new_rect = rect;
 	if (number / 10 < 1) { //Если число одноразрядное
+		new_rect.x += new_rect.w * 2 / 3;
 		new_rect.w /= 3;
 	}
 	else if (number / 100 < 1) { //Если число двухразрядное
+		new_rect.x += new_rect.w / 2;
 		new_rect.w /= 2;
 	}
 	else if (number / 1000 < 1) { //Если число трёхразрядное
+		new_rect.x += new_rect.w * 0.5 / 1.5;
 		new_rect.w = int(new_rect.w / 1.5);
 	}
 	else { //Если число других размеров

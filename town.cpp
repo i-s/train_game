@@ -77,9 +77,9 @@ int difficulty;
 SDL_Rect g_recthumans = { 66,2,197,44 };
 SDL_Rect g_rectfood = { 66,47,197,51 };
 SDL_Rect g_rectresourses = { 66,99,197,49 };
-SDL_Rect rect_cost_humans = { 31,573,60,20 };
-SDL_Rect rect_cost_food = { 111,573,60,20 };
-SDL_Rect rect_cost_resourses = { 191,573,60,20 };
+SDL_Rect rect_cost_humans = { 36,573,60,20 };
+SDL_Rect rect_cost_food = { 116,573,60,20 };
+SDL_Rect rect_cost_resourses = { 196,573,60,20 };
 
 extern struct Background;
 
@@ -404,9 +404,9 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Backgroun
 	draw_number_text(window, renderer, g_resourses, g_rectresourses);
 	//рисует кол-во рессурсов нужное для апгрейта/строительства комнаты
 	if (draw_cost) {
-		draw_text(window, renderer, texts[3], rect_cost_humans);
-		draw_text(window, renderer, texts[4], rect_cost_food);
-		draw_text(window, renderer, texts[5], rect_cost_resourses);
+		draw_text(window, renderer, texts[3], rect_cost_humans,0,true);
+		draw_text(window, renderer, texts[4], rect_cost_food,0,true);
+		draw_text(window, renderer, texts[5], rect_cost_resourses,0,true);
 	}
 	SDL_RenderPresent(renderer);
 }
@@ -628,8 +628,8 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Rect rect_room_icon_4 = { 297,504,56,56 };
 	SDL_Rect rect_room_icon_5 = { 363,504,56,56 };
 
-	SDL_Rect rect_room_update = { 430,504,56,56 };
-	SDL_Rect rect_room_delete = { 497,504,56,56 };
+	SDL_Rect rect_room_update = { 428,504,56,56 };
+	SDL_Rect rect_room_delete = { 494,504,56,56 };
 
 	
 
