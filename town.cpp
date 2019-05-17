@@ -322,6 +322,12 @@ void draw_room_icon(SDL_Renderer* renderer, Room_icon room_icon) {
 	SDL_RenderCopy(renderer, room_icon.texture, NULL, &room_icon.rectangle);
 }
 
+//рисует окно инфо комнаты
+void draw_rooms_info(SDL_Renderer* renderer, SDL_Texture* rooms_info[], int room_type, SDL_Rect rect) {
+	rect.x += 67 *( room_type-1);//сдвиг места рисования
+	SDL_RenderCopy(renderer, rooms_info[room_type-1], NULL, &rect);
+}
+
 //Рисует сирену
 void draw_alert(SDL_Renderer* renderer, Alert alert) {
 	SDL_RenderCopy(renderer, alert.texture, NULL, &alert.rectangle);
@@ -390,7 +396,7 @@ void Update_difficulty() {
 
 //Отрисовывает все изображения на экран
 void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Background background, Room_Selecting room_selecting,
-			Alert alert, Room_icon room_icons[], Room rooms[], SDL_Rect room_name_rect, 
+			Alert alert, Room_icon room_icons[], SDL_Texture* rooms_info[], Room rooms[], SDL_Rect room_name_rect, SDL_Rect room_info_rect,
 			int draw_room_name_level = -1, int draw_room_name_type = -1, bool draw_cost = false,
 			int draw_nores = 0,int draw_room_info = -1) {
 	draw_background(renderer, background);
@@ -417,7 +423,7 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Backgroun
 	}
 	if (draw_room_info != -1)
 	{
-		//TODO: рисуем картиночки информации где-то над иконкой
+		draw_rooms_info(renderer, rooms_info, draw_room_info, room_info_rect);
 	}
 
 	//рисуем рессурсы
@@ -488,6 +494,11 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Surface* farm3_surf = SDL_LoadBMP("resourses/textures/rooms/farm_3.bmp");
 	SDL_Texture* farm3_texture = SDL_CreateTextureFromSurface(renderer, farm3_surf);
 	SDL_FreeSurface(farm3_surf);
+	SDL_Surface* farm_info_surf = SDL_LoadBMP("resourses/textures/rooms/farm_info.bmp");
+	SDL_Texture* farm_info_texture = SDL_CreateTextureFromSurface(renderer, farm_info_surf);
+	SDL_FreeSurface(farm_info_surf);
+
+
 
 	//иконки фермы
 	SDL_Surface* farm1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/farm_1_icon.bmp");
@@ -504,6 +515,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Surface* factory3_surf = SDL_LoadBMP("resourses/textures/rooms/factory_3.bmp");
 	SDL_Texture* factory3_texture = SDL_CreateTextureFromSurface(renderer, factory3_surf);
 	SDL_FreeSurface(factory3_surf);
+	SDL_Surface* factory_info_surf = SDL_LoadBMP("resourses/textures/rooms/factory_info.bmp");
+	SDL_Texture* factory_info_texture = SDL_CreateTextureFromSurface(renderer, factory_info_surf);
+	SDL_FreeSurface(factory_info_surf);
 
 	//иконки фабрики
 	SDL_Surface* factory1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/factory_1_icon.bmp");//тут поменять
@@ -520,6 +534,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Surface* living3_surf = SDL_LoadBMP("resourses/textures/rooms/living_3.bmp");
 	SDL_Texture* living3_texture = SDL_CreateTextureFromSurface(renderer, living3_surf);
 	SDL_FreeSurface(living3_surf);
+	SDL_Surface* living_info_surf = SDL_LoadBMP("resourses/textures/rooms/living_info.bmp");
+	SDL_Texture* living_info_texture = SDL_CreateTextureFromSurface(renderer, living_info_surf);
+	SDL_FreeSurface(living_info_surf);
 
 	//Иконка жилой комнаты
 	SDL_Surface* living1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/living_1_icon.bmp");//тут поменять
@@ -536,6 +553,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Surface* weapony3_surf = SDL_LoadBMP("resourses/textures/rooms/weapony_3.bmp");
 	SDL_Texture* weapony3_texture = SDL_CreateTextureFromSurface(renderer, weapony3_surf);
 	SDL_FreeSurface(weapony3_surf);
+	SDL_Surface* weapony_info_surf = SDL_LoadBMP("resourses/textures/rooms/weapony_info.bmp");
+	SDL_Texture* weapony_info_texture = SDL_CreateTextureFromSurface(renderer, weapony_info_surf);
+	SDL_FreeSurface(weapony_info_surf);
 
 	//Иконка оружейной
 	SDL_Surface* weapony1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/weapony_1_icon.bmp");//тут поменять
@@ -562,6 +582,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Surface* storage3_surf = SDL_LoadBMP("resourses/textures/rooms/storage_3.bmp");
 	SDL_Texture* storage3_texture = SDL_CreateTextureFromSurface(renderer, storage3_surf);
 	SDL_FreeSurface(storage3_surf);
+	SDL_Surface* storage_info_surf = SDL_LoadBMP("resourses/textures/rooms/storage_info.bmp");
+	SDL_Texture* storage_info_texture = SDL_CreateTextureFromSurface(renderer, storage_info_surf);
+	SDL_FreeSurface(storage_info_surf);
 
 	//Иконка склада
 	SDL_Surface* storage1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/storage_1_icon.bmp");//тут поменять
@@ -578,6 +601,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Surface* radio3_surf = SDL_LoadBMP("resourses/textures/rooms/radio_3.bmp");
 	SDL_Texture* radio3_texture = SDL_CreateTextureFromSurface(renderer, radio3_surf);
 	SDL_FreeSurface(radio3_surf);
+	SDL_Surface* radio_info_surf = SDL_LoadBMP("resourses/textures/rooms/radio_info.bmp");
+	SDL_Texture* radio_info_texture = SDL_CreateTextureFromSurface(renderer, radio_info_surf);
+	SDL_FreeSurface(radio_info_surf);
 
 	//Иконка радио
 	SDL_Surface* radio1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/radio_1_icon.bmp");//тут поменять
@@ -661,7 +687,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Rect rect_room_update = { 428,504,56,56 };
 	SDL_Rect rect_room_delete = { 494,504,56,56 };
 
-	
+	SDL_Rect rect_room_info = { 30, 438, 325, 60 };
 
 	SDL_Rect buttons[15] = { rect_button_train,rect_room_0,rect_room_1,
 		rect_room_2, rect_room_3,rect_room_4,rect_room_5,
@@ -691,7 +717,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	//Массив комнат
 	Room rooms[6];
 
-	
+	SDL_Texture* rooms_info[6] = { farm_info_texture, factory_info_texture, living_info_texture,
+									weapony_info_texture, storage_info_texture, radio_info_texture};
+
 
 	
 	//Заполняем массив комнат из глобального массива комнат
@@ -992,8 +1020,8 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		
 
 		//Отрисовываем кадр
-		Update(window,renderer, texts, background, room_selecting, alert,room_icons,rooms, room_selecting_name_rect,
-			draw_room_name_level, draw_room_name_type, draw_cost=draw_cost_yes, draw_nores, draw_room_info);
+		Update(window,renderer, texts, background, room_selecting, alert,room_icons, rooms_info, rooms, room_selecting_name_rect,
+			rect_room_info, draw_room_name_level, draw_room_name_type, draw_cost=draw_cost_yes, draw_nores, draw_room_info);
 
 		//возвращаем флаги назад
 		draw_cost = false;
@@ -1024,12 +1052,16 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	for (int i = 0; i < 19; i++) {
 		SDL_DestroyTexture(room_textures[i]);
 	}
+	for (int i = 0; i < 6; i++) {
+		SDL_DestroyTexture(rooms_info[i]);
+	}
 	SDL_DestroyTexture(farm1_icon_texture);
 	SDL_DestroyTexture(factory1_icon_texture);
 	SDL_DestroyTexture(living1_icon_texture);
 	SDL_DestroyTexture(weapony1_icon_texture);
 	SDL_DestroyTexture(storage1_icon_texture);
 	SDL_DestroyTexture(radio1_icon_texture);
+
 
 	// Попытка красиво выгружать текстуры из памяти
 	/*
