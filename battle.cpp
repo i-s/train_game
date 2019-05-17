@@ -227,7 +227,8 @@ int generate_wave(int difficulty, int *enemies_wave)
 //Возврат 0 -> окно закрыто
 int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h, int custom_difficulty) {
 	//Вызываем оповещение о начале рейда
-	play_sound(101);
+	if(get_building_level(4) >= 1)//если построенна связная оповещаем
+		play_sound(101);
 	draw_blackout(window, renderer, { 0, 0, winsize_w, winsize_h }, 0, 128);
 	call_notificaton(window, renderer, (char*)(u8"Мы под атакой!")); 
 	//Загружаем текстуры

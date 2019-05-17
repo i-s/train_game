@@ -34,7 +34,7 @@ void play_music(int music_number, double position = 0);
 //5 взрыв гранаты
 //101 - баззер
 //default - 0
-void play_sound(int sound_number, double position = 0);
+void play_sound(int sound_number);
 
 //Рисует счётчики ресурсов с поправкой на размер Rect-а.
 void draw_number_text(SDL_Window* window, SDL_Renderer* renderer, int number, SDL_Rect rect, int color = 0, bool transparent = false);

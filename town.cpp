@@ -65,8 +65,8 @@ extern Room_info room_info[6];
 bool g_have_open_town_before = false;
 
 //Громкость музыки и звука в игре. Должна принимать значения от 0 до 128.
-int g_music_volume = 50;
-int g_sound_volume = 50;
+int g_music_volume = 30;
+int g_sound_volume = 30;
 
 //Позиция фоновой музыки в игре
 double g_music_position = 0;

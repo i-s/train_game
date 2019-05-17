@@ -182,32 +182,31 @@ void play_music(int music_number, double position = 0) {
 //5 взрыв гранаты
 //101 - баззер
 //default - 0
-void play_sound(int sound_number, double position = 0) {
+void play_sound(int sound_number) {
 	Mix_Init(MIX_INIT_MP3);
 	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
 		printf("Mix_OpenAudio: %s\n", Mix_GetError());
 		// Обработка ошибки
 	}
-	Mix_Music *sound;
+	Mix_Chunk *sound;
 	switch (sound_number)
 	{
-	case 1: sound = Mix_LoadMUS("resourses/sound/sound_pistol.mp3"); break; //звук для пистолета
-	case 2: sound = Mix_LoadMUS("resourses/sound/sound_automat.mp3"); break; //звук для автомата
-	case 3: sound = Mix_LoadMUS("resourses/sound/sound_machinegun.mp3"); break; //звук для пулемета
-	case 4: sound = Mix_LoadMUS("resourses/sound/sound_grenade1.mp3"); break; //звук для гранаты 1-ый
-	case 5: sound = Mix_LoadMUS("resourses/sound/sound_grenade2.mp3"); break; //звук для гранаты 2-ой
-	case 101: sound = Mix_LoadMUS("resourses/sound/buzzer.mp3"); break; //Баззер, оповещение
-	default: sound = Mix_LoadMUS("resourses/sound/sound_test.mp3"); break;
+	case 1: sound = Mix_LoadWAV("resourses/sound/sound_pistol.mp3"); break; //звук для пистолета
+	case 2: sound = Mix_LoadWAV("resourses/sound/sound_automat.mp3"); break; //звук для автомата
+	case 3: sound = Mix_LoadWAV("resourses/sound/sound_machinegun.mp3"); break; //звук для пулемета
+	case 4: sound = Mix_LoadWAV("resourses/sound/sound_grenade1.mp3"); break; //звук для гранаты 1-ый
+	case 5: sound = Mix_LoadWAV("resourses/sound/sound_grenade2.mp3"); break; //звук для гранаты 2-ой
+	case 101: sound = Mix_LoadWAV("resourses/sound/buzzer.mp3"); break; //Баззер, оповещение
+	default: sound = Mix_LoadWAV("resourses/sound/sound_test.mp3"); break;
 	}
 	if (sound == NULL) {
-		printf("Mix_LoadMUS: %s\n", Mix_GetError());
+		printf("Mix_LoadWAV: %s\n", Mix_GetError());
 		// Обработка ошибки
 	}
 	Mix_RewindMusic();
-	if (Mix_FadeInMusic(sound, 1, 250) == -1) {
+	if (Mix_PlayChannel(-1, sound, 0) == -1 ) {
 		printf("Mix_Playsound: %s\n", Mix_GetError());
 		// Обработка ошибки
 	}
-	Mix_SetMusicPosition(position);
-	Mix_VolumeMusic(g_sound_volume);
+	Mix_VolumeChunk(sound, g_sound_volume);
 }
