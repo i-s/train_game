@@ -67,8 +67,7 @@ void draw_res(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, 
 	_itoa_s(res_count, text, 10, 10);
 	int text_color;
 	if (res_count>=0)
-
-	draw_text(window, renderer, text, texture_rect, 4);
+		draw_text(window, renderer, text, texture_rect, 4);
 }
 
 //Рисует Town_block, если town_block.shown == истина.
