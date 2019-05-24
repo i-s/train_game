@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include "town.h"
 
+Mix_Music *music;
+Mix_Chunk *sound;
+
 //Рисует текст text в окне window и на рендерере renderer на rect-e rect.
 //Если не выбрать text_color, то будут рисоваться жёлтые буквы на сером фоне
 //Если установить флаг transperent в true, то текст будет писаться без фона
@@ -122,7 +125,6 @@ void call_voice_notification(int sound_number = 0) {
 		printf("Mix_OpenAudio: %s\n", Mix_GetError());
 		// Обработка ошибки
 	}
-	Mix_Music *music;
 	switch (sound_number)
 	{
 	default:
@@ -151,7 +153,6 @@ void play_music(int music_number, double position = 0) {
 		printf("Mix_OpenAudio: %s\n", Mix_GetError());
 		// Обработка ошибки
 	}
-	Mix_Music *music;
 	switch (music_number)
 	{
 	case 0: music = Mix_LoadMUS("resourses/music/music_test.mp3"); break; //Музыка для города
@@ -188,7 +189,6 @@ void play_sound(int sound_number) {
 		printf("Mix_OpenAudio: %s\n", Mix_GetError());
 		// Обработка ошибки
 	}
-	Mix_Chunk *sound;
 	switch (sound_number)
 	{
 	case 1: sound = Mix_LoadWAV("resourses/sound/sound_pistol.mp3"); break; //звук для пистолета
@@ -209,4 +209,15 @@ void play_sound(int sound_number) {
 		// Обработка ошибки
 	}
 	Mix_VolumeChunk(sound, g_sound_volume);
+}
+
+//Выгружает музыку из RAM
+void Empty_Music() {
+	Mix_FreeMusic(music);
+	Mix_FreeChunk(sound);
+}
+
+//Выходит из MIX-ера
+void Exit_Music() {
+	Mix_Quit();
 }

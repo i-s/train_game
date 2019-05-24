@@ -537,7 +537,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_FreeSurface(factory_info_surf);
 
 	//иконки фабрики
-	SDL_Surface* factory1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/factory_1_icon.bmp");//тут поменять
+	SDL_Surface* factory1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/factory_1_icon.bmp");
 	SDL_Texture* factory1_icon_texture = SDL_CreateTextureFromSurface(renderer, factory1_icon_surf);
 	SDL_FreeSurface(factory1_icon_surf);
 
@@ -556,7 +556,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_FreeSurface(living_info_surf);
 
 	//Иконка жилой комнаты
-	SDL_Surface* living1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/living_1_icon.bmp");//тут поменять
+	SDL_Surface* living1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/living_1_icon.bmp");
 	SDL_Texture* living1_icon_texture = SDL_CreateTextureFromSurface(renderer, living1_icon_surf);
 	SDL_FreeSurface(living1_icon_surf);
 
@@ -604,7 +604,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_FreeSurface(storage_info_surf);
 
 	//Иконка склада
-	SDL_Surface* storage1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/storage_1_icon.bmp");//тут поменять
+	SDL_Surface* storage1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/storage_1_icon.bmp");
 	SDL_Texture* storage1_icon_texture = SDL_CreateTextureFromSurface(renderer, storage1_icon_surf);
 	SDL_FreeSurface(storage1_icon_surf);
 
@@ -623,7 +623,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_FreeSurface(radio_info_surf);
 
 	//Иконка радио
-	SDL_Surface* radio1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/radio_1_icon.bmp");//тут поменять
+	SDL_Surface* radio1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/radio_1_icon.bmp");
 	SDL_Texture* radio1_icon_texture = SDL_CreateTextureFromSurface(renderer, radio1_icon_surf);
 	SDL_FreeSurface(radio1_icon_surf);
 
@@ -1097,9 +1097,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	}
 	*/
 
-	//Так НУЖНО выходить из Mix_Init-а. Серьёзно. Сказано в Вики.
-	while (Mix_Init(0))
-		Mix_Quit();
+	Empty_Music();
 
 	if (raid_started) {
 		raid_started = false;

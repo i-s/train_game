@@ -215,7 +215,7 @@ int generate_wave(int difficulty, int *enemies_wave)
 	//TODO: Продумать волну зомби
 
 	int range_min = 1;
-	int range_max = fmin(double(difficulty % 10), double(3));
+	int range_max = fmin(double(difficulty % 10), double(3)) + 1;
 	int enemies = 0;
 
 	for (int i = 0; i < NUMBER_OF_TYPES_OF_ENEMIES; i++)
@@ -538,5 +538,6 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	SDL_DestroyTexture(block_texture);
 	SDL_DestroyTexture(zombie1_texture);
 	SDL_DestroyTexture(grenade_texture);
+	Empty_Music();
 	return 0;
 }

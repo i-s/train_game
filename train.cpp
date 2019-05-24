@@ -608,6 +608,8 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	SDL_DestroyTexture(res_texture);
 	SDL_DestroyTexture(people_texture);
 
+	Empty_Music();
+
 	if (town_button_pressed) {
 		//Возвращаем в глобальные переменные состояние рычагов
 		lever1_pulled = lever1.switched;
