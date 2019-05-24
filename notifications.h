@@ -44,3 +44,6 @@ void Empty_Music();
 
 //Выходит из MIX-ера
 void Exit_Music();
+
+//Вызывает меню по ESC-у, в котором можно выйти из игры или сохраниться.
+void Escape_menu(SDL_Window* window, SDL_Renderer* renderer, SDL_Event *event);

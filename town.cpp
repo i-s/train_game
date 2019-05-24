@@ -798,6 +798,11 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 			QUIT = true;
 			quit = true;
 		}
+		bool was_game_paused = false; //Была ли игра поставлена на паузу.
+		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE) {
+			Escape_menu(window,renderer,&event);
+			was_game_paused = true;
+		}
 
 		bool was_background_changed = false; //Был ли фон изменён?
 		bool was_button_room_pressed = false; //Была ли нажата какая-либо комната?
@@ -976,6 +981,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		int tick_time = SDL_GetTicks(); //Время с момента инициализации SDL (запуска программы)
 		DELTA = tick_time - LASTTICKTIME;
 		if (g_have_open_town_before == false) { //Если город запускается впервые, то не нужно изменять время.
+			DELTA = 0;
+		}
+		if (was_game_paused) { //Если игра ставилась на паузу, то не нужно изменять время
 			DELTA = 0;
 		}
 		LASTTICKTIME = tick_time;

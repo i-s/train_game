@@ -389,6 +389,11 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 			QUIT = true;
 			quit = true;
 		}
+		bool was_game_paused = false; //Была ли игра поставлена на паузу.
+		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE) {
+			Escape_menu(window, renderer, &event);
+			was_game_paused = true;
+		}
 
 		//TODO: Доработать боёвку
 		for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
@@ -512,6 +517,10 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		int tick_time = SDL_GetTicks();
 		DELTA = tick_time - LASTTICKTIME;
 		LASTTICKTIME = tick_time;
+
+		if (was_game_paused) { //Если игра ставилась на паузу, то не нужно изменять время
+			DELTA = 0;
+		}
 
 		music_time += DELTA * 0.001;
 

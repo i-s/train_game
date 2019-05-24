@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "town.h"
+#include "battle.h"
+#include "menu.h"
+#include "save.h"
 
 Mix_Music *music;
 Mix_Chunk *sound;
@@ -61,6 +64,83 @@ void draw_text(SDL_Window* window, SDL_Renderer* renderer, char* text, SDL_Rect 
 	TTF_Quit();
 }
 
+extern int winsize_w, winsize_h;
+extern bool QUIT;
+
+//Вызывает меню по ESC-у, в котором можно выйти из игры или сохраниться.
+void Escape_menu(SDL_Window* window, SDL_Renderer* renderer, SDL_Event *event) {
+	//Загружаем текстуры
+	SDL_Surface* button_continue_surf = SDL_LoadBMP("resourses/textures/continue.bmp");
+	SDL_Texture*button_continue_texture = SDL_CreateTextureFromSurface(renderer, button_continue_surf);
+	SDL_FreeSurface(button_continue_surf);
+	SDL_Surface* button_save_surf = SDL_LoadBMP("resourses/textures/save.bmp");
+	SDL_Texture*button_save_texture = SDL_CreateTextureFromSurface(renderer, button_save_surf);
+	SDL_FreeSurface(button_save_surf);
+	SDL_Surface* button_exit_surf = SDL_LoadBMP("resourses/textures/exit.bmp");
+	SDL_Texture*button_exit_texture = SDL_CreateTextureFromSurface(renderer, button_exit_surf);
+	SDL_FreeSurface(button_exit_surf);
+	//Массив текстур кнопок
+	SDL_Texture* buttons_textures[3] = {button_continue_texture,button_save_texture,button_exit_texture};
+	//Прямоугольник окошка паузы
+	SDL_Rect menu_rect = { 275,175,250,350 };
+	//Прямоугольники кнопок
+	SDL_Rect button_continue = { menu_rect.x + 25, menu_rect.y + 60,200,75};
+	SDL_Rect button_save = { menu_rect.x + 25,menu_rect.y + 140,200,75};
+	SDL_Rect button_exit = { menu_rect.x + 25,menu_rect.y + 265,200,75};
+	//Массив кнопок
+	SDL_Rect buttons[3] = {button_continue,button_save, button_exit};
+	//Отрисовка затемнения задника
+	draw_blackout(window, renderer, {0,0,winsize_w,winsize_h}, 0, 128);
+	//Дополнительное очернение меню
+	draw_blackout(window,renderer,menu_rect,0,200);
+
+	SDL_Rect text_rect = { menu_rect.x + 75,menu_rect.y + 5,100,50 }; //Место под текст
+
+	draw_text(window, renderer, (char*)(u8"Pause"), text_rect, 3, true);
+
+	//Временное решения отрисовки кнопок
+	//SDL_SetRenderDrawColor(renderer,0,255,0,0);
+	//SDL_RenderFillRects(renderer,buttons,3);
+
+	//Отрисовка текстур кнопок
+	for (int i = 0; i < 3; i++) {
+		SDL_RenderCopy(renderer, buttons_textures[i], NULL, &buttons[i]);
+	}
+
+	SDL_RenderPresent(renderer);
+
+	bool quit = false;
+	while (!quit) {
+		SDL_PollEvent(event);
+		if (event->type == SDL_QUIT) {//Если нажат крестик, выходим из программы
+			QUIT = true;
+			quit = true;
+		}
+
+		int button_flag = -1; //Какая кнопка была нажата
+
+		if (LKMPressed(*event)) { //Провека нажатия LKM-а
+			if (check_mouse_on_rect(menu_rect, *event)) { //Если нажали внутри окошка меню
+				for (int i = 0; i < 3; i++) { //Проходим все конопки
+					if (check_mouse_on_rect(buttons[i], *event)) //Если нажали на i-ую кнопку, то...
+						button_flag = i; //...аписываем её номер в button_flag
+				}
+			}
+			else { //Если нажали вне окошка меню
+				quit = true;
+			}
+		}
+
+		switch (button_flag) { //Проверка нажатия какой-нибудь кнопки
+		case -1: break; //Никакая не нажата
+		case 0: quit = true; break; //Продолжить игру
+		case 1: save_game(); break; //Сохранить игру
+		case 2: quit = true; QUIT = true; break; //Выйти из игры
+		default: break;
+		}
+	}
+}
+
 //Рисует счётчики ресурсов с поправкой на размер Rect-а.
 void draw_number_text(SDL_Window* window, SDL_Renderer* renderer, int number, SDL_Rect rect, int color = 0, bool transparent = false) {
 	SDL_Rect new_rect = rect;
@@ -84,7 +164,6 @@ void draw_number_text(SDL_Window* window, SDL_Renderer* renderer, int number, SD
 	draw_text(window,renderer,text,new_rect, color, transparent);
 }
 
-extern int winsize_w, winsize_h;
 extern int g_music_volume;
 extern int g_sound_volume;
 
