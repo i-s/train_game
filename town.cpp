@@ -272,10 +272,12 @@ int get_level_room(Room rooms[], int button_flag)
 // 0, если нет  
 int get_building_level(int building_type)
 {
-	for (int i = 0; i < 2; i++)//обходим все комнаты
-		for (int j = 0; j < 3; j++)
+	for (int i = 0; i < 2; i++) {//обходим все комнаты
+		for (int j = 0; j < 3; j++) {
 			if (g_rooms[i][j][0] == building_type)//если построено это здание
 				return g_rooms[i][j][1]; // вернем уровень этого здания
+		}
+	}
 	return 0;
 }
 
@@ -1018,7 +1020,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		//Если время до прибытия рейда > 0, отнимаем от него прошедшее время за цикл
 		if (g_time_before_raid > 0) {
 			g_time_before_raid -= DELTA * 0.001;
-			if (g_time_before_raid < 3.2 && was_alarm_called == false && get_building_level(4) >= 1) {
+			if (g_time_before_raid < 3.2 && was_alarm_called == false && get_building_level(6) >= 1) {
 				play_sound(101);
 				was_alarm_called = true;
 			}
