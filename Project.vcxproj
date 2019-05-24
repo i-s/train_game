@@ -147,6 +147,7 @@
     <ClCompile Include="intro.cpp" />
     <ClCompile Include="rooms.cpp" />
     <ClCompile Include="save.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="textures.cpp" />
     <ClCompile Include="town.cpp" />
     <ClCompile Include="train.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="save.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="rooms.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="textures.h" />
     <ClInclude Include="town.h" />
     <ClInclude Include="train.h" />

@@ -38,6 +38,11 @@ void draw_text(SDL_Window* window, SDL_Renderer* renderer, char* text, SDL_Rect 
 		fore_color = { 0,0,0 };
 		back_color = { 255, 255, 255 };
 		break;
+	case 5: { //Вывод черного текста на сером фоне
+		fore_color = { 0,0,0 };
+		back_color = { 128, 128, 128 };
+		break;
+	}
 	}
 	default: { //Если цвет не определён специально (text_color = 0) выводим жёлые буквы на сером фоне
 		fore_color = { 255,216,0 };
@@ -117,11 +122,6 @@ void call_notificaton(SDL_Window* window, SDL_Renderer* renderer, char* text, ch
 //Звуки: 
 //default
 void call_voice_notification(int sound_number = 0) {
-	Mix_Init(MIX_INIT_MP3);
-	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
-		printf("Mix_OpenAudio: %s\n", Mix_GetError());
-		// Обработка ошибки
-	}
 	Mix_Music *music;
 	switch (sound_number)
 	{
@@ -146,11 +146,6 @@ void call_voice_notification(int sound_number = 0) {
 //2 - Поезд
 //default - Город
 void play_music(int music_number, double position = 0) {
-	Mix_Init(MIX_INIT_MP3);
-	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
-		printf("Mix_OpenAudio: %s\n", Mix_GetError());
-		// Обработка ошибки
-	}
 	Mix_Music *music;
 	switch (music_number)
 	{
@@ -165,12 +160,23 @@ void play_music(int music_number, double position = 0) {
 		// Обработка ошибки
 	}
 	Mix_RewindMusic();
-	if (Mix_FadeInMusic(music,-1,500) == -1) {
+	if (Mix_PlayMusic(music,-1) == -1) {
 		printf("Mix_PlayMusic: %s\n", Mix_GetError());
 		// Обработка ошибки
 	}
 	Mix_SetMusicPosition(position);
 	Mix_VolumeMusic(g_music_volume);
+}
+
+//запускает музыку , 1 - если запущена , 0 - при ошибке
+int init_music() {
+	Mix_Init(MIX_INIT_MP3);
+	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
+		printf("Mix_OpenAudio: %s\n", Mix_GetError());
+		// Обработка ошибки
+		return 0;
+	}
+	return 1;
 }
 
 //Воспроизводит определённый звук с определённого момента
@@ -183,11 +189,6 @@ void play_music(int music_number, double position = 0) {
 //101 - баззер
 //default - 0
 void play_sound(int sound_number) {
-	Mix_Init(MIX_INIT_MP3);
-	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
-		printf("Mix_OpenAudio: %s\n", Mix_GetError());
-		// Обработка ошибки
-	}
 	Mix_Chunk *sound;
 	switch (sound_number)
 	{
@@ -203,10 +204,11 @@ void play_sound(int sound_number) {
 		printf("Mix_LoadWAV: %s\n", Mix_GetError());
 		// Обработка ошибки
 	}
-	Mix_RewindMusic();
+	//Mix_RewindMusic();
 	if (Mix_PlayChannel(-1, sound, 0) == -1 ) {
 		printf("Mix_Playsound: %s\n", Mix_GetError());
 		// Обработка ошибки
 	}
 	Mix_VolumeChunk(sound, g_sound_volume);
+	//Mix_FreeChunk(sound);
 }

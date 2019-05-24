@@ -106,9 +106,10 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	int game_started = 0;
 	//Была ли игра загружена
 	bool loaded = false;
+	int settings = 0;
 
 	//Основной цикл
-	while (!quit && !game_started && !loaded) {
+	while (!quit && !game_started && !settings && !loaded) {
 		SDL_PollEvent(&event);
 		if (event.type == SDL_QUIT) {
 			quit = 1;
@@ -132,6 +133,8 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 					break;
 					//Курсор на кнопке Settings?
 				case 1: SDL_RenderCopy(renderer, setting_texture_click, NULL, &button_setting);
+					if (LKMPressed(event))
+						settings = 1;
 					break;
 					//Нажата кнопка Exit?
 				case 2: SDL_RenderCopy(renderer, exit_texture_click, NULL, &button_exit);
@@ -182,5 +185,6 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	SDL_DestroyTexture(exit_texture_click);
 	SDL_DestroyTexture(continue_texture_click);
 	if (game_started || loaded) return 1; //Возврат 1 - нажата кнопка Start
+	if (settings) return 2; //Возврат 2 - нажата кнопка Settings
 	return 0; //Возврат 0 -> программа закрыта
 }

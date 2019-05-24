@@ -8,9 +8,15 @@
 #include "rooms.h"
 #include "save.h"
 #include "intro.h"
+#include <stdio.h>
+#include "Settings.h"
+
 #define START_FOOD 1500
 #define START_HUMANS 1150
 #define START_RESOURSES 1200
+//размеры , куда крепились текстурки
+#define WINSIZE_H = 600
+#define WINSIZE_W = 800
 #undef main
 
 //Загружаем глобальные переменные из town.cpp
@@ -25,12 +31,40 @@ extern int GAME_OVER;
 extern bool g_have_open_town_before;
 extern bool g_was_game_loaded;
 
+extern int g_music_volume;
+extern int g_sound_volume;
+
 extern bool QUIT;
 
 //Глобальные размеры окна
 int winsize_w = 800, winsize_h = 600;
+int user_winsize_w = 800, user_winsize_h = 600;
+bool fullscreen = false;//флаг полного экрана
 
 
+//Проверяет, существует ли файл в папке с игрой.
+//Возвразает false, если нет, и true, если да.
+bool check_file(char* filename) {
+	FILE *read_file;
+	fopen_s(&read_file, filename, "r");
+	if (read_file != NULL) { //Если файл загружен
+		fclose(read_file);
+		return true; //Возвращаем true
+	}
+	return false;  //Возврващаем flase
+}
+
+
+int get_settings(char* filename)
+{
+	if (!check_file(filename))
+	{
+		printf("HE MOGU, Иду стандартом\n");
+		set_settings_in_file();
+	}	
+	get_settings_of_file();
+	return 1;
+}
 
 //menu(WINDOW, renderer, winsize_w, winsize_h)
 //train_game(WINDOW, renderer, winsize_w, winsize_h)
@@ -41,16 +75,26 @@ int winsize_w = 800, winsize_h = 600;
 //}
 
 int main() {
+	//ищем фаил настройками
+	get_settings((char *)"setting.txt");
+
 	//Создаём окно
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_Window* WINDOW = SDL_CreateWindow("Main window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		winsize_w, winsize_h, SDL_WINDOW_SHOWN);
-	SDL_Renderer* renderer = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	SDL_Window* WINDOW;
+	if (fullscreen)
+		WINDOW = SDL_CreateWindow("Main window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+			winsize_w, winsize_h, SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN_DESKTOP);
+	else 
+		WINDOW = SDL_CreateWindow("Main window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+			winsize_w, winsize_h, SDL_WINDOW_SHOWN);
 
+	SDL_Renderer* renderer = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	
 
 	//SDL_RenderSetScale(renderer,1.5,1.5);
 	SDL_RenderSetLogicalSize(renderer, winsize_w, winsize_h);
-	SDL_SetWindowSize(WINDOW,winsize_w*1,winsize_h*1);
+	
+	SDL_SetWindowSize(WINDOW, user_winsize_w, user_winsize_h);
 	SDL_SetWindowPosition(WINDOW, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	//Тестовые начальные значения ресурсов:
 	
@@ -128,22 +172,15 @@ int main() {
 				}
 			}
 		}
+		else if (menu_flag == 2)//если нажаты настрокйки
+			launch_settings(WINDOW, renderer, winsize_w, winsize_h);
 		if (QUIT) //Если нажали кнопку "закрыть" (крестик), выходим из программы.
 			break;
 	}
 	
-
-	//if (menu_flag == 1) {
-	//	//Запускаем поезд
-	//	 train_flag = train_game(WINDOW, renderer, winsize_w, winsize_h); 
-	//}
-
-	//if (train_flag == 0) {
-	//	town_flag = town_game(WINDOW, renderer, winsize_w, winsize_h);
-	//}
-
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(WINDOW);
-	if(g_have_open_town_before)save_game(); //Если игра открывалась, сохраняем её.
+	if(g_have_open_town_before)
+		save_game(); //Если игра открывалась, сохраняем её.
 	return 0;
 }

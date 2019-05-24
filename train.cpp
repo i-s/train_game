@@ -66,8 +66,6 @@ void draw_res(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, 
 	char* text = new char[10];
 	_itoa_s(res_count, text, 10, 10);
 	int text_color;
-	if (res_count>=0)
-
 	draw_text(window, renderer, text, texture_rect, 4);
 }
 
@@ -183,7 +181,7 @@ void Define_Train_Type_And_Delay_And_Speed(Train* train, int difficulty, SDL_Tex
 //Возврат 1 -> на убежище напали
 int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
 	srand(int(time(NULL)));
-		
+	init_music();
 	//Создаём ивент и переменную для отслеживания закрытия окна
 	SDL_Event event;
 	bool quit = false;
@@ -543,7 +541,8 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 				break;
 			}
 			case 3: {//Если прибыл рейдерский поезд, то...
-				play_sound(101);
+				if (get_building_level(6) >= 1)
+					play_sound(101);
 				draw_blackout(window, renderer, { 0, 0, winsize_w, winsize_h }, 0, 128);
 				call_notificaton(window, renderer, (char*)("Прибыл поезд с засадой!"),NULL,3);
 				has_raid_started = true;

@@ -65,8 +65,8 @@ extern Room_info room_info[6];
 bool g_have_open_town_before = false;
 
 //Громкость музыки и звука в игре. Должна принимать значения от 0 до 128.
-int g_music_volume = 30;
-int g_sound_volume = 30;
+int g_music_volume = 128;
+int g_sound_volume = 128;
 
 //Позиция фоновой музыки в игре
 double g_music_position = 0;
@@ -419,7 +419,6 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Backgroun
 	if (draw_room_name_level != -1 && draw_room_name_type != -1)
 	{
 		draw_text(window, renderer, texts[6 + draw_room_name_type], room_name_rect, 0, true);
-		//TODO: выводить вместе с именем уровень 
 	}
 	if (draw_room_info != -1)
 	{
@@ -447,8 +446,8 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Backgroun
 //Возврат 1 -> переход к экрану "поезд"
 //Возврат 0 -> завершение программы
 int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h) {
-	//Mix_Init(MIX_INIT_MP3);
 
+	init_music();
 	//Попытка красиво загружать текстуры в память
 	/*
 	const char textures_path[NUMBER_OF_TEXTURES][100] = { "resourses/textures/background_town_normal.bmp","resourses/textures/background_town_train_selected.bmp",

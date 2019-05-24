@@ -212,7 +212,7 @@ int generate_wave(int difficulty, int *enemies_wave)
 	//TODO: Продумать волну зомби
 
 	int range_min = 1;
-	int range_max = fmin(double(difficulty % 10), double(3));
+	int range_max = fmin(double(difficulty % 10), double(3)) + 1;
 	int enemies = 0;
 
 	for (int i = 0; i < NUMBER_OF_TYPES_OF_ENEMIES; i++)
@@ -226,8 +226,9 @@ int generate_wave(int difficulty, int *enemies_wave)
 //Экран "сражение". Если передать custom_difficulty != -1 ,то для ЭТОГО сражения будет использована специальная сложность
 //Возврат 0 -> окно закрыто
 int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_h, int custom_difficulty) {
+	init_music();
 	//Вызываем оповещение о начале рейда
-	if(get_building_level(4) >= 1)//если построенна связная оповещаем
+	if(get_building_level(6) >= 1)//если построенна связная оповещаем
 		play_sound(101);
 	draw_blackout(window, renderer, { 0, 0, winsize_w, winsize_h }, 0, 128);
 	call_notificaton(window, renderer, (char*)(u8"Мы под атакой!")); 
