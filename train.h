@@ -63,4 +63,4 @@ void draw_town_block(SDL_Renderer* renderer, Town_block town_block);
 int get_new_train_time();
 
 //Отрисовывает ресурс на texture_rect
-void draw_res(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect texture_rect, int res_count = -1);
+void draw_res(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect texture_rect, int res_count = -22555);

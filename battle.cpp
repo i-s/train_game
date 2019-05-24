@@ -201,7 +201,7 @@ int Attack_Enemy(Gun *gun, Enemy *enemy = NULL)
 	gun->time_end_reload = 0;
 	g_resourses -= gun->cost;
 	play_sound(gun->sound_number);
-	play_music(1, music_time+0.2);
+	//play_music(1, music_time+0.2);
 	if (enemy == NULL)//промах
 		return 0;
 	if (cause_damage_enemy(enemy, gun->damage))

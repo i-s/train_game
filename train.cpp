@@ -66,6 +66,7 @@ void draw_res(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, 
 	char* text = new char[10];
 	_itoa_s(res_count, text, 10, 10);
 	int text_color;
+	if (res_count != -22555)
 	draw_text(window, renderer, text, texture_rect, 4);
 }
 
