@@ -129,8 +129,8 @@ int main() {
 		lever2_pulled = 0;
 		difficulty = 1; //Сложность игры
 		one_second = 1;
-		TIMEUNTILTRAIN = 10;
-		g_time_before_raid = 10; //10 секунд до перехода в экран рейда
+		TIMEUNTILTRAIN = 30; //30 секунд до первого поезда
+		g_time_before_raid = 60; //60 секунд до первого рейда
 		GAME_OVER = 0;
 		int quit = 0;
 		initialize_rooms(); //Инициализируем массивы для создания комнат

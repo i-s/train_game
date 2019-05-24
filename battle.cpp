@@ -230,13 +230,23 @@ int generate_wave(int difficulty, int *enemies_wave)
 {
 	//TODO: Продумать волну зомби
 
-	int range_min = 2;
-	int range_max = fmin(double(difficulty), double(5)) + 1;
+	//int range_min = 2;
+	//int range_max = fmin(double(difficulty), double(5)) + 1;
 	int enemies = 0;
 
 	for (int i = 0; i < NUMBER_OF_TYPES_OF_ENEMIES; i++)
 	{
-		enemies_wave[i] =  rand() % (range_max - range_min + 1) + range_min;
+		//Обработка сложности спавна
+		switch (i)
+		{
+		case 0: enemies_wave[i] = fmin(difficulty/2,10); break;//Зомбяки
+		case 1: enemies_wave[i] = fmin(difficulty/5, 5); break;//Толстяки
+		case 2: if (difficulty > 10)enemies_wave[i] = fmin((difficulty - 10) / 2, 15); else enemies_wave[i] = 0; break;//Бегуны
+		case 3: enemies_wave[i] = fmin(difficulty/10, 2); break;//Танки
+		default:
+			break;
+		}
+		//enemies_wave[i] =  rand() % (range_max - range_min + 1) + range_min;
 		enemies += enemies_wave[i];
 	}
 	return enemies;

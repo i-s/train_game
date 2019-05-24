@@ -22,6 +22,7 @@ void call_voice_notification(int sound_number = 0);
 //Музыка: 0 - Город
 //1 - Битва
 //2 - Поезд
+//3 - Меню
 //default - Город
 void play_music(int music_number, double position = 0);
 

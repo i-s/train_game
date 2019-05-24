@@ -34,8 +34,7 @@ extern SDL_Rect g_rectresourses;
 //возвращаю время до нового поезда
 int get_new_train_time()
 {
-	//TODO: придумать что-нибудь с временем до поезда
-	return 15;
+	return (rand() % 45) + 15; //От 15 до 60 секунд вне зависимости от сложности.
 }
 //Рисует поезд
 void draw_train(SDL_Renderer* renderer, Train train) {

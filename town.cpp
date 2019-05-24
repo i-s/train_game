@@ -315,7 +315,7 @@ int check_full_stock(int res)
 
 //Определяет время до следующего рейда
 int get_new_battle_time() {
-	return 10;
+	return fmax(60-difficulty*5,20);
 	//TODO: Придумать что-то с временем до рейда
 }
 

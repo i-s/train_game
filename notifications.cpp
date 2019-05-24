@@ -230,6 +230,7 @@ void call_voice_notification(int sound_number = 0) {
 //Музыка: 0 - Город
 //1 - Битва
 //2 - Поезд
+//3 - Меню
 //default - Город
 void play_music(int music_number, double position = 0) {
 	Mix_Music *music;
@@ -238,6 +239,7 @@ void play_music(int music_number, double position = 0) {
 	case 0: music = Mix_LoadMUS("resourses/music/music_test.mp3"); break; //Музыка для города
 	case 1: music = Mix_LoadMUS("resourses/music/music_attack.mp3"); break; //Музыка для битвы
 	case 2: music = Mix_LoadMUS("resourses/music/music_train.mp3"); break; //Музыка для поезда
+	case 3: music = Mix_LoadMUS("resourses/music/music_menu.mp3"); break; //Музыка для меню
 
 	default: music = Mix_LoadMUS("resourses/music/music_test.mp3"); break;
 	}
