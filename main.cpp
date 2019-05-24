@@ -77,7 +77,7 @@ int get_settings(char* filename)
 
 int main() {
 	//ищем фаил настройками
-	get_settings((char *)"setting.txt");
+	get_settings((char *)"setting.cfg");
 
 	//Создаём окно
 	SDL_Init(SDL_INIT_EVERYTHING);

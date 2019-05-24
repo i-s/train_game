@@ -18,7 +18,7 @@ extern bool QUIT;
 int get_settings_of_file()
 {
 	FILE *f;
-	if (fopen_s(&f, "setting.txt", "r") != NULL)
+	if (fopen_s(&f, "setting.cfg", "r") != NULL)
 	{
 		printf("HE MOGU\n");
 		return -1;
@@ -51,7 +51,7 @@ int get_settings_of_file()
 int set_settings_in_file()
 {
 	FILE *f;
-	if (fopen_s(&f, "setting.txt", "w") != NULL)
+	if (fopen_s(&f, "setting.cfg", "w") != NULL)
 	{
 		printf("HE MOGU\n");
 		return -1;
