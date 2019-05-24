@@ -6,6 +6,7 @@
 #include <time.h>
 #include "battle.h"
 #include "rooms.h"
+#include "notifications.h"
 #include "save.h"
 #include "intro.h"
 #include <stdio.h>
@@ -180,7 +181,7 @@ int main() {
 	
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(WINDOW);
-	if(g_have_open_town_before)
-		save_game(); //Если игра открывалась, сохраняем её.
+	//if(g_have_open_town_before)save_game(); //Если игра открывалась, сохраняем её.
+	Exit_Music();
 	return 0;
 }

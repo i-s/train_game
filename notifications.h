@@ -40,3 +40,12 @@ int init_music();
 
 //Рисует счётчики ресурсов с поправкой на размер Rect-а.
 void draw_number_text(SDL_Window* window, SDL_Renderer* renderer, int number, SDL_Rect rect, int color = 0, bool transparent = false);
+
+//Выгружает музыку из RAM и завершает Mix.
+void Empty_Music();
+
+//Выходит из MIX-ера
+void Exit_Music();
+
+//Вызывает меню по ESC-у, в котором можно выйти из игры или сохраниться.
+void Escape_menu(SDL_Window* window, SDL_Renderer* renderer, SDL_Event *event);

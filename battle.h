@@ -49,3 +49,6 @@ struct Gun {
 //рисует поверх кнопки красивое затемнение
 void draw_blackout(SDL_Window* window, SDL_Renderer* renderer, SDL_Rect rect,
 	float percentage_of_recharge, int blackout_level);
+
+//проверяет нахождение мышки в прямоугольнике, возвр 1, если находится, и 0 , если нет
+int check_mouse_on_rect(SDL_Rect rectangle, SDL_Event event);

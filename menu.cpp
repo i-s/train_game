@@ -29,9 +29,6 @@ void DrawButtons(SDL_Renderer* renderer,SDL_Rect buttons[], SDL_Texture* buttons
 			continue;
 		SDL_RenderCopy(renderer, buttons_textures[i], NULL, &buttons[i]);
 	}
-	//SDL_RenderCopy(renderer, start_texture, NULL, &buttons[0]);
-	//SDL_RenderCopy(renderer, setting_texture, NULL, &buttons[1]);
-	//SDL_RenderCopy(renderer, exit_texture, NULL, &buttons[2]);
 }
 
 //Экран "меню".

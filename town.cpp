@@ -396,9 +396,10 @@ void Update_difficulty() {
 
 //Отрисовывает все изображения на экран
 void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Background background, Room_Selecting room_selecting,
-			Alert alert, Room_icon room_icons[], SDL_Texture* rooms_info[], Room rooms[], SDL_Rect room_name_rect, SDL_Rect room_info_rect,
-			int draw_room_name_level = -1, int draw_room_name_type = -1, bool draw_cost = false,
-			int draw_nores = 0,int draw_room_info = -1) {
+	Alert alert, Room_icon room_icons[], SDL_Texture* rooms_info[], Room rooms[], SDL_Rect room_name_rect, SDL_Rect room_info_rect,
+	SDL_Texture* resorses_textures[], SDL_Rect resorses_textures_rects[],
+	int draw_room_name_level = -1, int draw_room_name_type = -1, bool draw_cost = false,
+	int draw_nores = 0,int draw_room_info = -1) {
 	draw_background(renderer, background);
 
 	//Рисуем все комнаты
@@ -433,6 +434,8 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, char* texts[], Backgroun
 	if (draw_cost) {
 		if(draw_nores)
 			draw_text(window, renderer, texts[13 + draw_nores], room_name_rect, 0, true);
+		for(int i=0; i<3;i++)
+			draw_res(window,renderer, resorses_textures[i], resorses_textures_rects[i]);
 
 		draw_text(window, renderer, texts[3], rect_cost_humans, 0,true);
 		draw_text(window, renderer, texts[4], rect_cost_food, 0,true);
@@ -496,7 +499,21 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_Surface* farm_info_surf = SDL_LoadBMP("resourses/textures/rooms/farm_info.bmp");
 	SDL_Texture* farm_info_texture = SDL_CreateTextureFromSurface(renderer, farm_info_surf);
 	SDL_FreeSurface(farm_info_surf);
-
+	//Картиночки ресурсов
+	SDL_Surface* people_surf = SDL_LoadBMP("resourses/textures/people.bmp");
+	SDL_SetColorKey(people_surf, 1, SDL_MapRGB(people_surf->format, 0, 255, 0));
+	SDL_Texture* people_texture = SDL_CreateTextureFromSurface(renderer, people_surf);
+	SDL_FreeSurface(people_surf);
+	SDL_Surface* food_surf = SDL_LoadBMP("resourses/textures/food.bmp");
+	SDL_SetColorKey(food_surf, 1, SDL_MapRGB(food_surf->format, 0, 255, 0));
+	SDL_Texture* food_texture = SDL_CreateTextureFromSurface(renderer, food_surf);
+	SDL_FreeSurface(food_surf);
+	SDL_Surface* res_surf = SDL_LoadBMP("resourses/textures/res.bmp");
+	SDL_SetColorKey(res_surf, 1, SDL_MapRGB(res_surf->format, 0, 255, 0));
+	SDL_Texture* res_texture = SDL_CreateTextureFromSurface(renderer, res_surf);
+	SDL_FreeSurface(res_surf);
+	//Массив картиночек ресурсов
+	SDL_Texture* resorses_textures[3] = {people_texture,food_texture,res_texture};
 
 
 	//иконки фермы
@@ -519,7 +536,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_FreeSurface(factory_info_surf);
 
 	//иконки фабрики
-	SDL_Surface* factory1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/factory_1_icon.bmp");//тут поменять
+	SDL_Surface* factory1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/factory_1_icon.bmp");
 	SDL_Texture* factory1_icon_texture = SDL_CreateTextureFromSurface(renderer, factory1_icon_surf);
 	SDL_FreeSurface(factory1_icon_surf);
 
@@ -538,7 +555,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_FreeSurface(living_info_surf);
 
 	//Иконка жилой комнаты
-	SDL_Surface* living1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/living_1_icon.bmp");//тут поменять
+	SDL_Surface* living1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/living_1_icon.bmp");
 	SDL_Texture* living1_icon_texture = SDL_CreateTextureFromSurface(renderer, living1_icon_surf);
 	SDL_FreeSurface(living1_icon_surf);
 
@@ -586,7 +603,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_FreeSurface(storage_info_surf);
 
 	//Иконка склада
-	SDL_Surface* storage1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/storage_1_icon.bmp");//тут поменять
+	SDL_Surface* storage1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/storage_1_icon.bmp");
 	SDL_Texture* storage1_icon_texture = SDL_CreateTextureFromSurface(renderer, storage1_icon_surf);
 	SDL_FreeSurface(storage1_icon_surf);
 
@@ -605,7 +622,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_FreeSurface(radio_info_surf);
 
 	//Иконка радио
-	SDL_Surface* radio1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/radio_1_icon.bmp");//тут поменять
+	SDL_Surface* radio1_icon_surf = SDL_LoadBMP("resourses/textures/rooms/radio_1_icon.bmp");
 	SDL_Texture* radio1_icon_texture = SDL_CreateTextureFromSurface(renderer, radio1_icon_surf);
 	SDL_FreeSurface(radio1_icon_surf);
 
@@ -666,6 +683,13 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	char* texts[17] = { text_humans, text_food, text_resourses, text_cost_humans, text_cost_food, text_cost_resourses,
 		empty_name, farm_name, factory_name, live_name, wearony_name, stock_name, radio_name, text_room_level,
 		text_nopeople, text_nofood, text_nores};
+
+	//Rect-ы для иконок ресурсов возле иконок строительства
+	SDL_Rect Near_icon_humans_rect = {16,568,30,30};
+	SDL_Rect Near_icon_food_rect = {91,568,30,30};
+	SDL_Rect Near_icon_res_rect = {173,568,30,30};
+
+	SDL_Rect resorses_textures_rect[3] = {Near_icon_humans_rect,Near_icon_food_rect,Near_icon_res_rect};
 
 	//Описание всех кнопок
 	SDL_Rect rect_button_train = { 289,68,52,74 };
@@ -772,6 +796,11 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		if (event.type == SDL_QUIT) {
 			QUIT = true;
 			quit = true;
+		}
+		bool was_game_paused = false; //Была ли игра поставлена на паузу.
+		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE) {
+			Escape_menu(window,renderer,&event);
+			was_game_paused = true;
 		}
 
 		bool was_background_changed = false; //Был ли фон изменён?
@@ -953,6 +982,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		if (g_have_open_town_before == false) { //Если город запускается впервые, то не нужно изменять время.
 			DELTA = 0;
 		}
+		if (was_game_paused) { //Если игра ставилась на паузу, то не нужно изменять время
+			DELTA = 0;
+		}
 		LASTTICKTIME = tick_time;
 
 		g_music_position += DELTA * 0.001; //Сдвигаем сохранённую позицию музыки на DELTA
@@ -1020,7 +1052,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 
 		//Отрисовываем кадр
 		Update(window,renderer, texts, background, room_selecting, alert,room_icons, rooms_info, rooms, room_selecting_name_rect,
-			rect_room_info, draw_room_name_level, draw_room_name_type, draw_cost=draw_cost_yes, draw_nores, draw_room_info);
+			rect_room_info, resorses_textures,resorses_textures_rect, draw_room_name_level, draw_room_name_type, draw_cost=draw_cost_yes, draw_nores, draw_room_info);
 
 		//возвращаем флаги назад
 		draw_cost = false;
@@ -1060,6 +1092,9 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	SDL_DestroyTexture(weapony1_icon_texture);
 	SDL_DestroyTexture(storage1_icon_texture);
 	SDL_DestroyTexture(radio1_icon_texture);
+	SDL_DestroyTexture(food_texture);
+	SDL_DestroyTexture(res_texture);
+	SDL_DestroyTexture(people_texture);
 
 
 	// Попытка красиво выгружать текстуры из памяти
@@ -1069,9 +1104,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 	}
 	*/
 
-	//Так НУЖНО выходить из Mix_Init-а. Серьёзно. Сказано в Вики.
-	while (Mix_Init(0))
-		Mix_Quit();
+	Empty_Music();
 
 	if (raid_started) {
 		raid_started = false;

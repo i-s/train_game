@@ -26,6 +26,8 @@ struct Grenade
 	SDL_Texture* texture;
 };
 
+//Сохраняет время проигрывания музыки
+double music_time;
 
 //Загружаем глобальные переменные из town.cpp
 extern float g_humans, g_resourses, g_food;
@@ -109,9 +111,9 @@ void Update_EnemiesPosition(Enemy enemies[], SDL_Rect battle_rect, SpawnPoint sp
 			//Двигаем зомби
 			//TODO: Зомби должны бежать медленнее
 			enemies[i].rectangle.x -= 1;
-			enemies[i].rectangle.w += 1;
-			enemies[i].rectangle.y += 1;
-			enemies[i].rectangle.h += 1;
+			enemies[i].rectangle.w += 2;
+			enemies[i].rectangle.y -= 1;
+			enemies[i].rectangle.h += 2;
 			//Проверка на выходы врага за границы допустимой области
 			if (enemies[i].rectangle.h <= battle_rect.h) { // Если размеры зомби не превышают высоту боевого окна (т.е. зомби ещё "не дошёл" до убежища)
 				if (enemies[i].rectangle.y < battle_rect.y)
@@ -199,6 +201,7 @@ int Attack_Enemy(Gun *gun, Enemy *enemy = NULL)
 	gun->time_end_reload = 0;
 	g_resourses -= gun->cost;
 	play_sound(gun->sound_number);
+	play_music(1, music_time+0.2);
 	if (enemy == NULL)//промах
 		return 0;
 	if (cause_damage_enemy(enemy, gun->damage))
@@ -264,12 +267,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	char* text_zombitext = (char*)(u8"Врагов осталось: ");
 	char* text_zombicount = new char[10];
 
-	////строки для хран числ знач перезарядки
-	//char* text_cooldown1 = new char[10];
-	//char* text_cooldown2 = new char[10];
-	//char* text_cooldown3 = new char[10];
-	//char* text_cooldown4 = new char[10];
-	
+	music_time = 0; //Устанвливаем позицию музыки в 0	
 
 	//Массив строк для удобной передачи в ф-ию
 	char* texts[5] = { NULL, NULL, NULL, text_zombitext, text_zombicount};
@@ -391,6 +389,11 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		if (event.type == SDL_QUIT) {
 			QUIT = true;
 			quit = true;
+		}
+		bool was_game_paused = false; //Была ли игра поставлена на паузу.
+		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE) {
+			Escape_menu(window, renderer, &event);
+			was_game_paused = true;
 		}
 
 		//TODO: Доработать боёвку
@@ -516,6 +519,12 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 		DELTA = tick_time - LASTTICKTIME;
 		LASTTICKTIME = tick_time;
 
+		if (was_game_paused) { //Если игра ставилась на паузу, то не нужно изменять время
+			DELTA = 0;
+		}
+
+		music_time += DELTA * 0.001;
+
 		for (int gun_type = 1; gun_type < 5; gun_type++)// проверим кд у всего оружия
 		{
 			if (guns[gun_type - 1].time_end_reload < guns[gun_type - 1].cooldown)
@@ -539,5 +548,6 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	SDL_DestroyTexture(block_texture);
 	SDL_DestroyTexture(zombie1_texture);
 	SDL_DestroyTexture(grenade_texture);
+	Empty_Music();
 	return 0;
 }

@@ -386,6 +386,11 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 			QUIT = true;
 			quit = true;
 		}
+		bool was_game_paused = false; //Была ли игра поставлена на паузу.
+		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE) {
+			Escape_menu(window, renderer, &event);
+			was_game_paused = true;
+		}
 
 		//Каждый раз в цикле говорим, что мышь не наведена ни на одну из кнопок
 		int button_flag = -1;
@@ -558,6 +563,10 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 		DELTA = tick_time - LASTTICKTIME;
 		LASTTICKTIME = tick_time;
 
+		if (was_game_paused) { //Если игра ставилась на паузу, то не нужно изменять время
+			DELTA = 0;
+		}
+
 		one_second -= DELTA * 0.001;
 		if (one_second < 0) {
 			Update_resourses();
@@ -607,6 +616,8 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	SDL_DestroyTexture(food_texture);
 	SDL_DestroyTexture(res_texture);
 	SDL_DestroyTexture(people_texture);
+
+	Empty_Music();
 
 	if (town_button_pressed) {
 		//Возвращаем в глобальные переменные состояние рычагов
