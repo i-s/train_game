@@ -1,4 +1,5 @@
 #pragma once
+#include "train.h"
 
 
 //Экран "сражение". Если передать custom_difficulty != -1 ,то для ЭТОГО сражения будет использована специальная сложность
@@ -8,6 +9,8 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 
 
 //Ситруктура "Враг" SDL_Texture* texture;SDL_Rect rectangle;
+//Point coordinates;
+//float real_size_w, real_size_h;
 //int type; //Тип врага: 0 - обычный зомби 
 //bool active = false; Активен ли враг (нужно ли его отрисовывать, приближать?)
 //int spawn_point;
@@ -19,10 +22,14 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 struct Enemy {
 	SDL_Texture* texture;
 	SDL_Rect rectangle;
+	Point coordinates;
+	float real_size_w; //Реальный, дробный размер врага
+	float real_size_h; //Реальный, дробный размер врага
 	int type; //Тип врага: 0 - обычный зомби
 	bool active = false; //Активен ли враг (нужно ли его отрисовывать, приближать?)
 	int spawn_point;
 	int hp; //Жизни врага
+	float speed; //Скорость врага
 	//Потери ресурсов в порядке: еда, ресурсы, люди
 	int loss_food;
 	int loss_resourses;
