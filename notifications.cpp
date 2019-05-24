@@ -76,13 +76,13 @@ extern bool QUIT;
 void Escape_menu(SDL_Window* window, SDL_Renderer* renderer, SDL_Event *event) {
 	//Загружаем текстуры
 	SDL_Surface* button_continue_surf = SDL_LoadBMP("resourses/textures/continue.bmp");
-	SDL_Texture*button_continue_texture = SDL_CreateTextureFromSurface(renderer, button_continue_surf);
+	SDL_Texture* button_continue_texture = SDL_CreateTextureFromSurface(renderer, button_continue_surf);
 	SDL_FreeSurface(button_continue_surf);
 	SDL_Surface* button_save_surf = SDL_LoadBMP("resourses/textures/save.bmp");
-	SDL_Texture*button_save_texture = SDL_CreateTextureFromSurface(renderer, button_save_surf);
+	SDL_Texture* button_save_texture = SDL_CreateTextureFromSurface(renderer, button_save_surf);
 	SDL_FreeSurface(button_save_surf);
 	SDL_Surface* button_exit_surf = SDL_LoadBMP("resourses/textures/exit.bmp");
-	SDL_Texture*button_exit_texture = SDL_CreateTextureFromSurface(renderer, button_exit_surf);
+	SDL_Texture* button_exit_texture = SDL_CreateTextureFromSurface(renderer, button_exit_surf);
 	SDL_FreeSurface(button_exit_surf);
 	//Массив текстур кнопок
 	SDL_Texture* buttons_textures[3] = {button_continue_texture,button_save_texture,button_exit_texture};
@@ -144,6 +144,10 @@ void Escape_menu(SDL_Window* window, SDL_Renderer* renderer, SDL_Event *event) {
 		default: break;
 		}
 	}
+
+	SDL_DestroyTexture(button_continue_texture);
+	SDL_DestroyTexture(button_save_texture);
+	SDL_DestroyTexture(button_exit_texture);
 }
 
 //Рисует счётчики ресурсов с поправкой на размер Rect-а.
