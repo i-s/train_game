@@ -272,10 +272,12 @@ int get_level_room(Room rooms[], int button_flag)
 // 0, если нет  
 int get_building_level(int building_type)
 {
-	for (int i = 0; i < 2; i++)//обходим все комнаты
-		for (int j = 0; j < 3; j++)
+	for (int i = 0; i < 2; i++) {//обходим все комнаты
+		for (int j = 0; j < 3; j++) {
 			if (g_rooms[i][j][0] == building_type)//если построено это здание
 				return g_rooms[i][j][1]; // вернем уровень этого здания
+		}
+	}
 	return 0;
 }
 
@@ -313,7 +315,7 @@ int check_full_stock(int res)
 
 //Определяет время до следующего рейда
 int get_new_battle_time() {
-	return 10;
+	return fmax(60-difficulty*5,20);
 	//TODO: Придумать что-то с временем до рейда
 }
 
@@ -809,10 +811,13 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 
 		for (int i = 0; i <= 14; i++) {
 			button_flag = CheckIfMouseOnButton(event, i, buttons);
+			if (button_flag != -1)
+				break;
+		}
 
-			switch (button_flag) {
+		switch (button_flag) {
 			case -1: break;
-			//Нажатие на комнаты
+				//Нажатие на комнаты
 			case 0: {
 				background.texture = background_train_selected_texture;
 				was_background_changed = true;
@@ -821,7 +826,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 				}
 				break;
 			}
-			case 1: 
+			case 1:
 			case 2:
 			case 3:
 			case 4:
@@ -830,7 +835,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 				draw_room_name_type = get_type_room(rooms, button_flag);
 				draw_room_name_level = get_level_room(rooms, button_flag);
 				if (LKMPressed(event)) {
-					
+
 					choosed_room = button_flag;
 					was_button_room_pressed = true;
 				}
@@ -841,7 +846,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 
 				room_type = 1;
 				if (LKMPressed(event)) {//Нажатие на иконку фермы
-					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0 && 
+					if (choosed_room > -1 && rooms[choosed_room - 1].type == 0 &&
 						check_availability_res(room_type) == 0) {
 
 						was_rooms_changed = build_room(&rooms[choosed_room - 1], room_type, choosed_room);
@@ -926,15 +931,15 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 				}
 				break;
 			}
-			case 13: 
-			{ 
+			case 13:
+			{
 				room_type = rooms[choosed_room - 1].type;
 				draw_update_cost = true;
 				if (LKMPressed(event)) {//Нажатие на иконку апгрейда
 					if (choosed_room > -1  //Команта выбрана
 						&& rooms[choosed_room - 1].type != 0 //Комната построена
 						&& time(NULL) - time_last_update + 0.5 > 1 //Не чаще раза в секунду
-						&& check_availability_res(rooms[choosed_room - 1].type, rooms[choosed_room - 1].level + 1) == 0){
+						&& check_availability_res(rooms[choosed_room - 1].type, rooms[choosed_room - 1].level + 1) == 0) {
 
 						was_rooms_changed = upgrade_room(&rooms[choosed_room - 1], choosed_room);
 						Define_Rooms_Textures(&rooms[choosed_room - 1], room_textures);
@@ -959,7 +964,6 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 				break;
 			}
 			default: printf_s("There is a problem with a buttons!\n"); break;
-			}
 		}
 
 		if (was_rooms_changed) {
@@ -1016,7 +1020,7 @@ int town_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int win
 		//Если время до прибытия рейда > 0, отнимаем от него прошедшее время за цикл
 		if (g_time_before_raid > 0) {
 			g_time_before_raid -= DELTA * 0.001;
-			if (g_time_before_raid < 3.2 && was_alarm_called == false && get_building_level(4) >= 1) {
+			if (g_time_before_raid < 3.2 && was_alarm_called == false && get_building_level(6) >= 1) {
 				play_sound(101);
 				was_alarm_called = true;
 			}

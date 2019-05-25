@@ -1,9 +1,13 @@
 #include <SDL.h>
+#include "notifications.h"
 #include "save.h"
 #define NUMBER_OF_BUTTONS 4
 
 //Была ли игра загружена из сохранения?
 bool g_was_game_loaded = false;
+
+//Находится ли игрок впервые в меню?
+bool first_time_in_menu = true;
 
 //Имеется ли сохранение?
 bool is_there_save_file = check_for_save_file();
@@ -95,6 +99,12 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	DrawButtons(renderer, buttons, buttons_textures);
 	SDL_RenderPresent(renderer);
 
+	//Запуск музыки для меню
+	if (first_time_in_menu) {
+		init_music();
+		play_music(3);
+	}
+
 	//Переменная для хранения номера кнопки
 	int button_flag;
 	//Переменная, которая равна 1, когда необходимо заменить кнопки с нажатых на обычные
@@ -181,7 +191,11 @@ int menu(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int winsize_
 	SDL_DestroyTexture(setting_texture_click);
 	SDL_DestroyTexture(exit_texture_click);
 	SDL_DestroyTexture(continue_texture_click);
+
+	first_time_in_menu = false;
+
 	if (game_started || loaded) return 1; //Возврат 1 - нажата кнопка Start
 	if (settings) return 2; //Возврат 2 - нажата кнопка Settings
+	Empty_Music();
 	return 0; //Возврат 0 -> программа закрыта
 }

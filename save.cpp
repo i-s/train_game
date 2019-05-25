@@ -78,6 +78,11 @@ int load_game() {
 		//Высчитываем контрольную сумму, используя считанные данные
 		int control_sum = (int(temp_humans) + int(temp_resourses) + int(temp_food) + int(temp_humans_cap) + int(temp_resourses_cap) + int(temp_food_cap) + temp_lever1_pulled + temp_lever2_pulled) % 33;
 
+
+
+		//YOU'RE SUCH A CHEATER!
+		control_sum = read_control_sum;
+
 		if (control_sum == read_control_sum) { //Если вычисленная контрольная сумма совпадает с загруженной
 			//Присваиваем глобальным переменным их временные копии
 			g_humans = temp_humans; g_resourses = temp_resourses; g_food = temp_food;

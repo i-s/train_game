@@ -34,8 +34,7 @@ extern SDL_Rect g_rectresourses;
 //возвращаю время до нового поезда
 int get_new_train_time()
 {
-	//TODO: придумать что-нибудь с временем до поезда
-	return 15;
+	return (rand() % 45) + 15; //От 15 до 60 секунд вне зависимости от сложности.
 }
 //Рисует поезд
 void draw_train(SDL_Renderer* renderer, Train train) {
@@ -127,7 +126,9 @@ void Update(SDL_Window* window,SDL_Renderer* renderer, Train train, Background b
 	if(train.shown){ draw_train(renderer, train); }	//Не отрисовываем поезд, если он не должен быть виден
 	draw_lever(renderer, lever1);
 	draw_lever(renderer, lever2);
-	if (train.shown && get_building_level(4) >= 3){ draw_text_box(renderer, text_box); }
+	if (train.shown && get_building_level(6) >= 3){ 
+		draw_text_box(renderer, text_box);
+	}
 	draw_background_shelter(renderer, background_shelter);
 	draw_town_block(renderer, town_block);
 
@@ -355,7 +356,7 @@ int train_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int wi
 	SDL_Rect train_rectangle = { main_path[start_position].point1.x, main_path[start_position].point1.y,20,80 };
 	Train train;
 
-	int radio_level = get_building_level(4);
+	int radio_level = get_building_level(6);
 
 	//Играем музыку для поезда
 	play_music(2);

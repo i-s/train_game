@@ -10,13 +10,14 @@
 #include "battle.h"
 #include <stdlib.h>
 #define NUMBER_OF_ENEMIES 3
-#define NUMBER_OF_TYPES_OF_ENEMIES 1
+#define NUMBER_OF_TYPES_OF_ENEMIES 4
 
 //bool draw = false; // рисоваить ее или нет
 //int sound_number; номер звука
 //SDL_Rect init_rect; // где свавнится
 //SDL_Rect current_rect; // где сейчас
 //SDL_Texture* texture; // текстура
+/*
 struct Grenade 
 {
 	bool draw = false;
@@ -25,6 +26,7 @@ struct Grenade
 	SDL_Rect current_rect;
 	SDL_Texture* texture;
 };
+*/
 
 //Сохраняет время проигрывания музыки
 double music_time;
@@ -110,10 +112,20 @@ void Update_EnemiesPosition(Enemy enemies[], SDL_Rect battle_rect, SpawnPoint sp
 		{
 			//Двигаем зомби
 			//TODO: Зомби должны бежать медленнее
-			enemies[i].rectangle.x -= 1;
-			enemies[i].rectangle.w += 2;
-			enemies[i].rectangle.y -= 1;
-			enemies[i].rectangle.h += 2;
+			enemies[i].coordinates.x -= 0.5 * enemies[i].speed;
+			//enemies[i].rectangle.x -= 1;
+			enemies[i].real_size_w += 1 * enemies[i].speed;
+			//enemies[i].rectangle.w += 1 * enemies[i].speed;
+			enemies[i].coordinates.y -= 0.5 * enemies[i].speed;
+			//enemies[i].rectangle.y -= 1;
+			enemies[i].real_size_h += 1 * enemies[i].speed;
+			//enemies[i].rectangle.h += 1 * enemies[i].speed;
+
+			enemies[i].rectangle.x = int(enemies[i].coordinates.x);
+			enemies[i].rectangle.y = int(enemies[i].coordinates.y);
+			enemies[i].rectangle.w = int(enemies[i].real_size_w);
+			enemies[i].rectangle.h = int(enemies[i].real_size_h);
+
 			//Проверка на выходы врага за границы допустимой области
 			if (enemies[i].rectangle.h <= battle_rect.h) { // Если размеры зомби не превышают высоту боевого окна (т.е. зомби ещё "не дошёл" до убежища)
 				if (enemies[i].rectangle.y < battle_rect.y)
@@ -141,20 +153,24 @@ void Update_EnemiesPosition(Enemy enemies[], SDL_Rect battle_rect, SpawnPoint sp
 //"Спавнит" нового врага в случайной начальной точке
 //Это происходит, только при needness == true.
 //Если зомби заспавнен, возвращает 1, иначе 0
-int Spawn(bool needness, int type, SpawnPoint spawn_places[], Enemy* enemy, SDL_Texture* enemy_textures[], int enemies_hp[], int enemies_resourses_loss[][3]) {
+int Spawn(bool needness, int type, SpawnPoint spawn_places[], Enemy* enemy, SDL_Texture* enemy_textures[], int enemies_hp[], int enemies_resourses_loss[][3], float enemies_speed[]) {
 	if (needness) {
 		int rand_spawnposition = rand() % 3; //Случайное место для спавна
 		if (spawn_places[rand_spawnposition].open == true) { //Если место для спавна свободно
 			(*enemy).active = true;
-			(*enemy).type = (rand() % 1); //Делаем этого врага случайным типом
+			(*enemy).type = type; //Делаем этого врага случайным типом
 			(*enemy).texture = enemy_textures[(*enemy).type]; //Присваиваем врагу текстуру в зависимости от его типа
 			(*enemy).hp = enemies_hp[(*enemy).type]; //Присваиваем врагу жизни в зависимости от его типа
 			//Присваиваем врагу потери ресурсов в зависимости от его типа
 			(*enemy).loss_food = enemies_resourses_loss[(*enemy).type][0];
 			(*enemy).loss_resourses = enemies_resourses_loss[(*enemy).type][1];
 			(*enemy).loss_humans = enemies_resourses_loss[(*enemy).type][2];
+			enemy->speed = enemies_speed[enemy->type]; //Присваиваем ему скорость
 			spawn_places[rand_spawnposition].open = false; // Запрещаем спавнить в этом месте ещё одного врага
 			(*enemy).rectangle.w = 0; (*enemy).rectangle.h = 0;
+			(*enemy).real_size_w = 0; (*enemy).real_size_h = 0;
+			enemy->coordinates.x = spawn_places[rand_spawnposition].point.x;
+			enemy->coordinates.y = spawn_places[rand_spawnposition].point.y;
 			(*enemy).rectangle.x = spawn_places[rand_spawnposition].point.x; //Отправляем врага в точку спавна
 			(*enemy).rectangle.y = spawn_places[rand_spawnposition].point.y;
 			(*enemy).spawn_point = rand_spawnposition;
@@ -214,16 +230,31 @@ int generate_wave(int difficulty, int *enemies_wave)
 {
 	//TODO: Продумать волну зомби
 
-	int range_min = 1;
-	int range_max = fmin(double(difficulty % 10), double(3)) + 1;
+	//int range_min = 2;
+	//int range_max = fmin(double(difficulty), double(5)) + 1;
 	int enemies = 0;
 
 	for (int i = 0; i < NUMBER_OF_TYPES_OF_ENEMIES; i++)
 	{
-		enemies_wave[i] =  rand() % (range_max - range_min + 1) + range_min;
+		//Обработка сложности спавна
+		switch (i)
+		{
+		case 0: enemies_wave[i] = fmin(difficulty/2,10); break;//Зомбяки
+		case 1: enemies_wave[i] = fmin(difficulty/5, 5); break;//Толстяки
+		case 2: if (difficulty > 10)enemies_wave[i] = fmin((difficulty - 10) / 2, 15); else enemies_wave[i] = 0; break;//Бегуны
+		case 3: enemies_wave[i] = fmin(difficulty/10, 2); break;//Танки
+		default:
+			break;
+		}
+		//enemies_wave[i] =  rand() % (range_max - range_min + 1) + range_min;
 		enemies += enemies_wave[i];
 	}
 	return enemies;
+}
+
+//Определяет время спавна зомби в зависимости от сложности
+int define_spawn_time(int difficulty) {
+	return fmax((rand() % 10) - difficulty,1);
 }
 
 //Экран "сражение". Если передать custom_difficulty != -1 ,то для ЭТОГО сражения будет использована специальная сложность
@@ -255,8 +286,20 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	SDL_SetColorKey(zombie1_surf, 1, SDL_MapRGB(zombie1_surf->format, 0, 255, 0));
 	SDL_Texture* zombie1_texture = SDL_CreateTextureFromSurface(renderer, zombie1_surf);
 	SDL_FreeSurface(zombie1_surf);
+	SDL_Surface* zombie2_surf = SDL_LoadBMP("resourses/textures/enemies/zombie2.bmp");
+	SDL_SetColorKey(zombie2_surf, 1, SDL_MapRGB(zombie2_surf->format, 0, 255, 0));
+	SDL_Texture* zombie2_texture = SDL_CreateTextureFromSurface(renderer, zombie2_surf);
+	SDL_FreeSurface(zombie2_surf);
+	SDL_Surface* zombie3_surf = SDL_LoadBMP("resourses/textures/enemies/zombie3.bmp");
+	SDL_SetColorKey(zombie3_surf, 1, SDL_MapRGB(zombie3_surf->format, 0, 255, 0));
+	SDL_Texture* zombie3_texture = SDL_CreateTextureFromSurface(renderer, zombie3_surf);
+	SDL_FreeSurface(zombie3_surf);
+	SDL_Surface* zombie4_surf = SDL_LoadBMP("resourses/textures/enemies/zombie4.bmp");
+	SDL_SetColorKey(zombie4_surf, 1, SDL_MapRGB(zombie4_surf->format, 0, 255, 0));
+	SDL_Texture* zombie4_texture = SDL_CreateTextureFromSurface(renderer, zombie4_surf);
+	SDL_FreeSurface(zombie4_surf);
 
-	SDL_Texture* enemy_textures[1] = { zombie1_texture };
+	SDL_Texture* enemy_textures[4] = { zombie1_texture, zombie2_texture,zombie3_texture,zombie4_texture };
 
 	//Заполняем структуру заднего фона
 	SDL_Rect background_rect = {0,0,winsize_w,winsize_h};
@@ -300,13 +343,28 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	//Массив здоровья врагов
 	//0-ой тип - первое значение, 1-ый тип - второе значение и т.д.
 	int enemies_hp[NUMBER_OF_TYPES_OF_ENEMIES] = {
-		1, //0-ой тип имеет 1 здоровье
+		2, //0-ой тип имеет 1 здоровье
+		5, //1-ый тип имеет 5 здоровья
+		1,
+		10
 	};
 
 	//Массив урона ресурсам, которые наносит зомби, когда доходит до убежища
 	//0-ой тип - первый элемент массива, в котором расположены: урон_еде, урон_ресурсам, урон_людям
 	int enemies_resourses_loss[NUMBER_OF_TYPES_OF_ENEMIES][3] = {
-		{0,0,33}, //0-ой тип наносит 0, 0, 1 урона соответственно еде, ресурсам и людям
+		{0,0,6}, //0-ой тип наносит 0, 0, 6 урона соответственно еде, ресурсам и людям
+		{0,0,15},
+		{0,0,3},
+		{0,10,25},
+	};
+
+	//Массив скоростей движения врагов
+	//0-ой тип - скорость 2 -> 1 пиксель за такт
+	float enemies_speed[NUMBER_OF_TYPES_OF_ENEMIES] = {
+		1,
+		0.5,
+		2,
+		0.2,
 	};
 
 	//[тип] - кол-во зомби
@@ -360,9 +418,9 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	//Текущее оружее 1 - пистолет, 2 - автомат, 3 - пулемет , 4 - граната
 	int gun_type = 1;
 	int weapony_level = get_building_level(4);//уровень оружейной
-	Grenade grenage;
-	grenage.init_rect = {};
-	grenage.texture = grenade_texture;
+	//Grenade grenage;
+	//grenage.init_rect = {};
+	//grenage.texture = grenade_texture;
 
 	//здесь хранится кол-во оставшихся в волне зомби 
 	int enemies_count_in_wave;
@@ -371,7 +429,7 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	printf_s("In wave :");
 	for (int i = 0; i < NUMBER_OF_TYPES_OF_ENEMIES; i++)
 	{
-		printf_s("%d", enemies_wave[i]);
+		printf_s("%d ", enemies_wave[i]);
 	}
 	printf_s("Count: %d\n", enemies_count_in_wave);
 
@@ -402,23 +460,24 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 			{
 				//type - тип врага
 				//Перебираем все типы врагов в массиве enemies_wave
-				for (int type = 0; type < NUMBER_OF_TYPES_OF_ENEMIES; type++)
-				{
+				int type = rand() % NUMBER_OF_TYPES_OF_ENEMIES;
+				//for (int type = 0; type < NUMBER_OF_TYPES_OF_ENEMIES; type++)
+				//{
 					//Если врагов типа type осталось больше 0
 					if (enemies_wave[type] > 0) 
 					{
 						//Пытаемся заспавнить врага
 						if (Spawn(true, type, spawn_places, &enemies[i], enemy_textures, 
-							enemies_hp, enemies_resourses_loss))//если спавн удачный
+							enemies_hp, enemies_resourses_loss, enemies_speed))//если спавн удачный
 						{
 							enemies_wave[type]--; //Вычитаем одного врага из данного типа врагов
 							time_last_spawn = time(NULL); //Устанавливаем время последнего спавна
-							spawn_cooldown = type * 2 + rand() % 3 + 1; //Устанавливаем время до следующего появления врагов
+							spawn_cooldown = define_spawn_time(difficulty); //Устанавливаем время до следующего появления врагов
 							//TODO: как-то задать время спавна
 						}
 						
 					}
-				}
+				//}
 			}
 		}
 
@@ -547,6 +606,9 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 	SDL_DestroyTexture(background_texture);
 	SDL_DestroyTexture(block_texture);
 	SDL_DestroyTexture(zombie1_texture);
+	SDL_DestroyTexture(zombie2_texture);
+	SDL_DestroyTexture(zombie3_texture);
+	SDL_DestroyTexture(zombie4_texture);
 	SDL_DestroyTexture(grenade_texture);
 	Empty_Music();
 	return 0;

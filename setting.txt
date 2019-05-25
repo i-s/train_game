@@ -1,5 +1,0 @@
-g_music_volume=128
-g_sound_volume=50
-winsize_w=800
-winsize_h=600
-fullscreen=0
