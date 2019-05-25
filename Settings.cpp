@@ -67,12 +67,9 @@ int set_settings_in_file()
 
 
 void Update(SDL_Window* window, SDL_Renderer* renderer, Background backgroung, SDL_Rect buttons[], char* texts[],
-		int button_flag, int screensize, int volmus, int volsound, bool need_notification, SDL_Rect text_rect[]) {
+		int button_flag, int screensize, int volmus, int volsound, bool need_notification) {
 
 	draw_background(renderer, backgroung);
-
-	//Рисуем текст разрешения
-	draw_text(window, renderer, texts[7], text_rect[0], 5);
 	
 	//рисуем разрешение
 	for (int i = 0; i < 2; i++)//mus
@@ -83,9 +80,6 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, Background backgroung, S
 		draw_text(window, renderer, texts[i], buttons[i], k);
 	}
 
-	//Рисуем текст фулла
-	draw_text(window, renderer, texts[8], text_rect[1], 5);
-
 	//рисуем фулскрин
 	int k = 5;
 	if (fullscreen && screensize == -1)
@@ -95,11 +89,6 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, Background backgroung, S
 	if (!fullscreen)
 		k = 0;
 	draw_text(window, renderer, (char*)"NO", buttons[11], k);		
-
-	//Рисуем текст музыки
-	draw_text(window, renderer, texts[9], text_rect[2], 5);
-	//Рисуем текст звуков
-	draw_text(window, renderer, texts[10], text_rect[3], 5);
 
 	//рисуем громкость
 	for (int i = 0; i < 3; i++)//mus
@@ -116,10 +105,6 @@ void Update(SDL_Window* window, SDL_Renderer* renderer, Background backgroung, S
 			k = 0;
 		draw_text(window, renderer, texts[2 + i], buttons[6 + i], k);
 	}
-
-	//Рисуем текст предупреждения
-	if(need_notification)
-		draw_text(window, renderer, texts[11], text_rect[4], 5);
 
 	//рисуем сохр и назад
 	draw_text(window, renderer, texts[5], buttons[9], 0);
@@ -165,34 +150,26 @@ int launch_settings(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, i
 	backgroung.texture = settings_texture;
 
 	//определим , где кнопки
-	SDL_Rect scrn_text = {80,50,340,75}; //Текст "Разрешение окна"
 	SDL_Rect but_scrnsz1 = {437, 64, 130, 59};
 	SDL_Rect but_scrnsz2 = { 600, 64, 130, 59 };
-	SDL_Rect full_text = { 10,155,265,65 }; //Текст "Полный экран"
 	SDL_Rect but_fullscrnon = { 287, 158, 64, 61 };
 	SDL_Rect but_fullscrnoff = { 366, 158, 64, 61 };
-	SDL_Rect mus_text = {35,275,250,70};//Текст "Громкость музыки"
 	SDL_Rect but_volmus1 = { 382, 283, 94, 59 };
 	SDL_Rect but_volmus2 = { 502, 283, 94, 59 };
 	SDL_Rect but_volmus3 = { 615, 283, 94, 59 };
-	SDL_Rect sound_text = { 35,355,250,70 }; //Текст "Громокость звуков"
 	SDL_Rect but_volsond1 = { 382, 361, 94, 59 };
 	SDL_Rect but_volsond2 = { 502, 361, 94, 59 };
 	SDL_Rect but_volsond3 = { 615, 361, 94, 59 };
 	SDL_Rect but_back = { 382, 471, 184, 54 };
 	SDL_Rect but_save = { 188, 471, 184, 54 };
-	SDL_Rect warning_text = {25,430,715,35}; //Текст предупреждения
 	
 	SDL_Rect buttons[12] = { but_scrnsz1, but_scrnsz2, but_fullscrnon , but_volmus1 , but_volmus2 , but_volmus3,
 									but_volsond1 ,but_volsond2 ,but_volsond3 ,but_save, but_back, but_fullscrnoff };
 
-	SDL_Rect text_rects[5] = { scrn_text,full_text,mus_text,sound_text,warning_text };
 
 
-
-	char* texts[12] = { (char*)u8"800x600" , (char*)u8"1440x900", (char*)u8"Громко", (char*)u8"Средне", (char*)u8"Тихо",
-						(char*)u8"Сохранить", (char*)u8"Назад",
-						(char*)u8"Разрешение окна",(char*)u8"Полноэкранный режим",(char*)u8"Громкость музыки",(char*)u8"Громкость звуков",(char*)u8"Перезапустите игру для применения изменений" };
+	char* texts[7] = { (char*)u8"800x600" , (char*)u8"1440x900", (char*)u8"Громко", (char*)u8"Средне", (char*)u8"Тихо",
+						(char*)u8"Сохранить", (char*)u8"Назад" };
 
 	SDL_Event event;
 	bool quit = false;
@@ -334,10 +311,10 @@ int launch_settings(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, i
 			}
 			}
 		}
-		Update(window, renderer, backgroung, buttons, texts, current_button, screensize, volmus, volsound, need_notification, text_rects);
+		Update(window, renderer, backgroung, buttons, texts, current_button, screensize, volmus, volsound, need_notification);
 
 
-		//need_notification = false;
+		need_notification = false;
 	}
 	
 
