@@ -209,6 +209,26 @@ int check_mouse_on_rect(SDL_Rect rectangle, SDL_Event event)
 	return 0;
 }
 
+//проверяет порядок отображения зомби, 1 - ближе 2 - чуть дальше и тд
+//int correct_enemies(Enemy enemies[])
+//{
+//	int max[2] = { 0,0 };//храним размер самого близкого зомби
+//	int min[2] = { 800,600 };//храним размер самого дальнего зомби
+//	int maxn = 0, minx = 0; // их номера
+//	Enemy tmp[3];
+//	for (int i = 0; i < 2; i++)
+//	{
+//		int k = i + 1;
+//		if (k > 2) k = 0;
+//		if (enemies[i].real_size_h > enemies[k].real_size_h) {
+//			
+//			max[0];
+//				
+//		}
+//	}
+//	return 1;
+//}
+
 //атакуем зомби из оружия возвращает 1 , если зомби не умер после атаки, 
 // -1 , если умер, 
 // 0, если промах
@@ -473,7 +493,6 @@ int battle_game(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, int w
 							enemies_wave[type]--; //Вычитаем одного врага из данного типа врагов
 							time_last_spawn = time(NULL); //Устанавливаем время последнего спавна
 							spawn_cooldown = define_spawn_time(difficulty); //Устанавливаем время до следующего появления врагов
-							//TODO: как-то задать время спавна
 						}
 						
 					}

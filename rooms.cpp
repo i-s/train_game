@@ -181,15 +181,15 @@ void initialize_rooms() {
 		{
 			cost_rooms[5][0][0] = 25;
 			cost_rooms[5][0][1] = 50;
-			cost_rooms[5][0][2] = 150;
+			cost_rooms[5][0][2] = 100;
 
 			cost_rooms[5][1][0] = 75;
 			cost_rooms[5][1][1] = 50;
-			cost_rooms[5][1][2] = 200;
+			cost_rooms[5][1][2] = 150;
 
 			cost_rooms[5][2][0] = 125;
 			cost_rooms[5][2][1] = 100;
-			cost_rooms[5][2][2] = 300;
+			cost_rooms[5][2][2] = 200;
 		}
 	}
 	//инициализация изменений ограничений

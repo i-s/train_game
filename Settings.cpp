@@ -312,11 +312,12 @@ int launch_settings(SDL_Window* window, SDL_Renderer* renderer, int winsize_w, i
 			}
 		}
 		Update(window, renderer, backgroung, buttons, texts, current_button, screensize, volmus, volsound, need_notification);
-
-
-		need_notification = false;
+		if (need_notification && quit)//если нужно уведомление и выходим из настроек
+		{
+			draw_blackout(window, renderer, { 0,0,winsize_w,winsize_h }, 0, 128);
+			call_notificaton(window, renderer, (char*)u8"Для применения некоторых", (char*)u8"настроек перезайдите в игру", 1);
+		}
 	}
-	
 
 	SDL_DestroyTexture(settings_texture);
 
